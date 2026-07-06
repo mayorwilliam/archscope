@@ -1,0 +1,30 @@
+{
+  "name": "archmap",
+  "version": "0.0.1",
+  "type": "module",
+  "bin": {
+    "archmap": "dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@archmap/core": "workspace:*",
+    "@archmap/schema": "workspace:*",
+    "commander": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.9.3"
+  }
+}
