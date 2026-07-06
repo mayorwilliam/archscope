@@ -1,0 +1,579 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 4,
+      "file": 6,
+      "symbol": 8,
+      "entity": 0,
+      "table": 0,
+      "extpkg": 3
+    }
+  },
+  "nodes": [
+    {
+      "id": "file:src/auth/index.ts",
+      "kind": "file",
+      "name": "index.ts",
+      "parent": "mod:auth",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 3,
+        "fanIn": 1,
+        "fanOut": 2,
+        "rank": 0.089573
+      }
+    },
+    {
+      "id": "file:src/auth/login.ts",
+      "kind": "file",
+      "name": "login.ts",
+      "parent": "mod:auth",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 11,
+        "fanIn": 2,
+        "fanOut": 2,
+        "rank": 0.292313
+      }
+    },
+    {
+      "id": "file:src/auth/session.ts",
+      "kind": "file",
+      "name": "session.ts",
+      "parent": "mod:auth",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 13,
+        "fanIn": 2,
+        "fanOut": 1,
+        "rank": 0.22516
+      }
+    },
+    {
+      "id": "file:src/db/client.ts",
+      "kind": "file",
+      "name": "client.ts",
+      "parent": "mod:db",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 7,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.062858
+      }
+    },
+    {
+      "id": "file:src/main.ts",
+      "kind": "file",
+      "name": "main.ts",
+      "parent": "mod:ts-basic",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 11,
+        "fanIn": 0,
+        "fanOut": 2,
+        "rank": 0.062858
+      }
+    },
+    {
+      "id": "file:src/utils/format.ts",
+      "kind": "file",
+      "name": "format.ts",
+      "parent": "mod:utils",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 3,
+        "fanOut": 0,
+        "rank": 0.267236
+      }
+    },
+    {
+      "id": "mod:auth",
+      "kind": "module",
+      "name": "auth",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 27,
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0.607046
+      }
+    },
+    {
+      "id": "mod:db",
+      "kind": "module",
+      "name": "db",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 7,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.062858
+      }
+    },
+    {
+      "id": "mod:ts-basic",
+      "kind": "module",
+      "name": "ts-basic",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 11,
+        "fanIn": 0,
+        "fanOut": 2,
+        "rank": 0.062858
+      }
+    },
+    {
+      "id": "mod:utils",
+      "kind": "module",
+      "name": "utils",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 3,
+        "fanOut": 0,
+        "rank": 0.267236
+      }
+    },
+    {
+      "id": "pkg:express",
+      "kind": "extpkg",
+      "name": "express",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "npm"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:fs",
+      "kind": "extpkg",
+      "name": "fs",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:path",
+      "kind": "extpkg",
+      "name": "path",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#login",
+      "kind": "symbol",
+      "name": "login",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 4,
+        "endLine": 8
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#LOGIN_TIMEOUT",
+      "kind": "symbol",
+      "name": "LOGIN_TIMEOUT",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 10,
+        "endLine": 10
+      }
+    },
+    {
+      "id": "sym:src/auth/session.ts#createSession",
+      "kind": "symbol",
+      "name": "createSession",
+      "parent": "file:src/auth/session.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/session.ts",
+        "startLine": 9,
+        "endLine": 12
+      }
+    },
+    {
+      "id": "sym:src/auth/session.ts#Session",
+      "kind": "symbol",
+      "name": "Session",
+      "parent": "file:src/auth/session.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "interface",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/session.ts",
+        "startLine": 4,
+        "endLine": 7
+      }
+    },
+    {
+      "id": "sym:src/db/client.ts#connect",
+      "kind": "symbol",
+      "name": "connect",
+      "parent": "file:src/db/client.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/db/client.ts",
+        "startLine": 3,
+        "endLine": 6
+      }
+    },
+    {
+      "id": "sym:src/main.ts#bootstrap",
+      "kind": "symbol",
+      "name": "bootstrap",
+      "parent": "file:src/main.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/main.ts",
+        "startLine": 6,
+        "endLine": 10
+      }
+    },
+    {
+      "id": "sym:src/utils/format.ts#DateLike",
+      "kind": "symbol",
+      "name": "DateLike",
+      "parent": "file:src/utils/format.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "type",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/utils/format.ts",
+        "startLine": 5,
+        "endLine": 5
+      }
+    },
+    {
+      "id": "sym:src/utils/format.ts#formatDate",
+      "kind": "symbol",
+      "name": "formatDate",
+      "parent": "file:src/utils/format.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/utils/format.ts",
+        "startLine": 1,
+        "endLine": 3
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "depends_on|mod:auth|mod:utils",
+      "kind": "depends_on",
+      "from": "mod:auth",
+      "to": "mod:utils",
+      "attrs": {
+        "weight": 1
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "depends_on|mod:db|mod:utils",
+      "kind": "depends_on",
+      "from": "mod:db",
+      "to": "mod:utils",
+      "attrs": {
+        "weight": 1
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "depends_on|mod:ts-basic|mod:auth",
+      "kind": "depends_on",
+      "from": "mod:ts-basic",
+      "to": "mod:auth",
+      "attrs": {
+        "weight": 1
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "depends_on|mod:ts-basic|mod:utils",
+      "kind": "depends_on",
+      "from": "mod:ts-basic",
+      "to": "mod:utils",
+      "attrs": {
+        "weight": 1
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/db/client.ts|pkg:fs",
+      "kind": "imports_pkg",
+      "from": "file:src/db/client.ts",
+      "to": "pkg:fs",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/main.ts|pkg:express",
+      "kind": "imports_pkg",
+      "from": "file:src/main.ts",
+      "to": "pkg:express",
+      "attrs": {
+        "symbols": [
+          "default"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/main.ts|pkg:path",
+      "kind": "imports_pkg",
+      "from": "file:src/main.ts",
+      "to": "pkg:path",
+      "attrs": {
+        "symbols": [
+          "default"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/auth/index.ts|file:src/auth/login.ts",
+      "kind": "imports",
+      "from": "file:src/auth/index.ts",
+      "to": "file:src/auth/login.ts",
+      "attrs": {
+        "symbols": [
+          "login"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/auth/index.ts|file:src/auth/session.ts",
+      "kind": "imports",
+      "from": "file:src/auth/index.ts",
+      "to": "file:src/auth/session.ts",
+      "attrs": {
+        "symbols": [
+          "*"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/auth/login.ts|file:src/auth/session.ts",
+      "kind": "imports",
+      "from": "file:src/auth/login.ts",
+      "to": "file:src/auth/session.ts",
+      "attrs": {
+        "symbols": [
+          "createSession"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/auth/login.ts|file:src/utils/format.ts",
+      "kind": "imports",
+      "from": "file:src/auth/login.ts",
+      "to": "file:src/utils/format.ts",
+      "attrs": {
+        "symbols": [
+          "formatDate"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/auth/session.ts|file:src/auth/login.ts",
+      "kind": "imports",
+      "from": "file:src/auth/session.ts",
+      "to": "file:src/auth/login.ts",
+      "attrs": {
+        "symbols": [
+          "LOGIN_TIMEOUT"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/db/client.ts|file:src/utils/format.ts",
+      "kind": "imports",
+      "from": "file:src/db/client.ts",
+      "to": "file:src/utils/format.ts",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/main.ts|file:src/auth/index.ts",
+      "kind": "imports",
+      "from": "file:src/main.ts",
+      "to": "file:src/auth/index.ts",
+      "attrs": {
+        "symbols": [
+          "login"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/main.ts|file:src/utils/format.ts",
+      "kind": "imports",
+      "from": "file:src/main.ts",
+      "to": "file:src/utils/format.ts",
+      "attrs": {
+        "symbols": [
+          "formatDate"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}

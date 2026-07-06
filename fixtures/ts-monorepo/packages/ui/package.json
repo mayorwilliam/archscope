@@ -1,0 +1,9 @@
+{
+  "name": "@fix/ui",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@fix/core": "workspace:*"
+  }
+}

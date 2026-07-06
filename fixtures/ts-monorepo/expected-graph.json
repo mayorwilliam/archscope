@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 2,
+      "file": 3,
+      "symbol": 3,
+      "entity": 0,
+      "table": 0,
+      "extpkg": 0
+    }
+  },
+  "nodes": [
+    {
+      "id": "file:packages/core-lib/src/helpers.ts",
+      "kind": "file",
+      "name": "helpers.ts",
+      "parent": "mod:@fix/core",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 4,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.37013
+      }
+    },
+    {
+      "id": "file:packages/core-lib/src/index.ts",
+      "kind": "file",
+      "name": "index.ts",
+      "parent": "mod:@fix/core",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 4,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.37013
+      }
+    },
+    {
+      "id": "file:packages/ui/src/index.ts",
+      "kind": "file",
+      "name": "index.ts",
+      "parent": "mod:@fix/ui",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 10,
+        "fanIn": 0,
+        "fanOut": 2,
+        "rank": 0.25974
+      }
+    },
+    {
+      "id": "mod:@fix/core",
+      "kind": "module",
+      "name": "@fix/core",
+      "attrs": {
+        "kind": "module",
+        "source": "workspace"
+      },
+      "metrics": {
+        "loc": 8,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.74026
+      }
+    },
+    {
+      "id": "mod:@fix/ui",
+      "kind": "module",
+      "name": "@fix/ui",
+      "attrs": {
+        "kind": "module",
+        "source": "workspace"
+      },
+      "metrics": {
+        "loc": 10,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.25974
+      }
+    },
+    {
+      "id": "sym:packages/core-lib/src/helpers.ts#clamp",
+      "kind": "symbol",
+      "name": "clamp",
+      "parent": "file:packages/core-lib/src/helpers.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "packages/core-lib/src/helpers.ts",
+        "startLine": 1,
+        "endLine": 3
+      }
+    },
+    {
+      "id": "sym:packages/core-lib/src/index.ts#add",
+      "kind": "symbol",
+      "name": "add",
+      "parent": "file:packages/core-lib/src/index.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "packages/core-lib/src/index.ts",
+        "startLine": 1,
+        "endLine": 3
+      }
+    },
+    {
+      "id": "sym:packages/ui/src/index.ts#render",
+      "kind": "symbol",
+      "name": "render",
+      "parent": "file:packages/ui/src/index.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "packages/ui/src/index.ts",
+        "startLine": 7,
+        "endLine": 9
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "depends_on|mod:@fix/ui|mod:@fix/core",
+      "kind": "depends_on",
+      "from": "mod:@fix/ui",
+      "to": "mod:@fix/core",
+      "attrs": {
+        "weight": 2
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:packages/ui/src/index.ts|file:packages/core-lib/src/helpers.ts",
+      "kind": "imports",
+      "from": "file:packages/ui/src/index.ts",
+      "to": "file:packages/core-lib/src/helpers.ts",
+      "attrs": {
+        "symbols": [
+          "clamp"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:packages/ui/src/index.ts|file:packages/core-lib/src/index.ts",
+      "kind": "imports",
+      "from": "file:packages/ui/src/index.ts",
+      "to": "file:packages/core-lib/src/index.ts",
+      "attrs": {
+        "symbols": [
+          "add"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}
