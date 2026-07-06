@@ -1,0 +1,5 @@
+packages:
+  - "packages/*"
+  - "e2e"
+# fixtures/ deliberadamente excluidos: el hoisting de pnpm dentro de los fixtures
+# corrompería el comportamiento de resolución que justamente estamos testeando.
