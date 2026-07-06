@@ -1,0 +1,35 @@
+{
+  "name": "@archmap/core",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "@archmap/schema": "workspace:*",
+    "enhanced-resolve": "^5.18.1",
+    "execa": "^9.6.0",
+    "get-tsconfig": "^4.10.1",
+    "ignore": "^7.0.5",
+    "picomatch": "^4.0.2",
+    "tree-sitter-wasms": "^0.1.12",
+    "web-tree-sitter": "^0.25.6",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/picomatch": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
