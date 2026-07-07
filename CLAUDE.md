@@ -30,12 +30,12 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*`):
 - `pnpm lint` — `biome check .`
 - `pnpm lint:fix` — `biome check --write .`
 - `pnpm typecheck` — `tsc -b` en modo typecheck por paquete.
-- CLI local (requiere build previo): `node packages/cli/dist/index.js analyze` (o `init`).
+- CLI local (requiere build previo): `node packages/cli/dist/index.js <cmd>` — comandos: `init`, `analyze [--full]`, `diff <base> [head] [--json]`, `watch`.
 
 ## Convenciones de testing
 
 - **Fixtures con goldens** (`fixtures/<nombre>/expected-graph.json`): la primera corrida escribe el golden y **falla a propósito** (`expectGolden` en `packages/core/test/helpers.ts`), forzando revisión humana del contenido antes de commitear.
-- **Tests del resolver son table-driven** (`packages/core/test/resolver.test.ts`): cada bug de resolución nuevo que aparezca se agrega como una fila nueva de caso, nunca como test suelto.
+- **Tests del resolver son table-driven** (`packages/core/test/resolver.test.ts`, `packages/core/test/py-resolver.test.ts`): cada bug de resolución nuevo que aparezca se agrega como una fila nueva de caso, nunca como test suelto.
 - Los tests de `core` importan `@archmap/schema` desde su `src/` vía alias en `packages/core/vitest.config.ts` (no `dist/`) — el loop red-green no requiere build.
 
 ## Reglas del repo
@@ -48,6 +48,6 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*`):
 
 ## Estado
 
-**Fase 1 completa**: extracción TS/JS determinista (scan → parse → resolve → infer → build de grafo), CLI `init`/`analyze`, fixtures `ts-basic`/`ts-monorepo` con goldens revisados a mano.
+**Fase 2 completa**: extracción TS/JS + Python deterministas, cache incremental de `FileFacts` por content-hash (`.archmap/cache/`), snapshots gzip por sha (`.archmap/snapshots/`, solo con árbol limpio), diff arquitectónico rename-aware (`archmap diff` — snapshots bajo demanda vía git worktree temporal con cache compartido) y watch mode. Fixtures `ts-basic`/`ts-monorepo`/`py-basic` con goldens revisados a mano. Validado contra requests/flask/django (django: 3034 archivos, 20s frío / 1.9s caliente).
 
-Plan completo de 6 fases guardado en Engram (proyecto `visual-work`, topic `visual-work/plan`). **Fase 2** (siguiente): soporte Python, cache incremental, snapshots y diff arquitectónico entre commits.
+Plan completo de 6 fases guardado en Engram (proyecto `visual-work`, topic `visual-work/plan`). **Fase 3** (siguiente): query engine con budget de tokens explícito + servidor MCP (los 7 tools no-DB), MCP antes que dashboard para forzar el query engine como librería pura.
