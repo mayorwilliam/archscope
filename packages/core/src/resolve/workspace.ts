@@ -58,6 +58,17 @@ function readWorkspaceGlobs(rootDir: string): string[] {
       // no workspaces
     }
   }
+  // Lerna monorepos (e.g. NestJS) often declare packages ONLY in lerna.json,
+  // with no `workspaces` field anywhere — found validating against real repos.
+  const lernaPath = path.join(rootDir, "lerna.json");
+  if (fs.existsSync(lernaPath)) {
+    try {
+      const lerna = JSON.parse(fs.readFileSync(lernaPath, "utf8")) as { packages?: string[] };
+      if (Array.isArray(lerna.packages)) return lerna.packages;
+    } catch {
+      // no lerna packages
+    }
+  }
   return [];
 }
 

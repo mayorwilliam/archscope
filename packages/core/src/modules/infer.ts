@@ -55,11 +55,20 @@ export function createModuleInferrer(
     }
 
     const withoutSrc = relPath.startsWith("src/") ? relPath.slice(4) : relPath;
-    const slash = withoutSrc.indexOf("/");
-    if (slash === -1) {
+    const segments = withoutSrc.split("/");
+    if (segments.length === 1) {
       // Loose file at the root (or directly in src/) joins the root module.
       return { moduleName: rootName, source: "inferred" };
     }
-    return { moduleName: withoutSrc.slice(0, slash), source: "inferred" };
+    const first = segments[0] as string;
+    // Well-known container dirs are not architecture — descend one level so an
+    // undeclared monorepo (lerna without workspaces, rush, ...) still splits
+    // into its real packages instead of one giant "packages" module.
+    if (CONTAINER_DIRS.has(first) && segments.length > 2) {
+      return { moduleName: segments[1] as string, source: "inferred" };
+    }
+    return { moduleName: first, source: "inferred" };
   };
 }
+
+const CONTAINER_DIRS = new Set(["packages", "apps", "libs", "services", "modules"]);
