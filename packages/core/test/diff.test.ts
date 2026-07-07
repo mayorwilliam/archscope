@@ -5,6 +5,7 @@ import { execa } from "execa";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { diffGraphs } from "../src/diff/engine.js";
 import { gitRenames } from "../src/diff/rename.js";
+import { analyze } from "../src/pipeline.js";
 import { ensureSnapshot } from "../src/snapshot.js";
 import { Store } from "../src/store/store.js";
 
@@ -152,5 +153,12 @@ describe("architecture diff on scripted git history", () => {
     expect(store.hasSnapshot(sha1)).toBe(true);
     const again = await ensureSnapshot(root, sha1);
     expect(again.created).toBe(false);
+  });
+
+  it("archmap's own .archmap/ output never makes the repo dirty", async () => {
+    // This repo does NOT gitignore .archmap, and the snapshot runs above
+    // already populated .archmap/cache — the tree must still read clean.
+    const { graph } = await analyze({ rootDir: root, toolVersion: "test" });
+    expect(graph.meta.git?.dirty).toBe(false);
   });
 });

@@ -7,7 +7,10 @@ export async function gitInfo(rootDir: string): Promise<GitInfo | null> {
     const [sha, branch, status] = await Promise.all([
       git(rootDir, ["rev-parse", "HEAD"]),
       git(rootDir, ["rev-parse", "--abbrev-ref", "HEAD"]),
-      git(rootDir, ["status", "--porcelain"]),
+      // Our own output must never count as dirt: without the exclusion, a
+      // repo that doesn't gitignore .archmap/ reads dirty forever after the
+      // first analyze — and dirty repos never get snapshots.
+      git(rootDir, ["status", "--porcelain", "--", ":(exclude).archmap"]),
     ]);
     return { sha, branch, dirty: status.length > 0 };
   } catch {
