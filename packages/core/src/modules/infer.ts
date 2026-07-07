@@ -26,6 +26,7 @@ export function createModuleInferrer(
   rootDir: string,
   config: ArchmapConfig,
   workspacePackages: WorkspacePackage[],
+  rootName?: string,
 ): ModuleInferrer {
   const rules = (config.modules ?? []).map((rule) => ({
     rule,
@@ -37,7 +38,10 @@ export function createModuleInferrer(
     // Deeper dirs first so nested packages win over their parents.
     .sort((a, b) => b.relDir.length - a.relDir.length);
 
-  const rootName = path.basename(rootDir);
+  // The fallback module for root-level files. Overridable because the
+  // analyzed directory is not always the repo's identity — a temp git
+  // worktree must produce the same module name as the repo it snapshots.
+  const rootModule = rootName ?? path.basename(rootDir);
 
   return (relPath: string): ModuleAssignment => {
     for (const { rule, isMatch } of rules) {
@@ -58,7 +62,7 @@ export function createModuleInferrer(
     const segments = withoutSrc.split("/");
     if (segments.length === 1) {
       // Loose file at the root (or directly in src/) joins the root module.
-      return { moduleName: rootName, source: "inferred" };
+      return { moduleName: rootModule, source: "inferred" };
     }
     const first = segments[0] as string;
     // Well-known container dirs are not architecture — descend one level so an

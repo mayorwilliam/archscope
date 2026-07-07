@@ -16,6 +16,7 @@ export async function analyzeFixture(name: string): Promise<ArchGraph> {
     rootDir: fixturePath(name),
     createdAt: "1970-01-01T00:00:00.000Z",
     toolVersion: "test",
+    cache: false, // fixtures are inputs — no .archmap/ side effects in them
   });
   return normalizeGraph(graph);
 }

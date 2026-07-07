@@ -14,6 +14,7 @@ import { CombinedResolver } from "./resolve/resolver.js";
 import { TsResolver } from "./resolve/ts-resolver.js";
 import { discoverWorkspacePackages } from "./resolve/workspace.js";
 import { scanSourceFiles } from "./scan.js";
+import { type CacheStats, FactsCache, factsKey } from "./store/cache.js";
 
 /**
  * The pipeline: scan → parse → resolve → infer → build.
@@ -27,20 +28,48 @@ export interface AnalyzeOptions {
   toolVersion?: string;
   /** Injectable for tests; defaults to now. */
   createdAt?: string;
+  /**
+   * Incremental extraction cache. Defaults to `<rootDir>/.archmap/cache`.
+   * `false` disables it; `dir` redirects it (a worktree analysis pointing at
+   * the main repo's cache is what makes cross-ref snapshots cheap); `refresh`
+   * ignores existing entries but still rewrites them (CLI --full).
+   */
+  cache?: boolean | { dir?: string; refresh?: boolean };
+  /**
+   * Name for the root fallback module. Defaults to the analyzed directory's
+   * basename; snapshot analyses in temp worktrees pass the real repo name so
+   * module identity is stable across snapshots.
+   */
+  rootName?: string;
 }
 
 export interface AnalyzeResult {
   graph: ArchGraph;
   /** Files skipped because no extractor handles them. */
   skipped: string[];
+  cache: CacheStats;
 }
 
 export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
-  const rootDir = path.resolve(options.rootDir);
+  // realpath, not just resolve: enhanced-resolve returns symlink-free paths,
+  // and a symlinked root (macOS /var/folders, /tmp) would make every resolved
+  // file look like it lives outside the repo.
+  const rootDir = fs.realpathSync(path.resolve(options.rootDir));
   const config = options.config ?? loadConfig(rootDir);
 
   const files = scanSourceFiles(rootDir, config);
   const workspacePackages = discoverWorkspacePackages(rootDir);
+
+  const cacheOpt = options.cache ?? true;
+  const cache =
+    cacheOpt === false
+      ? null
+      : new FactsCache(
+          (typeof cacheOpt === "object" ? cacheOpt.dir : undefined) ??
+            path.join(rootDir, ".archmap", "cache"),
+        );
+  const refresh = typeof cacheOpt === "object" && cacheOpt.refresh === true;
+  const stats: CacheStats = { hits: 0, misses: 0 };
 
   const facts: FileFacts[] = [];
   const skipped: string[] = [];
@@ -51,18 +80,29 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
       continue;
     }
     const source = fs.readFileSync(path.join(rootDir, relPath), "utf8");
-    facts.push(
+    const key = cache ? factsKey(relPath, source) : null;
+    if (cache && key && !refresh) {
+      const cached = cache.get(key);
+      if (cached) {
+        facts.push(cached);
+        stats.hits++;
+        continue;
+      }
+    }
+    const extracted =
       grammar === "python"
         ? await extractPyFacts(relPath, source)
-        : await extractTsFacts(relPath, source),
-    );
+        : await extractTsFacts(relPath, source);
+    if (cache && key) cache.put(key, extracted);
+    facts.push(extracted);
+    stats.misses++;
   }
 
   const resolver = new CombinedResolver(
     new TsResolver(rootDir, workspacePackages),
     new PyResolver(rootDir, config),
   );
-  const inferModule = createModuleInferrer(rootDir, config, workspacePackages);
+  const inferModule = createModuleInferrer(rootDir, config, workspacePackages, options.rootName);
   const git = await gitInfo(rootDir);
 
   const graph = buildGraph({
@@ -76,5 +116,5 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
     createdAt: options.createdAt ?? new Date().toISOString(),
   });
 
-  return { graph, skipped };
+  return { graph, skipped, cache: stats };
 }
