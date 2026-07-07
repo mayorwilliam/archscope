@@ -17,7 +17,7 @@ export async function runAnalyze(rootDir: string, options: { full?: boolean }): 
       `${graph.edges.length} edges (${elapsed}s)`,
   );
   if (skipped.length > 0) {
-    console.log(`Skipped ${skipped.length} Python files (extractor lands in Phase 2).`);
+    console.log(`Skipped ${skipped.length} files with no extractor.`);
   }
   if (graph.meta.git) {
     const { branch, sha, dirty } = graph.meta.git;

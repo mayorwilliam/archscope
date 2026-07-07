@@ -23,7 +23,7 @@ const { ResolverFactory, CachedInputFileSystem } = enhancedResolve;
 
 export type Resolution =
   | { type: "file"; relPath: string }
-  | { type: "package"; name: string }
+  | { type: "package"; name: string; registry: "npm" | "pypi" }
   | { type: "builtin"; name: string }
   | { type: "unresolved" };
 
@@ -83,7 +83,7 @@ export class TsResolver {
     const hit = this.tryEnhanced(importerDir, clean);
     if (hit) return this.classify(hit);
 
-    return { type: "package", name: packageNameOf(clean) };
+    return { type: "package", name: packageNameOf(clean), registry: "npm" };
   }
 
   // -------------------------------------------------------------------------
@@ -93,7 +93,7 @@ export class TsResolver {
     const nmIndex = normalized.lastIndexOf("/node_modules/");
     if (nmIndex !== -1) {
       const after = normalized.slice(nmIndex + "/node_modules/".length);
-      return { type: "package", name: packageNameOf(after) };
+      return { type: "package", name: packageNameOf(after), registry: "npm" };
     }
     const rel = path.relative(this.rootDir, absPath);
     if (rel.startsWith("..")) return { type: "unresolved" };

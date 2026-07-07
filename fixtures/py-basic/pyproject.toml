@@ -1,0 +1,4 @@
+[project]
+name = "py-basic"
+version = "0.1.0"
+description = "ArchMap fixture: src-layout Python app with relative imports"

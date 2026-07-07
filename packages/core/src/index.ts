@@ -9,8 +9,15 @@ export {
 } from "./modules/infer.js";
 export type { FileFacts, ImportFact, ImportKind, OrmHint, SymbolFact } from "./parse/facts.js";
 export { grammarForFile, initParser } from "./parse/parser.js";
+export { extractPyFacts } from "./parse/py.js";
 export { extractTsFacts } from "./parse/ts.js";
 export { type AnalyzeOptions, type AnalyzeResult, analyze } from "./pipeline.js";
+export { PyResolver } from "./resolve/py-resolver.js";
+export {
+  CombinedResolver,
+  type ImportResolver,
+  type ResolvedImport,
+} from "./resolve/resolver.js";
 export { packageNameOf, type Resolution, TsResolver } from "./resolve/ts-resolver.js";
 export { discoverWorkspacePackages, type WorkspacePackage } from "./resolve/workspace.js";
 export { scanSourceFiles } from "./scan.js";

@@ -10,7 +10,7 @@ import type {
 import { edgeId, fileId, moduleId, packageId, symbolId } from "@archmap/schema";
 import type { ModuleInferrer } from "../modules/infer.js";
 import type { FileFacts } from "../parse/facts.js";
-import type { Resolution, TsResolver } from "../resolve/ts-resolver.js";
+import type { ImportResolver } from "../resolve/resolver.js";
 import { pageRank } from "./metrics.js";
 
 /**
@@ -25,7 +25,7 @@ export interface BuildInput {
   rootDir: string;
   toolVersion: string;
   facts: FileFacts[];
-  resolver: TsResolver;
+  resolver: ImportResolver;
   inferModule: ModuleInferrer;
   config: ArchmapConfig;
   git: GitInfo | null;
@@ -90,28 +90,29 @@ export function buildGraph(input: BuildInput): ArchGraph {
   for (const file of facts) {
     const fid = fileId(file.path);
     for (const imp of file.imports) {
-      const resolution: Resolution = resolver.resolve(file.path, imp.specifier);
-      if (resolution.type === "file") {
-        if (resolution.relPath === file.path) continue;
-        // Only scanned source files become edge targets; a resolution into
-        // e.g. a .json asset is not an architectural dependency in v1.
-        if (!factsByPath.has(resolution.relPath)) continue;
-        upsertEdge(edges, "imports", fid, fileId(resolution.relPath), imp.symbols);
-      } else if (resolution.type === "package" || resolution.type === "builtin") {
-        const registry = resolution.type === "builtin" ? "stdlib" : "npm";
-        const pid = packageId(resolution.name);
-        if (!nodes.has(pid)) {
-          nodes.set(pid, {
-            id: pid,
-            kind: "extpkg",
-            name: resolution.name,
-            attrs: { kind: "extpkg", registry },
-            metrics: { fanIn: 0, fanOut: 0, rank: 0 },
-          });
+      for (const { resolution, symbols } of resolver.resolveImport(file.path, imp)) {
+        if (resolution.type === "file") {
+          if (resolution.relPath === file.path) continue;
+          // Only scanned source files become edge targets; a resolution into
+          // e.g. a .json asset is not an architectural dependency in v1.
+          if (!factsByPath.has(resolution.relPath)) continue;
+          upsertEdge(edges, "imports", fid, fileId(resolution.relPath), symbols);
+        } else if (resolution.type === "package" || resolution.type === "builtin") {
+          const registry = resolution.type === "builtin" ? "stdlib" : resolution.registry;
+          const pid = packageId(resolution.name);
+          if (!nodes.has(pid)) {
+            nodes.set(pid, {
+              id: pid,
+              kind: "extpkg",
+              name: resolution.name,
+              attrs: { kind: "extpkg", registry },
+              metrics: { fanIn: 0, fanOut: 0, rank: 0 },
+            });
+          }
+          upsertEdge(edges, "imports_pkg", fid, pid, symbols);
         }
-        upsertEdge(edges, "imports_pkg", fid, pid, imp.symbols);
+        // "unresolved" → no edge: absence of evidence is recorded as absence.
       }
-      // "unresolved" → no edge: absence of evidence is recorded as absence.
     }
   }
 

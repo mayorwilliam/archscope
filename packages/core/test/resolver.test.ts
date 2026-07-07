@@ -42,7 +42,7 @@ describe("TsResolver on ts-basic", () => {
     {
       importer: "src/main.ts",
       specifier: "express",
-      expected: { type: "package", name: "express" },
+      expected: { type: "package", name: "express", registry: "npm" },
     },
     {
       importer: "src/main.ts",
@@ -57,7 +57,7 @@ describe("TsResolver on ts-basic", () => {
     {
       importer: "src/main.ts",
       specifier: "@scope/pkg/deep/path",
-      expected: { type: "package", name: "@scope/pkg" },
+      expected: { type: "package", name: "@scope/pkg", registry: "npm" },
     },
     { importer: "src/main.ts", specifier: "./does-not-exist", expected: { type: "unresolved" } },
   ];

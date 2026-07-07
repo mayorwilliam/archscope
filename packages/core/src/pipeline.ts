@@ -7,7 +7,10 @@ import { buildGraph } from "./graph/build.js";
 import { createModuleInferrer } from "./modules/infer.js";
 import type { FileFacts } from "./parse/facts.js";
 import { grammarForFile } from "./parse/parser.js";
+import { extractPyFacts } from "./parse/py.js";
 import { extractTsFacts } from "./parse/ts.js";
+import { PyResolver } from "./resolve/py-resolver.js";
+import { CombinedResolver } from "./resolve/resolver.js";
 import { TsResolver } from "./resolve/ts-resolver.js";
 import { discoverWorkspacePackages } from "./resolve/workspace.js";
 import { scanSourceFiles } from "./scan.js";
@@ -28,7 +31,7 @@ export interface AnalyzeOptions {
 
 export interface AnalyzeResult {
   graph: ArchGraph;
-  /** Files skipped because no extractor handles them yet (e.g. .py in Phase 1). */
+  /** Files skipped because no extractor handles them. */
   skipped: string[];
 }
 
@@ -43,16 +46,22 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
   const skipped: string[] = [];
   for (const relPath of files) {
     const grammar = grammarForFile(relPath);
-    if (grammar === null) continue;
-    if (grammar === "python") {
-      skipped.push(relPath); // Python extraction lands in Phase 2
+    if (grammar === null) {
+      skipped.push(relPath);
       continue;
     }
     const source = fs.readFileSync(path.join(rootDir, relPath), "utf8");
-    facts.push(await extractTsFacts(relPath, source));
+    facts.push(
+      grammar === "python"
+        ? await extractPyFacts(relPath, source)
+        : await extractTsFacts(relPath, source),
+    );
   }
 
-  const resolver = new TsResolver(rootDir, workspacePackages);
+  const resolver = new CombinedResolver(
+    new TsResolver(rootDir, workspacePackages),
+    new PyResolver(rootDir, config),
+  );
   const inferModule = createModuleInferrer(rootDir, config, workspacePackages);
   const git = await gitInfo(rootDir);
 

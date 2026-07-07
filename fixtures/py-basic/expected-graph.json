@@ -1,0 +1,623 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 2,
+      "file": 10,
+      "symbol": 8,
+      "entity": 0,
+      "table": 0,
+      "extpkg": 5
+    }
+  },
+  "nodes": [
+    {
+      "id": "file:main.py",
+      "kind": "file",
+      "name": "main.py",
+      "parent": "mod:py-basic",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 14,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.04983
+      }
+    },
+    {
+      "id": "file:src/app/__init__.py",
+      "kind": "file",
+      "name": "__init__.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 4,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.04983
+      }
+    },
+    {
+      "id": "file:src/app/api/__init__.py",
+      "kind": "file",
+      "name": "__init__.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 2,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.04983
+      }
+    },
+    {
+      "id": "file:src/app/api/handlers.py",
+      "kind": "file",
+      "name": "handlers.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 18,
+        "fanIn": 2,
+        "fanOut": 2,
+        "rank": 0.134541
+      }
+    },
+    {
+      "id": "file:src/app/config.py",
+      "kind": "file",
+      "name": "config.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 9,
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0.219146
+      }
+    },
+    {
+      "id": "file:src/app/db/__init__.py",
+      "kind": "file",
+      "name": "__init__.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 0,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0.04983
+      }
+    },
+    {
+      "id": "file:src/app/db/client.py",
+      "kind": "file",
+      "name": "client.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 19,
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0.10701
+      }
+    },
+    {
+      "id": "file:src/app/models/__init__.py",
+      "kind": "file",
+      "name": "__init__.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 4,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.04983
+      }
+    },
+    {
+      "id": "file:src/app/models/user.py",
+      "kind": "file",
+      "name": "user.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 14,
+        "fanIn": 2,
+        "fanOut": 1,
+        "rank": 0.149365
+      }
+    },
+    {
+      "id": "file:src/app/plugins.py",
+      "kind": "file",
+      "name": "plugins.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.140788
+      }
+    },
+    {
+      "id": "mod:app",
+      "kind": "module",
+      "name": "app",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 76,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.95017
+      }
+    },
+    {
+      "id": "mod:py-basic",
+      "kind": "module",
+      "name": "py-basic",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 14,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.04983
+      }
+    },
+    {
+      "id": "pkg:importlib",
+      "kind": "extpkg",
+      "name": "importlib",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:json",
+      "kind": "extpkg",
+      "name": "json",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:os",
+      "kind": "extpkg",
+      "name": "os",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:requests",
+      "kind": "extpkg",
+      "name": "requests",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "pypi"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:sqlite3",
+      "kind": "extpkg",
+      "name": "sqlite3",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "sym:main.py#run",
+      "kind": "symbol",
+      "name": "run",
+      "parent": "file:main.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "main.py",
+        "startLine": 8,
+        "endLine": 9
+      }
+    },
+    {
+      "id": "sym:src/app/__init__.py#VERSION",
+      "kind": "symbol",
+      "name": "VERSION",
+      "parent": "file:src/app/__init__.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/__init__.py",
+        "startLine": 3,
+        "endLine": 3
+      }
+    },
+    {
+      "id": "sym:src/app/api/handlers.py#handle_request",
+      "kind": "symbol",
+      "name": "handle_request",
+      "parent": "file:src/app/api/handlers.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/api/handlers.py",
+        "startLine": 7,
+        "endLine": 13
+      }
+    },
+    {
+      "id": "sym:src/app/config.py#settings",
+      "kind": "symbol",
+      "name": "settings",
+      "parent": "file:src/app/config.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/config.py",
+        "startLine": 3,
+        "endLine": 6
+      }
+    },
+    {
+      "id": "sym:src/app/db/client.py#connect",
+      "kind": "symbol",
+      "name": "connect",
+      "parent": "file:src/app/db/client.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/db/client.py",
+        "startLine": 9,
+        "endLine": 14
+      }
+    },
+    {
+      "id": "sym:src/app/models/user.py#User",
+      "kind": "symbol",
+      "name": "User",
+      "parent": "file:src/app/models/user.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/models/user.py",
+        "startLine": 6,
+        "endLine": 9
+      }
+    },
+    {
+      "id": "sym:src/app/models/user.py#USER_TABLE",
+      "kind": "symbol",
+      "name": "USER_TABLE",
+      "parent": "file:src/app/models/user.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/models/user.py",
+        "startLine": 3,
+        "endLine": 3
+      }
+    },
+    {
+      "id": "sym:src/app/plugins.py#register",
+      "kind": "symbol",
+      "name": "register",
+      "parent": "file:src/app/plugins.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/app/plugins.py",
+        "startLine": 4,
+        "endLine": 5
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "depends_on|mod:py-basic|mod:app",
+      "kind": "depends_on",
+      "from": "mod:py-basic",
+      "to": "mod:app",
+      "attrs": {
+        "weight": 1
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:main.py|pkg:json",
+      "kind": "imports_pkg",
+      "from": "file:main.py",
+      "to": "pkg:json",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/app/api/handlers.py|pkg:requests",
+      "kind": "imports_pkg",
+      "from": "file:src/app/api/handlers.py",
+      "to": "pkg:requests",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/app/config.py|pkg:os",
+      "kind": "imports_pkg",
+      "from": "file:src/app/config.py",
+      "to": "pkg:os",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/app/db/client.py|pkg:importlib",
+      "kind": "imports_pkg",
+      "from": "file:src/app/db/client.py",
+      "to": "pkg:importlib",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/app/db/client.py|pkg:sqlite3",
+      "kind": "imports_pkg",
+      "from": "file:src/app/db/client.py",
+      "to": "pkg:sqlite3",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:main.py|file:src/app/api/handlers.py",
+      "kind": "imports",
+      "from": "file:main.py",
+      "to": "file:src/app/api/handlers.py",
+      "attrs": {
+        "symbols": [
+          "handle_request"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/__init__.py|file:src/app/config.py",
+      "kind": "imports",
+      "from": "file:src/app/__init__.py",
+      "to": "file:src/app/config.py",
+      "attrs": {
+        "symbols": [
+          "settings"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/api/__init__.py|file:src/app/api/handlers.py",
+      "kind": "imports",
+      "from": "file:src/app/api/__init__.py",
+      "to": "file:src/app/api/handlers.py",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/api/handlers.py|file:src/app/db/client.py",
+      "kind": "imports",
+      "from": "file:src/app/api/handlers.py",
+      "to": "file:src/app/db/client.py",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/api/handlers.py|file:src/app/models/user.py",
+      "kind": "imports",
+      "from": "file:src/app/api/handlers.py",
+      "to": "file:src/app/models/user.py",
+      "attrs": {
+        "symbols": [
+          "User"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/db/client.py|file:src/app/plugins.py",
+      "kind": "imports",
+      "from": "file:src/app/db/client.py",
+      "to": "file:src/app/plugins.py",
+      "attrs": {
+        "symbols": []
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/models/__init__.py|file:src/app/models/user.py",
+      "kind": "imports",
+      "from": "file:src/app/models/__init__.py",
+      "to": "file:src/app/models/user.py",
+      "attrs": {
+        "symbols": [
+          "USER_TABLE",
+          "User"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/app/models/user.py|file:src/app/config.py",
+      "kind": "imports",
+      "from": "file:src/app/models/user.py",
+      "to": "file:src/app/config.py",
+      "attrs": {
+        "symbols": [
+          "settings"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}
