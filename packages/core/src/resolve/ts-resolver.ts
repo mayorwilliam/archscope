@@ -39,7 +39,9 @@ export class TsResolver {
   private readonly matcherCache = new Map<string, ((specifier: string) => string[]) | null>();
 
   constructor(rootDir: string, workspacePackages: WorkspacePackage[]) {
-    this.rootDir = rootDir;
+    // classify() compares enhanced-resolve output (always symlink-free) with
+    // this root — so the root itself must be symlink-free too.
+    this.rootDir = fs.realpathSync(rootDir);
     this.workspaceByName = new Map(workspacePackages.map((p) => [p.name, p]));
     this.resolver = ResolverFactory.createResolver({
       // biome-ignore lint/suspicious/noExplicitAny: enhanced-resolve's fs type is narrower than node:fs

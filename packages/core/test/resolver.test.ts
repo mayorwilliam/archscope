@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterAll, describe, expect, it } from "vitest";
 import { type Resolution, TsResolver } from "../src/resolve/ts-resolver.js";
 import { discoverWorkspacePackages } from "../src/resolve/workspace.js";
 import { fixturePath } from "./helpers.js";
@@ -64,6 +67,26 @@ describe("TsResolver on ts-basic", () => {
 
   it.each(cases)("$importer → $specifier", ({ importer, specifier, expected }) => {
     expect(resolver.resolve(importer, specifier)).toEqual(expected);
+  });
+});
+
+describe("TsResolver under a symlinked root", () => {
+  // macOS os.tmpdir() lives under /var → /private/var. enhanced-resolve
+  // returns symlink-free paths, so an un-realpathed root made every file
+  // classify as outside the repo (bug found by the Phase 2 diff tests).
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-symlink-"));
+  fs.cpSync(fixturePath("ts-basic"), root, { recursive: true });
+
+  afterAll(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it("resolves relative imports to files, not 'unresolved'", () => {
+    const resolver = new TsResolver(root, discoverWorkspacePackages(root));
+    expect(resolver.resolve("src/main.ts", "./auth")).toEqual({
+      type: "file",
+      relPath: "src/auth/index.ts",
+    });
   });
 });
 
