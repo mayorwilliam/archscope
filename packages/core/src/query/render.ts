@@ -1,13 +1,17 @@
-import type { ArchDiff } from "@archmap/schema";
+import type { ArchDiff, DriftEntry, EntityField, TableColumn } from "@archmap/schema";
 import { parseNodeId } from "@archmap/schema";
 import { BudgetWriter, clampBudget, suggestBudget } from "./budget.js";
 import type {
+  DbSchemaView,
   DependenciesView,
   DependencyItem,
+  EntityRelationsView,
   FileContextView,
   ImpactView,
+  LiveMeta,
   ModuleView,
   OverviewView,
+  SchemaDriftView,
   SearchView,
 } from "./engine.js";
 
@@ -333,6 +337,177 @@ export function renderDiff(diff: ArchDiff, ctx: RenderContext): string {
     w.line("No architectural changes.");
   }
   return w.toString();
+}
+
+export function renderDbSchema(view: DbSchemaView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  const t = view.totals;
+  w.line(`# DB schema — ${t.tables} tables · ${t.entities} entities`);
+  w.line(liveLine(view.live, ctx));
+  if (t.tables === 0) {
+    w.blank();
+    w.line(
+      "No entities or tables in the graph — the repo declares no supported ORM schema " +
+        "(Prisma, SQLAlchemy) or `archmap analyze` predates the DB layer.",
+    );
+    return w.toString();
+  }
+
+  for (const group of view.schemas) {
+    section(w, `## ${group.schema} (${group.tables.length} tables)`);
+    w.list(
+      group.tables.map((tb) => {
+        const entities =
+          tb.entities.length > 0
+            ? ` · ← ${tb.entities.map((e) => `${e.id} [${e.orm}]`).join(", ")}`
+            : "";
+        const driftTag = tb.drift > 0 ? ` · ⚠ ${tb.drift} drift` : "";
+        return (
+          `- ${tb.id} · ${tb.columns} cols` +
+          `${tb.pks.length > 0 ? ` · pk ${tb.pks.join("+")}` : ""}` +
+          ` · ${tb.origin}${entities}${driftTag}`
+        );
+      }),
+      (n) => more(n, `get_db_schema(budget_tokens=${suggestBudget(budget)})`),
+    );
+  }
+
+  if (view.fks.length > 0) {
+    section(w, `## Foreign keys (${view.fks.length})`);
+    w.list(
+      view.fks.map(
+        (fk) =>
+          `- ${fk.from} → ${fk.to} · ${fk.columns.map(([a, b]) => `${a}→${b}`).join(", ")}` +
+          provenance(fk.source, fk.confidence),
+      ),
+      (n) => more(n, `get_db_schema(budget_tokens=${suggestBudget(budget)})`),
+    );
+  }
+  w.blank();
+  w.line(`Drill down: get_db_schema(table="<schema.table>") or get_entity_relations("<Entity>").`);
+  return w.toString();
+}
+
+export function renderEntityRelations(view: EntityRelationsView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  const moreRel = (n: number) =>
+    more(n, `get_entity_relations("${view.center.name}", budget_tokens=${suggestBudget(budget)})`);
+
+  w.line(`# ${view.center.id} — ${view.center.kind}`);
+  if (view.table) {
+    w.line(
+      `table ${view.table.id} · origin ${view.table.origin} · ${view.table.columns.length} cols` +
+        `${view.table.drift.length > 0 ? ` · ⚠ ${view.table.drift.length} drift` : ""}`,
+    );
+  } else {
+    w.line("no table node — the entity's table was not linked");
+  }
+
+  if (view.fields && view.fields.length > 0) {
+    section(w, `## Fields (${view.fields.length})`);
+    w.list(view.fields.map(fieldLine), moreRel);
+  } else if (view.table) {
+    section(w, `## Columns (${view.table.columns.length})`);
+    w.list(view.table.columns.map(columnLine), moreRel);
+  }
+
+  if (view.entities.length > 0) {
+    section(w, `## Mapped entities (${view.entities.length})`);
+    w.list(
+      view.entities.map(
+        (e) =>
+          `- ${e.id} · ${e.orm} · ${e.file}${e.confidence === "inferred" ? " [inferred]" : ""}`,
+      ),
+      moreRel,
+    );
+  }
+
+  if (view.related.length > 0) {
+    section(w, `## FK relations (${view.related.length})`);
+    w.list(
+      view.related.map((r) => {
+        const arrow = r.direction === "out" ? "→" : "←";
+        const pairs = r.columns.map(([a, b]) => `${a}→${b}`).join(", ");
+        const ents = r.entities.length > 0 ? ` · ${r.entities.map((e) => e.id).join(", ")}` : "";
+        return `- ${arrow} ${r.tableId} · ${pairs}${ents}${provenance(r.source, r.confidence)}`;
+      }),
+      moreRel,
+    );
+  }
+
+  if (view.table && view.table.drift.length > 0) {
+    section(w, `## Drift (${view.table.drift.length})`);
+    w.list(view.table.drift.map(driftLine), (n) =>
+      more(n, `get_schema_drift(budget_tokens=${suggestBudget(budget)})`),
+    );
+  }
+  return w.toString();
+}
+
+export function renderSchemaDrift(view: SchemaDriftView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  w.line("# Schema drift — declared vs live");
+  w.line(liveLine(view.live, ctx));
+
+  if (!view.live) {
+    w.blank();
+    w.line(
+      "No live introspection data in the graph. Configure `db.live` in .archmap.yaml " +
+        "and run `archmap db introspect` — then this tool compares code against the database.",
+    );
+    return w.toString();
+  }
+  if (view.totals.entries === 0) {
+    w.blank();
+    w.line(`✓ No drift: ${view.totals.tablesChecked} tables match the live database.`);
+    return w.toString();
+  }
+
+  w.line(
+    `${view.totals.entries} findings across ${view.totals.tablesWithDrift} of ` +
+      `${view.totals.tablesChecked} tables`,
+  );
+  for (const table of view.tables) {
+    section(w, `## ${table.id} (${table.entries.length})`);
+    w.list(table.entries.map(driftLine), (n) =>
+      more(
+        n,
+        `get_db_schema(table="${parseNodeId(table.id).rest}", budget_tokens=${suggestBudget(budget)})`,
+      ),
+    );
+  }
+  return w.toString();
+}
+
+// ---------------------------------------------------------------------------
+
+function liveLine(live: LiveMeta | null, ctx: RenderContext): string {
+  if (!live) return "static declarations only — `archmap db introspect` adds live drift";
+  const when = ago(live.introspectedAt, ctx.staleness.now ?? new Date());
+  return `live: "${live.source}" (${live.dialect}) introspected ${when}`;
+}
+
+function fieldLine(field: EntityField): string {
+  return (
+    `- ${field.name} · ${field.type}` +
+    `${field.column !== undefined ? ` · col ${field.column}` : ""}` +
+    `${field.isPk ? " · pk" : ""}${field.isFk ? " · fk" : ""}${field.nullable ? " · nullable" : ""}`
+  );
+}
+
+function columnLine(column: TableColumn): string {
+  return (
+    `- ${column.name} · ${column.sqlType}` +
+    `${column.isPk ? " · pk" : ""}${column.nullable ? " · nullable" : ""}` +
+    `${column.fkTo ? ` · fk → ${column.fkTo.table}.${column.fkTo.column}` : ""}`
+  );
+}
+
+function driftLine(entry: DriftEntry): string {
+  return `- ⚠ ${entry.kind}: ${entry.detail}`;
 }
 
 export function renderNotFound(

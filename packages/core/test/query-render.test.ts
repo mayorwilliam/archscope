@@ -1,25 +1,31 @@
 import type { ArchDiff, ArchGraph, GraphEdge, GraphNode } from "@archmap/schema";
-import { edgeId, fileId, moduleId, symbolId } from "@archmap/schema";
+import { edgeId, entityId, fileId, moduleId, symbolId, tableId } from "@archmap/schema";
 import { describe, expect, it } from "vitest";
 import { BudgetWriter, estimateTokens, MAX_BUDGET, MIN_BUDGET } from "../src/query/budget.js";
 import {
+  dbSchemaView,
   dependenciesView,
+  entityRelationsView,
   fileContextView,
   impactView,
   indexGraph,
   moduleView,
   overviewView,
+  schemaDriftView,
   searchView,
 } from "../src/query/engine.js";
 import {
   type RenderContext,
+  renderDbSchema,
   renderDependencies,
   renderDiff,
+  renderEntityRelations,
   renderFileContext,
   renderImpact,
   renderModule,
   renderNotFound,
   renderOverview,
+  renderSchemaDrift,
   renderSearch,
   stalenessLines,
 } from "../src/query/render.js";
@@ -121,6 +127,84 @@ function syntheticGraph(): ArchGraph {
     }
   }
 
+  // DB layer: enough tables/entities/drift that every DB render truncates at
+  // the low end of the budget range.
+  const TABLES = 25;
+  for (let t = 0; t < TABLES; t++) {
+    const tableName = `table_${String(t).padStart(2, "0")}`;
+    const filePath = `area-00/file-0.ts`;
+    const tid = tableId("public", tableName);
+    nodes.push({
+      id: tid,
+      kind: "table",
+      name: tableName,
+      attrs: {
+        kind: "table",
+        origin: t % 3 === 0 ? "both" : "declared",
+        columns: Array.from({ length: 8 }, (_, c) => ({
+          name: `col_${c}`,
+          sqlType: c === 0 ? "Int" : "String",
+          nullable: c % 2 === 1,
+          isPk: c === 0,
+        })),
+        ...(t % 3 === 0
+          ? {
+              drift: [
+                {
+                  kind: "column_missing_in_code" as const,
+                  column: "legacy",
+                  detail: `legacy (live varchar) is not declared in code — table ${tableName}`,
+                },
+              ],
+            }
+          : {}),
+      },
+      metrics: { fanIn: 1, fanOut: 0, rank: 0 },
+    });
+    const eid = entityId(filePath, `Entity${t}`);
+    nodes.push({
+      id: eid,
+      kind: "entity",
+      name: `Entity${t}`,
+      parent: fileId(filePath),
+      lang: "ts",
+      attrs: {
+        kind: "entity",
+        orm: "prisma",
+        declaredTable: `public.${tableName}`,
+        fields: Array.from({ length: 8 }, (_, c) => ({
+          name: `col_${c}`,
+          type: c === 0 ? "Int" : "String",
+          nullable: c % 2 === 1,
+          isPk: c === 0,
+          isFk: false,
+        })),
+      },
+      metrics: { fanIn: 0, fanOut: 1, rank: 0 },
+      span: { path: filePath, startLine: 1, endLine: 9 },
+    });
+    edges.push({
+      id: edgeId("maps_to", eid, tid),
+      kind: "maps_to",
+      from: eid,
+      to: tid,
+      source: "static",
+      confidence: t % 2 === 0 ? "certain" : "inferred",
+    });
+    if (t > 0) {
+      const prev = tableId("public", `table_${String(t - 1).padStart(2, "0")}`);
+      edges.push({
+        id: edgeId("fk", tid, prev),
+        kind: "fk",
+        from: tid,
+        to: prev,
+        attrs: { columns: [["col_1", "col_0"]] },
+        source: "static",
+        confidence: "certain",
+      });
+    }
+  }
+
   return {
     schemaVersion: 1,
     meta: {
@@ -129,12 +213,17 @@ function syntheticGraph(): ArchGraph {
       createdAt: "2026-01-01T00:00:00.000Z",
       root: "/repo/synthetic",
       git: { sha: "aabbccdd00112233", branch: "main", dirty: false },
+      live: {
+        source: "main",
+        dialect: "postgres",
+        introspectedAt: "2026-01-01T00:00:00.000Z",
+      },
       counts: {
         module: MODULES,
         file: MODULES * FILES,
         symbol: MODULES * FILES,
-        entity: 0,
-        table: 0,
+        entity: TABLES,
+        table: TABLES,
         extpkg: 0,
       },
     },
@@ -187,7 +276,11 @@ function everyRender(ctx: RenderContext): Array<[string, string]> {
   const deps = dependenciesView(index, "area-05/file-5.ts");
   const impact = impactView(index, "area-00/file-0.ts");
   const file = fileContextView(index, "area-05/file-5.ts");
-  if (!mod || !deps || !impact || !file) throw new Error("synthetic graph lookup failed");
+  const entityRel = entityRelationsView(index, "Entity10");
+  const tableRel = entityRelationsView(index, "public.table_10");
+  if (!mod || !deps || !impact || !file || !entityRel || !tableRel) {
+    throw new Error("synthetic graph lookup failed");
+  }
   return [
     ["get_architecture_overview", renderOverview(overviewView(index), ctx)],
     ["get_module", renderModule(mod, ctx)],
@@ -196,6 +289,10 @@ function everyRender(ctx: RenderContext): Array<[string, string]> {
     ["search_nodes", renderSearch(searchAll, ctx)],
     ["get_file_context", renderFileContext(file, ctx)],
     ["get_architecture_diff", renderDiff(syntheticDiff(), ctx)],
+    ["get_db_schema", renderDbSchema(dbSchemaView(index), ctx)],
+    ["get_db_schema(table)", renderEntityRelations(tableRel, ctx)],
+    ["get_entity_relations", renderEntityRelations(entityRel, ctx)],
+    ["get_schema_drift", renderSchemaDrift(schemaDriftView(index), ctx)],
     ["not_found", renderNotFound("ghost-module", [{ id: "mod:area-01", kind: "module" }], ctx)],
   ];
 }

@@ -1,5 +1,13 @@
-import type { ArchGraph, GraphEdge, GraphNode, NodeKind } from "@archmap/schema";
-import { fileId, moduleId, packageId, parseNodeId } from "@archmap/schema";
+import type {
+  ArchGraph,
+  DriftEntry,
+  EntityField,
+  GraphEdge,
+  GraphNode,
+  NodeKind,
+  TableColumn,
+} from "@archmap/schema";
+import { fileId, moduleId, packageId, parseNodeId, tableId } from "@archmap/schema";
 
 /**
  * The query engine is a pure library over an already-built ArchGraph: no I/O,
@@ -529,6 +537,329 @@ function containingModule(index: GraphIndex, node: GraphNode): string | undefine
     current = current.parent ? index.nodes.get(current.parent) : undefined;
   }
   return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// DB schema
+// ---------------------------------------------------------------------------
+
+export type LiveMeta = NonNullable<ArchGraph["meta"]["live"]>;
+
+export interface TableEntityRef {
+  id: string;
+  name: string;
+  orm: string;
+  confidence: GraphEdge["confidence"];
+}
+
+export interface TableSummary {
+  id: string;
+  schema: string;
+  name: string;
+  origin: "declared" | "live" | "both";
+  columns: number;
+  pks: string[];
+  entities: TableEntityRef[];
+  drift: number;
+}
+
+export interface FkRelation {
+  from: string;
+  to: string;
+  columns: Array<[string, string]>;
+  source: GraphEdge["source"];
+  confidence: GraphEdge["confidence"];
+}
+
+export interface DbSchemaView {
+  live: LiveMeta | null;
+  schemas: Array<{ schema: string; tables: TableSummary[] }>;
+  fks: FkRelation[];
+  totals: { tables: number; entities: number; drift: number };
+}
+
+export function dbSchemaView(index: GraphIndex): DbSchemaView {
+  const bySchema = new Map<string, TableSummary[]>();
+  const fks: FkRelation[] = [];
+  let entities = 0;
+  let tables = 0;
+  let drift = 0;
+
+  for (const node of index.graph.nodes) {
+    if (node.kind === "entity") entities += 1;
+    if (node.kind !== "table" || node.attrs.kind !== "table") continue;
+    tables += 1;
+    const summary = tableSummary(index, node);
+    drift += summary.drift;
+    const list = bySchema.get(summary.schema);
+    if (list) list.push(summary);
+    else bySchema.set(summary.schema, [summary]);
+  }
+  for (const edge of index.graph.edges) {
+    if (edge.kind !== "fk") continue;
+    fks.push({
+      from: edge.from,
+      to: edge.to,
+      columns: edge.attrs?.columns ?? [],
+      source: edge.source,
+      confidence: edge.confidence,
+    });
+  }
+
+  const schemas = [...bySchema.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([schema, list]) => ({
+      schema,
+      tables: list.sort((a, b) => a.id.localeCompare(b.id)),
+    }));
+  fks.sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to));
+
+  return {
+    live: index.graph.meta.live ?? null,
+    schemas,
+    fks,
+    totals: { tables, entities, drift },
+  };
+}
+
+function tableSummary(index: GraphIndex, node: GraphNode): TableSummary {
+  if (node.attrs.kind !== "table") throw new Error(`not a table node: ${node.id}`);
+  const { schema } = splitTableRef(node.id, node.name);
+  return {
+    id: node.id,
+    schema,
+    name: node.name,
+    origin: node.attrs.origin,
+    columns: node.attrs.columns.length,
+    pks: node.attrs.columns.filter((c) => c.isPk).map((c) => c.name),
+    entities: mappedEntities(index, node.id),
+    drift: node.attrs.drift?.length ?? 0,
+  };
+}
+
+function mappedEntities(index: GraphIndex, tableNodeId: string): TableEntityRef[] {
+  const refs: TableEntityRef[] = [];
+  for (const edge of index.inEdges.get(tableNodeId) ?? []) {
+    if (edge.kind !== "maps_to") continue;
+    const entity = index.nodes.get(edge.from);
+    if (entity?.attrs.kind !== "entity") continue;
+    refs.push({
+      id: entity.id,
+      name: entity.name,
+      orm: entity.attrs.orm,
+      confidence: edge.confidence,
+    });
+  }
+  refs.sort((a, b) => a.id.localeCompare(b.id));
+  return refs;
+}
+
+/** `tbl:public.users` → { schema: "public", table: "users" }. */
+function splitTableRef(id: string, fallbackName: string): { schema: string; table: string } {
+  const rest = parseNodeId(id).rest;
+  const dot = rest.indexOf(".");
+  if (dot === -1) return { schema: "public", table: fallbackName };
+  return { schema: rest.slice(0, dot), table: rest.slice(dot + 1) };
+}
+
+// ---------------------------------------------------------------------------
+// Entity/table relations
+// ---------------------------------------------------------------------------
+
+export interface RelatedTable {
+  direction: "out" | "in";
+  tableId: string;
+  tableName: string;
+  columns: Array<[string, string]>;
+  source: GraphEdge["source"];
+  confidence: GraphEdge["confidence"];
+  entities: TableEntityRef[];
+}
+
+export interface EntityRelationsView {
+  center: { id: string; kind: "entity" | "table"; name: string };
+  /** The table side of the pair — null when an entity's table node is absent. */
+  table: {
+    id: string;
+    schema: string;
+    name: string;
+    origin: "declared" | "live" | "both";
+    columns: TableColumn[];
+    drift: DriftEntry[];
+  } | null;
+  /** Every entity mapping to that table (includes the center when it is one). */
+  entities: Array<TableEntityRef & { file: string }>;
+  /** Declared fields — only when the center is an entity. */
+  fields: EntityField[] | null;
+  related: RelatedTable[];
+}
+
+export function entityRelationsView(
+  index: GraphIndex,
+  ref: string,
+  prefer: "entity" | "table" = "entity",
+): EntityRelationsView | null {
+  const node = resolveDbRef(index, ref, prefer);
+  if (!node) return null;
+
+  let tableNode: GraphNode | null = null;
+  if (node.kind === "table") {
+    tableNode = node;
+  } else {
+    for (const edge of index.outEdges.get(node.id) ?? []) {
+      if (edge.kind === "maps_to") {
+        tableNode = index.nodes.get(edge.to) ?? null;
+        break;
+      }
+    }
+  }
+
+  const entities: EntityRelationsView["entities"] = [];
+  if (tableNode) {
+    for (const ref of mappedEntities(index, tableNode.id)) {
+      const entityNode = index.nodes.get(ref.id);
+      entities.push({
+        ...ref,
+        file: entityNode?.parent ? parseNodeId(entityNode.parent).rest : "",
+      });
+    }
+  } else if (node.attrs.kind === "entity") {
+    entities.push({
+      id: node.id,
+      name: node.name,
+      orm: node.attrs.orm,
+      confidence: "certain",
+      file: node.parent ? parseNodeId(node.parent).rest : "",
+    });
+  }
+
+  const related: RelatedTable[] = [];
+  if (tableNode) {
+    for (const edge of index.outEdges.get(tableNode.id) ?? []) {
+      if (edge.kind === "fk") related.push(relatedTable(index, edge, "out"));
+    }
+    for (const edge of index.inEdges.get(tableNode.id) ?? []) {
+      if (edge.kind === "fk") related.push(relatedTable(index, edge, "in"));
+    }
+    related.sort(
+      (a, b) => a.direction.localeCompare(b.direction) || a.tableId.localeCompare(b.tableId),
+    );
+  }
+
+  const table =
+    tableNode && tableNode.attrs.kind === "table"
+      ? {
+          id: tableNode.id,
+          ...splitTableRefAs(tableNode),
+          origin: tableNode.attrs.origin,
+          columns: tableNode.attrs.columns,
+          drift: tableNode.attrs.drift ?? [],
+        }
+      : null;
+
+  return {
+    center: { id: node.id, kind: node.kind === "table" ? "table" : "entity", name: node.name },
+    table,
+    entities,
+    fields: node.attrs.kind === "entity" ? node.attrs.fields : null,
+    related,
+  };
+}
+
+function splitTableRefAs(node: GraphNode): { schema: string; name: string } {
+  const { schema, table } = splitTableRef(node.id, node.name);
+  return { schema, name: table };
+}
+
+function relatedTable(index: GraphIndex, edge: GraphEdge, direction: "out" | "in"): RelatedTable {
+  const otherId = direction === "out" ? edge.to : edge.from;
+  const other = index.nodes.get(otherId);
+  return {
+    direction,
+    tableId: otherId,
+    tableName: other?.name ?? otherId,
+    columns: edge.attrs?.columns ?? [],
+    source: edge.source,
+    confidence: edge.confidence,
+    entities: mappedEntities(index, otherId),
+  };
+}
+
+/**
+ * DB references arrive in every shape an agent might try: node ids,
+ * "schema.table", bare table or entity names. Explicit ids and qualified
+ * names always win; bare names search the PREFERRED kind first (Prisma's
+ * default table name equals the model name, so "User" is both an entity and
+ * a table — the asking tool decides which reading it means). Bare-name
+ * matches must be unique — an ambiguous name returns null and the caller's
+ * not-found path suggests candidates instead of silently picking one.
+ */
+function resolveDbRef(
+  index: GraphIndex,
+  ref: string,
+  prefer: "entity" | "table",
+): GraphNode | null {
+  const direct = index.nodes.get(ref);
+  if (direct && (direct.kind === "entity" || direct.kind === "table")) return direct;
+
+  if (ref.includes(".")) {
+    const qualified = index.nodes.get(`tbl:${ref}`);
+    if (qualified?.kind === "table") return qualified;
+  }
+
+  const lower = ref.toLowerCase();
+  const kinds: Array<"entity" | "table"> =
+    prefer === "entity" ? ["entity", "table"] : ["table", "entity"];
+  for (const kind of kinds) {
+    if (kind === "table") {
+      const publicTable = index.nodes.get(tableId("public", ref));
+      if (publicTable?.kind === "table") return publicTable;
+    }
+    const matches = index.graph.nodes.filter(
+      (n) => n.kind === kind && n.name.toLowerCase() === lower,
+    );
+    if (matches.length === 1) return matches[0] ?? null;
+    if (matches.length > 1) return null;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Schema drift
+// ---------------------------------------------------------------------------
+
+export interface DriftTable {
+  id: string;
+  name: string;
+  entries: DriftEntry[];
+}
+
+export interface SchemaDriftView {
+  live: LiveMeta | null;
+  tables: DriftTable[];
+  totals: { tablesWithDrift: number; entries: number; tablesChecked: number };
+}
+
+export function schemaDriftView(index: GraphIndex): SchemaDriftView {
+  const tables: DriftTable[] = [];
+  let entries = 0;
+  let tablesChecked = 0;
+
+  for (const node of index.graph.nodes) {
+    if (node.kind !== "table" || node.attrs.kind !== "table") continue;
+    tablesChecked += 1;
+    const drift = node.attrs.drift ?? [];
+    if (drift.length === 0) continue;
+    tables.push({ id: node.id, name: node.name, entries: drift });
+    entries += drift.length;
+  }
+  tables.sort((a, b) => a.id.localeCompare(b.id));
+
+  return {
+    live: index.graph.meta.live ?? null,
+    tables,
+    totals: { tablesWithDrift: tables.length, entries, tablesChecked },
+  };
 }
 
 // ---------------------------------------------------------------------------
