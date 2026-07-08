@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@archmap/core": "workspace:*",
+    "@archmap/mcp": "workspace:*",
     "@archmap/schema": "workspace:*",
     "chokidar": "^4.0.3",
     "commander": "^14.0.0"

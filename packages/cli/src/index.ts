@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { runAnalyze } from "./commands/analyze.js";
 import { runDiff } from "./commands/diff.js";
 import { runInit } from "./commands/init.js";
+import { runMcp } from "./commands/mcp.js";
 import { runWatch } from "./commands/watch.js";
 
 const program = new Command();
@@ -37,6 +38,13 @@ program
   .option("--json", "print the full ArchDiff as JSON")
   .action(async (base: string, head: string, options: { json?: boolean }) => {
     await runDiff(process.cwd(), base, head, options);
+  });
+
+program
+  .command("mcp")
+  .description("Serve the architecture graph to coding agents over MCP stdio")
+  .action(async () => {
+    await runMcp(process.cwd());
   });
 
 program
