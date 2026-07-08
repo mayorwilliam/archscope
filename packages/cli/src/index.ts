@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { runAnalyze } from "./commands/analyze.js";
+import { runDbDrift, runDbIntrospect } from "./commands/db.js";
 import { runDiff } from "./commands/diff.js";
 import { runInit } from "./commands/init.js";
 import { runMcp } from "./commands/mcp.js";
@@ -45,6 +46,25 @@ program
   .description("Serve the architecture graph to coding agents over MCP stdio")
   .action(async () => {
     await runMcp(process.cwd());
+  });
+
+const db = program
+  .command("db")
+  .description("Live database: introspect into the graph, or report schema drift");
+
+db.command("introspect")
+  .description("Introspect the live DB (read-only) and merge tables + drift into graph.json")
+  .option("--source <name>", "live source from .archmap.yaml (db.live)")
+  .action(async (options: { source?: string }) => {
+    await runDbIntrospect(process.cwd(), options);
+  });
+
+db.command("drift")
+  .description("Compare declared vs live schema; exits 1 when drift exists")
+  .option("--source <name>", "live source from .archmap.yaml (db.live)")
+  .option("--json", "print the full drift report as JSON")
+  .action(async (options: { source?: string; json?: boolean }) => {
+    await runDbDrift(process.cwd(), options);
   });
 
 program

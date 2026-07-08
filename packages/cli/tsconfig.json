@@ -6,5 +6,10 @@
     "types": ["node"]
   },
   "include": ["src"],
-  "references": [{ "path": "../schema" }, { "path": "../core" }, { "path": "../mcp" }]
+  "references": [
+    { "path": "../schema" },
+    { "path": "../core" },
+    { "path": "../db" },
+    { "path": "../mcp" }
+  ]
 }
