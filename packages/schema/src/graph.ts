@@ -12,7 +12,7 @@ export const NODE_KINDS = ["module", "file", "symbol", "entity", "table", "extpk
 export const NodeKindSchema = z.enum(NODE_KINDS);
 export type NodeKind = z.infer<typeof NodeKindSchema>;
 
-export const LangSchema = z.enum(["ts", "js", "py"]);
+export const LangSchema = z.enum(["ts", "js", "py", "prisma"]);
 export type Lang = z.infer<typeof LangSchema>;
 
 // ---------------------------------------------------------------------------
@@ -201,6 +201,18 @@ export const ArchGraphSchema = z.object({
     root: z.string(),
     git: GitInfoSchema.nullable(),
     counts: z.record(z.string(), z.number().int().nonnegative()),
+    /**
+     * Present only after `archmap db introspect` merged a live database into
+     * the graph. `analyze` regenerates from static facts and drops it —
+     * live data is an explicit overlay, never part of the deterministic build.
+     */
+    live: z
+      .object({
+        source: z.string(),
+        dialect: z.enum(["postgres", "mysql"]),
+        introspectedAt: z.string(),
+      })
+      .optional(),
   }),
   nodes: z.array(GraphNodeSchema),
   edges: z.array(GraphEdgeSchema),
