@@ -285,7 +285,7 @@ function dependsOnByKey(
     if (edge.kind !== "depends_on") continue;
     const from = remapModule(edge.from);
     const to = remapModule(edge.to);
-    deps.set(`${from} ${to}`, {
+    deps.set(`${from} ${to}`, {
       edge: { kind: "depends_on", from, to },
       weight: edge.attrs?.weight ?? 1,
     });
