@@ -19,9 +19,10 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*` + `e2e`):
 
 - **packages/schema** — tipos Zod del grafo (`ArchGraph`, `GraphNode`, `GraphEdge`, etc.) e IDs estables. Los IDs (`mod:`, `file:`, `sym:`, `ent:`, `tbl:`, `pkg:`) se construyen y parsean **solo** en `packages/schema/src/ids.ts` — ningún otro paquete debe montar un ID a mano.
 - **packages/core** — el pipeline: `scan` → `parse` (tree-sitter WASM) → `resolve` (imports/workspace) → `infer` (módulos) → `graph/build` (el grafo final + métricas). Además **`src/query/`**: el query engine puro (`engine.ts` view-models JSON-serializables, `render.ts` markdown compacto, `budget.ts` presupuesto). El `BudgetWriter` garantiza **por construcción** que ningún render excede su budget; el truncado siempre termina en un hint ejecutable (`… +N more → tool(...)`).
+- **packages/db** — capa DB. Extractores estáticos (`prisma.ts` vía `@mrleebo/prisma-ast`; `sqlalchemy.ts` recibe el árbol tree-sitter **ya parseado** por core — inyección, cero WASM propio) que emiten el mismo intermedio `DeclaredSchema`. `link.ts` (entidad↔tabla: nombre explícito `@@map`/`__tablename__` → `certain`, convención → `inferred`), `introspect.ts` (Postgres read-only, la URL jamás se persiste y los errores del driver se redactan), `drift.ts` (declarado vs vivo por familias de tipo normalizadas) y `merge.ts` (overlay vivo **idempotente**: las columnas declaradas quedan intactas, el drift es el delta; `analyze` regenera sin overlay). Depende solo de `schema` — `core` → `db`, nunca al revés.
 - **packages/mcp** — servidor MCP stdio (`@modelcontextprotocol/sdk`). Handlers ≤30 líneas que delegan a `core/query` — jamás derivan hechos estructurales por su cuenta. `GraphSource` relee `graph.json` por mtime (convive con `watch`) y recalcula el staleness (HEAD actual vs sha del grafo) en cada llamada.
-- **packages/cli** — bin `archmap` (Commander): `init`, `analyze [--full]`, `diff`, `watch`, `mcp`. En el comando `mcp`, stdout es el canal del protocolo: cualquier log humano va a stderr.
-- **e2e/** — harness contra el CLI **compilado**: SDK `Client` sobre stdio, repo sintético con git real (12 módulos en cadena → números de impact exactos y truncado garantizado). `oss.test.ts` corre solo con `TEST_OSS_REPO=/path` (patrón opt-in, como `TEST_LIVE_DB`).
+- **packages/cli** — bin `archmap` (Commander): `init`, `analyze [--full]`, `diff`, `watch`, `mcp`, `db introspect|drift`. En el comando `mcp`, stdout es el canal del protocolo: cualquier log humano va a stderr.
+- **e2e/** — harness contra el CLI **compilado**: SDK `Client` sobre stdio. `mcp.test.ts` usa un repo sintético puro TS (12 módulos en cadena → números de impact exactos); `db.test.ts` usa su propio mini-repo Prisma (26 models → truncado garantizado) para no perturbar esos números. `oss.test.ts` corre solo con `TEST_OSS_REPO=/path` (patrón opt-in, como `TEST_LIVE_DB`).
 
 `fixtures/` está **fuera del workspace pnpm a propósito** (ver `pnpm-workspace.yaml`): si pnpm hiciera hoisting dentro de los fixtures, corrompería exactamente el comportamiento de resolución que los tests del resolver verifican. Por eso los fixtures nunca se `pnpm install`ean.
 
@@ -33,14 +34,15 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*` + `e2e`):
 - `pnpm lint:fix` — `biome check --write .`
 - `pnpm typecheck` — `tsc -b` en modo typecheck por paquete.
 - `pnpm test:e2e` — build + harness MCP e2e (requiere build porque spawnea el CLI compilado).
-- CLI local (requiere build previo): `node packages/cli/dist/index.js <cmd>` — comandos: `init`, `analyze [--full]`, `diff <base> [head] [--json]`, `watch`, `mcp`.
+- CLI local (requiere build previo): `node packages/cli/dist/index.js <cmd>` — comandos: `init`, `analyze [--full]`, `diff <base> [head] [--json]`, `watch`, `mcp`, `db introspect [--source]`, `db drift [--source] [--json]` (exit 1 si hay drift — pensado para CI).
 - El server MCP de este propio repo está registrado en `.mcp.json` (dogfooding) — correr `analyze` antes de usarlo.
 
 ## Convenciones de testing
 
 - **Fixtures con goldens** (`fixtures/<nombre>/expected-graph.json`): la primera corrida escribe el golden y **falla a propósito** (`expectGolden` en `packages/core/test/helpers.ts`), forzando revisión humana del contenido antes de commitear.
 - **Tests del resolver son table-driven** (`packages/core/test/resolver.test.ts`, `packages/core/test/py-resolver.test.ts`): cada bug de resolución nuevo que aparezca se agrega como una fila nueva de caso, nunca como test suelto.
-- Los tests de `core` importan `@archmap/schema` desde su `src/` vía alias en `packages/core/vitest.config.ts` (no `dist/`) — el loop red-green no requiere build.
+- Los tests de `core` importan `@archmap/schema` y `@archmap/db` desde su `src/` vía alias en `packages/core/vitest.config.ts` (no `dist/`) — el loop red-green no requiere build.
+- **Tests de DB viva** (`packages/db/test/live-postgres.test.ts`): Testcontainers Postgres, gated por `TEST_LIVE_DB=1` (requiere Docker). Plantan drift exacto y validan que el reporte contenga eso y **nada más**, más la guarda de credenciales (grep de URL/password sobre todo output de `.archmap/`).
 
 ## Reglas del repo
 
@@ -52,8 +54,8 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*` + `e2e`):
 
 ## Estado
 
-**Fase 3 completa**: query engine con budget de tokens explícito (`core/src/query/` — clamp [200, 20000], estimación `chars/4 × 1.15`, property test permanente con budgets aleatorios seedeados que asserta `render ≤ budget` en TODOS los tools) + servidor MCP stdio con los 7 tools no-DB (`get_architecture_overview`, `get_module`, `find_dependencies`, `get_impact`, `search_nodes`, `get_file_context`, `get_architecture_diff`). Toda respuesta abre con staleness header (`graph@sha · branch · clean · analyzed Xm ago` + warning si HEAD se movió). Not-found responde con sugerencias de search. Harness e2e valida los hints de drill-down re-ejecutándolos. Validado contra django (2922 archivos: toda respuesta ≤ budget en chars) y probado interactivamente desde Claude Code (headless) leyendo el grafo de este mismo repo.
+**Fase 4 completa**: capa DB. Extractores Prisma + SQLAlchemy → `DeclaredSchema` → grafo (nodos `entity`/`table`, edges `maps_to`/`fk` con procedencia honesta), fixtures `prisma-app`/`sqlalchemy-app` con goldens revisados. Introspección viva Postgres + drift + merge idempotente (`archmap db introspect` escribe overlay en el grafo; `analyze` lo regenera sin él). Los 3 tools MCP de DB (`get_db_schema [table?]`, `get_entity_relations`, `get_schema_drift`) con budget, staleness y not-found con sugerencias — un nombre bare como "User" resuelve entidad-primero en `get_entity_relations` y tabla-primero en `get_db_schema` (en Prisma la tabla por convención se llama igual que el model). El diff ahora reporta `dbChanges` (tablas/fks/drift introducido). `EXTRACTOR_VERSION=2` (los facts cachean `entities`). El property test de budget cubre los 10 tools. Pendiente de correr por falta de Docker en la sesión: `TEST_LIVE_DB=1` (Testcontainers con drift plantado) — el resto de la capa viva está cubierta por unit tests (drift/merge/redacción) y el error path del CLI verificado a mano.
 
-Fases 1 y 2 (pipeline TS/JS + Python, cache incremental, snapshots por sha, diff rename-aware, watch) completas — ver historial de commits.
+Fases 1–3 (pipeline TS/JS + Python, cache incremental, snapshots por sha, diff rename-aware, watch, query engine con budget, servidor MCP con los 7 tools no-DB, harness e2e) completas — ver historial de commits.
 
-Plan completo de 6 fases guardado en Engram (proyecto `visual-work`, topic `visual-work/plan`). **Fase 4** (siguiente): capa DB — extractores estáticos Prisma + SQLAlchemy, `link.ts` (entidad↔tabla, el diferenciador `maps_to`), introspección viva Postgres, `drift.ts` y los 3 tools MCP de DB. El engine ya recorre `maps_to`/`fk` y renderiza tablas en impact — la Fase 4 solo tiene que poblar el grafo.
+Plan completo de 6 fases guardado en Engram (proyecto `visual-work`, topic `visual-work/plan`). **Fase 5** (siguiente): dashboard — Vite + React Flow (`@xyflow/react`) + elkjs, 4 vistas (overview, module drill-down, ERD con badges de drift, diff), REST + SSE servidos por fastify desde el CLI (`serve`). Los view-models JSON del query engine ya existen — la Fase 5 los consume verbatim.
