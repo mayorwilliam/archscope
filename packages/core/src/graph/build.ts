@@ -1,3 +1,4 @@
+import { linkDeclaredSchema } from "@archmap/db";
 import type {
   ArchGraph,
   ArchmapConfig,
@@ -116,6 +117,61 @@ export function buildGraph(input: BuildInput): ArchGraph {
     }
   }
 
+  // --- db: entities, declared tables, maps_to, fk ---------------------------
+  const declaredEntities = facts.flatMap((f) => f.entities ?? []);
+  if (declaredEntities.length > 0) {
+    const linked = linkDeclaredSchema(declaredEntities);
+    for (const { entity, id, tableId, confidence } of linked.entities) {
+      nodes.set(id, {
+        id,
+        kind: "entity",
+        name: entity.name,
+        parent: fileId(entity.filePath),
+        ...(factsByPath.get(entity.filePath)?.lang !== undefined
+          ? { lang: factsByPath.get(entity.filePath)?.lang }
+          : {}),
+        attrs: {
+          kind: "entity",
+          orm: entity.orm,
+          declaredTable: `${entity.schema}.${entity.table}`,
+          fields: entity.fields,
+        },
+        metrics: { fanIn: 0, fanOut: 0, rank: 0 },
+        span: { path: entity.filePath, startLine: entity.startLine, endLine: entity.endLine },
+      });
+      const mapsToId = edgeId("maps_to", id, tableId);
+      edges.set(mapsToId, {
+        id: mapsToId,
+        kind: "maps_to",
+        from: id,
+        to: tableId,
+        source: "static",
+        confidence,
+      });
+    }
+    for (const table of linked.tables) {
+      nodes.set(table.id, {
+        id: table.id,
+        kind: "table",
+        name: table.name,
+        attrs: { kind: "table", origin: "declared", columns: table.columns },
+        metrics: { fanIn: 0, fanOut: 0, rank: 0 },
+      });
+    }
+    for (const fk of linked.fks) {
+      const id = edgeId("fk", fk.fromTableId, fk.toTableId);
+      edges.set(id, {
+        id,
+        kind: "fk",
+        from: fk.fromTableId,
+        to: fk.toTableId,
+        attrs: { columns: fk.columns },
+        source: "static",
+        confidence: "certain",
+      });
+    }
+  }
+
   // --- manual edges from config -------------------------------------------
   for (const manual of config.edges ?? []) {
     const id = edgeId(manual.kind, manual.from, manual.to);
@@ -225,6 +281,9 @@ function applyMetrics(nodes: Map<string, GraphNode>, edges: Map<string, GraphEdg
     } else if (edge.kind === "imports_pkg") {
       increment(nodes, edge.to, "fanIn");
     } else if (edge.kind === "depends_on") {
+      increment(nodes, edge.from, "fanOut");
+      increment(nodes, edge.to, "fanIn");
+    } else if (edge.kind === "maps_to" || edge.kind === "fk") {
       increment(nodes, edge.from, "fanOut");
       increment(nodes, edge.to, "fanIn");
     }

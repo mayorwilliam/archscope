@@ -7,6 +7,7 @@ import { buildGraph } from "./graph/build.js";
 import { createModuleInferrer } from "./modules/infer.js";
 import type { FileFacts } from "./parse/facts.js";
 import { grammarForFile } from "./parse/parser.js";
+import { extractPrismaFacts } from "./parse/prisma.js";
 import { extractPyFacts } from "./parse/py.js";
 import { extractTsFacts } from "./parse/ts.js";
 import { PyResolver } from "./resolve/py-resolver.js";
@@ -75,7 +76,8 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
   const skipped: string[] = [];
   for (const relPath of files) {
     const grammar = grammarForFile(relPath);
-    if (grammar === null) {
+    const isPrisma = relPath.endsWith(".prisma");
+    if (grammar === null && !isPrisma) {
       skipped.push(relPath);
       continue;
     }
@@ -89,8 +91,9 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
         continue;
       }
     }
-    const extracted =
-      grammar === "python"
+    const extracted = isPrisma
+      ? extractPrismaFacts(relPath, source)
+      : grammar === "python"
         ? await extractPyFacts(relPath, source)
         : await extractTsFacts(relPath, source);
     if (cache && key) cache.put(key, extracted);

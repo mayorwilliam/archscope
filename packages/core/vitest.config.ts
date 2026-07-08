@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       // Test against source, not dist — keeps the red-green loop build-free.
       "@archmap/schema": path.resolve(__dirname, "../schema/src/index.ts"),
+      "@archmap/db": path.resolve(__dirname, "../db/src/index.ts"),
     },
   },
 });

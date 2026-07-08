@@ -1,0 +1,613 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 1,
+      "file": 4,
+      "symbol": 5,
+      "entity": 3,
+      "table": 3,
+      "extpkg": 2
+    }
+  },
+  "nodes": [
+    {
+      "id": "ent:app/models.py#Post",
+      "kind": "entity",
+      "name": "Post",
+      "parent": "file:app/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "entity",
+        "orm": "sqlalchemy",
+        "declaredTable": "public.posts",
+        "fields": [
+          {
+            "name": "id",
+            "type": "int",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "title",
+            "type": "String(200)",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "author_id",
+            "type": "int",
+            "nullable": false,
+            "isPk": false,
+            "isFk": true
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/models.py",
+        "startLine": 26,
+        "endLine": 32
+      }
+    },
+    {
+      "id": "ent:app/models.py#Team",
+      "kind": "entity",
+      "name": "Team",
+      "parent": "file:app/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "entity",
+        "orm": "sqlalchemy",
+        "declaredTable": "public.teams",
+        "fields": [
+          {
+            "name": "id",
+            "type": "Integer",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "name",
+            "type": "String(80)",
+            "column": "team_name",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/models.py",
+        "startLine": 9,
+        "endLine": 13
+      }
+    },
+    {
+      "id": "ent:app/models.py#User",
+      "kind": "entity",
+      "name": "User",
+      "parent": "file:app/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "entity",
+        "orm": "sqlalchemy",
+        "declaredTable": "public.users",
+        "fields": [
+          {
+            "name": "id",
+            "type": "int",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "email",
+            "type": "str",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "bio",
+            "type": "str",
+            "nullable": true,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "team_id",
+            "type": "int",
+            "nullable": false,
+            "isPk": false,
+            "isFk": true
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/models.py",
+        "startLine": 16,
+        "endLine": 23
+      }
+    },
+    {
+      "id": "file:app/__init__.py",
+      "kind": "file",
+      "name": "__init__.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 0,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0.155703
+      }
+    },
+    {
+      "id": "file:app/base.py",
+      "kind": "file",
+      "name": "base.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.400545
+      }
+    },
+    {
+      "id": "file:app/models.py",
+      "kind": "file",
+      "name": "models.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 33,
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0.28805
+      }
+    },
+    {
+      "id": "file:app/service.py",
+      "kind": "file",
+      "name": "service.py",
+      "parent": "mod:app",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.155703
+      }
+    },
+    {
+      "id": "mod:app",
+      "kind": "module",
+      "name": "app",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 45,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 1.000001
+      }
+    },
+    {
+      "id": "pkg:sqlalchemy",
+      "kind": "extpkg",
+      "name": "sqlalchemy",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "pypi"
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "pkg:typing",
+      "kind": "extpkg",
+      "name": "typing",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "stdlib"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "sym:app/base.py#Base",
+      "kind": "symbol",
+      "name": "Base",
+      "parent": "file:app/base.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/base.py",
+        "startLine": 4,
+        "endLine": 5
+      }
+    },
+    {
+      "id": "sym:app/models.py#Post",
+      "kind": "symbol",
+      "name": "Post",
+      "parent": "file:app/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/models.py",
+        "startLine": 26,
+        "endLine": 32
+      }
+    },
+    {
+      "id": "sym:app/models.py#Team",
+      "kind": "symbol",
+      "name": "Team",
+      "parent": "file:app/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/models.py",
+        "startLine": 9,
+        "endLine": 13
+      }
+    },
+    {
+      "id": "sym:app/models.py#User",
+      "kind": "symbol",
+      "name": "User",
+      "parent": "file:app/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/models.py",
+        "startLine": 16,
+        "endLine": 23
+      }
+    },
+    {
+      "id": "sym:app/service.py#recent_posts_by",
+      "kind": "symbol",
+      "name": "recent_posts_by",
+      "parent": "file:app/service.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "app/service.py",
+        "startLine": 4,
+        "endLine": 5
+      }
+    },
+    {
+      "id": "tbl:public.posts",
+      "kind": "table",
+      "name": "posts",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "author_id",
+            "sqlType": "int",
+            "nullable": false,
+            "isPk": false,
+            "fkTo": {
+              "table": "public.users",
+              "column": "id"
+            }
+          },
+          {
+            "name": "id",
+            "sqlType": "int",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "title",
+            "sqlType": "String(200)",
+            "nullable": false,
+            "isPk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0
+      }
+    },
+    {
+      "id": "tbl:public.teams",
+      "kind": "table",
+      "name": "teams",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "id",
+            "sqlType": "Integer",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "team_name",
+            "sqlType": "String(80)",
+            "nullable": false,
+            "isPk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "tbl:public.users",
+      "kind": "table",
+      "name": "users",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "bio",
+            "sqlType": "str",
+            "nullable": true,
+            "isPk": false
+          },
+          {
+            "name": "email",
+            "sqlType": "str",
+            "nullable": false,
+            "isPk": false
+          },
+          {
+            "name": "id",
+            "sqlType": "int",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "team_id",
+            "sqlType": "int",
+            "nullable": false,
+            "isPk": false,
+            "fkTo": {
+              "table": "public.teams",
+              "column": "id"
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 1,
+        "rank": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "fk|tbl:public.posts|tbl:public.users",
+      "kind": "fk",
+      "from": "tbl:public.posts",
+      "to": "tbl:public.users",
+      "attrs": {
+        "columns": [
+          [
+            "author_id",
+            "id"
+          ]
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "fk|tbl:public.users|tbl:public.teams",
+      "kind": "fk",
+      "from": "tbl:public.users",
+      "to": "tbl:public.teams",
+      "attrs": {
+        "columns": [
+          [
+            "team_id",
+            "id"
+          ]
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:app/base.py|pkg:sqlalchemy",
+      "kind": "imports_pkg",
+      "from": "file:app/base.py",
+      "to": "pkg:sqlalchemy",
+      "attrs": {
+        "symbols": [
+          "DeclarativeBase"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:app/models.py|pkg:sqlalchemy",
+      "kind": "imports_pkg",
+      "from": "file:app/models.py",
+      "to": "pkg:sqlalchemy",
+      "attrs": {
+        "symbols": [
+          "Column",
+          "ForeignKey",
+          "Integer",
+          "Mapped",
+          "String",
+          "mapped_column",
+          "relationship"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:app/models.py|pkg:typing",
+      "kind": "imports_pkg",
+      "from": "file:app/models.py",
+      "to": "pkg:typing",
+      "attrs": {
+        "symbols": [
+          "List"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:app/models.py|file:app/base.py",
+      "kind": "imports",
+      "from": "file:app/models.py",
+      "to": "file:app/base.py",
+      "attrs": {
+        "symbols": [
+          "Base"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:app/service.py|file:app/models.py",
+      "kind": "imports",
+      "from": "file:app/service.py",
+      "to": "file:app/models.py",
+      "attrs": {
+        "symbols": [
+          "Post",
+          "User"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:app/models.py#Post|tbl:public.posts",
+      "kind": "maps_to",
+      "from": "ent:app/models.py#Post",
+      "to": "tbl:public.posts",
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:app/models.py#Team|tbl:public.teams",
+      "kind": "maps_to",
+      "from": "ent:app/models.py#Team",
+      "to": "tbl:public.teams",
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:app/models.py#User|tbl:public.users",
+      "kind": "maps_to",
+      "from": "ent:app/models.py#User",
+      "to": "tbl:public.users",
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}

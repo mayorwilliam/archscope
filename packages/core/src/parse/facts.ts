@@ -1,3 +1,4 @@
+import type { DeclaredEntity } from "@archmap/db";
 import type { Lang, SymbolKind } from "@archmap/schema";
 
 /**
@@ -39,4 +40,6 @@ export interface FileFacts {
   imports: ImportFact[];
   symbols: SymbolFact[];
   ormHints: OrmHint[];
+  /** ORM entities declared in this file (populated when ormHints is). */
+  entities?: DeclaredEntity[];
 }

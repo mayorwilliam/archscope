@@ -16,6 +16,7 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@archmap/db": "workspace:*",
     "@archmap/schema": "workspace:*",
     "enhanced-resolve": "^5.18.1",
     "execa": "^9.6.0",

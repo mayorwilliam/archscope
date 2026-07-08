@@ -21,6 +21,7 @@ const SOURCE_EXTENSIONS = new Set([
   ".mjs",
   ".cjs",
   ".py",
+  ".prisma",
 ]);
 
 const ALWAYS_IGNORED_DIRS = new Set([

@@ -1,3 +1,4 @@
+import { type DeclaredEntity, extractSqlalchemyEntities } from "@archmap/db";
 import type { Lang, SymbolKind } from "@archmap/schema";
 import type { Node } from "web-tree-sitter";
 import type { FileFacts, ImportFact, SymbolFact } from "./facts.js";
@@ -58,6 +59,14 @@ export async function extractPyFacts(relPath: string, source: string): Promise<F
     sym.exported = allList ? allList.has(sym.name) : !sym.name.startsWith("_");
   }
 
+  // `__tablename__` in the source is the deterministic SQLAlchemy-declarative
+  // marker — cheaper and more robust than chasing the Base class through
+  // imports (models often only import Base from a local module).
+  let entities: DeclaredEntity[] = [];
+  if (source.includes("__tablename__")) {
+    entities = extractSqlalchemyEntities(relPath, root);
+  }
+
   tree.delete();
 
   return {
@@ -66,7 +75,12 @@ export async function extractPyFacts(relPath: string, source: string): Promise<F
     loc: countLines(source),
     imports,
     symbols,
-    ormHints: [],
+    ormHints: entities.map((e) => ({
+      framework: "sqlalchemy",
+      startLine: e.startLine,
+      endLine: e.endLine,
+    })),
+    ...(entities.length > 0 ? { entities } : {}),
   };
 }
 
