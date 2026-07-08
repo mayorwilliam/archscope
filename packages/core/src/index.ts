@@ -14,6 +14,55 @@ export { grammarForFile, initParser } from "./parse/parser.js";
 export { extractPyFacts } from "./parse/py.js";
 export { extractTsFacts } from "./parse/ts.js";
 export { type AnalyzeOptions, type AnalyzeResult, analyze } from "./pipeline.js";
+export {
+  BudgetWriter,
+  clampBudget,
+  DEFAULT_BUDGET,
+  estimateTokens,
+  MAX_BUDGET,
+  MIN_BUDGET,
+  maxCharsFor,
+  suggestBudget,
+} from "./query/budget.js";
+export {
+  type DependenciesView,
+  type DependencyItem,
+  dependenciesView,
+  type FileContextView,
+  type FileExport,
+  type FileSummary,
+  fileContextView,
+  type GraphIndex,
+  type ImpactDependent,
+  type ImpactModule,
+  type ImpactView,
+  impactView,
+  indexGraph,
+  type ModuleDependency,
+  type ModuleSummary,
+  type ModuleView,
+  moduleView,
+  type OverviewView,
+  overviewView,
+  type PackageSummary,
+  resolveNodeRef,
+  type SearchResult,
+  type SearchView,
+  searchView,
+} from "./query/engine.js";
+export {
+  type RenderContext,
+  renderDependencies,
+  renderDiff,
+  renderFileContext,
+  renderImpact,
+  renderModule,
+  renderNotFound,
+  renderOverview,
+  renderSearch,
+  type StalenessInfo,
+  stalenessLines,
+} from "./query/render.js";
 export { PyResolver } from "./resolve/py-resolver.js";
 export {
   CombinedResolver,
