@@ -15,11 +15,13 @@ Principios innegociables:
 
 ## Estructura
 
-Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*`):
+Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*` + `e2e`):
 
 - **packages/schema** — tipos Zod del grafo (`ArchGraph`, `GraphNode`, `GraphEdge`, etc.) e IDs estables. Los IDs (`mod:`, `file:`, `sym:`, `ent:`, `tbl:`, `pkg:`) se construyen y parsean **solo** en `packages/schema/src/ids.ts` — ningún otro paquete debe montar un ID a mano.
-- **packages/core** — el pipeline: `scan` → `parse` (tree-sitter WASM) → `resolve` (imports/workspace) → `infer` (módulos) → `graph/build` (el grafo final + métricas).
-- **packages/cli** — bin `archmap` (Commander): comandos `init` (detecta el stack y escribe `.archmap.yaml`) y `analyze` (corre el pipeline y escribe `.archmap/graph.json`).
+- **packages/core** — el pipeline: `scan` → `parse` (tree-sitter WASM) → `resolve` (imports/workspace) → `infer` (módulos) → `graph/build` (el grafo final + métricas). Además **`src/query/`**: el query engine puro (`engine.ts` view-models JSON-serializables, `render.ts` markdown compacto, `budget.ts` presupuesto). El `BudgetWriter` garantiza **por construcción** que ningún render excede su budget; el truncado siempre termina en un hint ejecutable (`… +N more → tool(...)`).
+- **packages/mcp** — servidor MCP stdio (`@modelcontextprotocol/sdk`). Handlers ≤30 líneas que delegan a `core/query` — jamás derivan hechos estructurales por su cuenta. `GraphSource` relee `graph.json` por mtime (convive con `watch`) y recalcula el staleness (HEAD actual vs sha del grafo) en cada llamada.
+- **packages/cli** — bin `archmap` (Commander): `init`, `analyze [--full]`, `diff`, `watch`, `mcp`. En el comando `mcp`, stdout es el canal del protocolo: cualquier log humano va a stderr.
+- **e2e/** — harness contra el CLI **compilado**: SDK `Client` sobre stdio, repo sintético con git real (12 módulos en cadena → números de impact exactos y truncado garantizado). `oss.test.ts` corre solo con `TEST_OSS_REPO=/path` (patrón opt-in, como `TEST_LIVE_DB`).
 
 `fixtures/` está **fuera del workspace pnpm a propósito** (ver `pnpm-workspace.yaml`): si pnpm hiciera hoisting dentro de los fixtures, corrompería exactamente el comportamiento de resolución que los tests del resolver verifican. Por eso los fixtures nunca se `pnpm install`ean.
 
@@ -30,7 +32,9 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*`):
 - `pnpm lint` — `biome check .`
 - `pnpm lint:fix` — `biome check --write .`
 - `pnpm typecheck` — `tsc -b` en modo typecheck por paquete.
-- CLI local (requiere build previo): `node packages/cli/dist/index.js <cmd>` — comandos: `init`, `analyze [--full]`, `diff <base> [head] [--json]`, `watch`.
+- `pnpm test:e2e` — build + harness MCP e2e (requiere build porque spawnea el CLI compilado).
+- CLI local (requiere build previo): `node packages/cli/dist/index.js <cmd>` — comandos: `init`, `analyze [--full]`, `diff <base> [head] [--json]`, `watch`, `mcp`.
+- El server MCP de este propio repo está registrado en `.mcp.json` (dogfooding) — correr `analyze` antes de usarlo.
 
 ## Convenciones de testing
 
@@ -48,6 +52,8 @@ Monorepo pnpm (`pnpm-workspace.yaml`: `packages/*`):
 
 ## Estado
 
-**Fase 2 completa**: extracción TS/JS + Python deterministas, cache incremental de `FileFacts` por content-hash (`.archmap/cache/`), snapshots gzip por sha (`.archmap/snapshots/`, solo con árbol limpio), diff arquitectónico rename-aware (`archmap diff` — snapshots bajo demanda vía git worktree temporal con cache compartido) y watch mode. Fixtures `ts-basic`/`ts-monorepo`/`py-basic` con goldens revisados a mano. Validado contra requests/flask/django (django: 3034 archivos, 20s frío / 1.9s caliente).
+**Fase 3 completa**: query engine con budget de tokens explícito (`core/src/query/` — clamp [200, 20000], estimación `chars/4 × 1.15`, property test permanente con budgets aleatorios seedeados que asserta `render ≤ budget` en TODOS los tools) + servidor MCP stdio con los 7 tools no-DB (`get_architecture_overview`, `get_module`, `find_dependencies`, `get_impact`, `search_nodes`, `get_file_context`, `get_architecture_diff`). Toda respuesta abre con staleness header (`graph@sha · branch · clean · analyzed Xm ago` + warning si HEAD se movió). Not-found responde con sugerencias de search. Harness e2e valida los hints de drill-down re-ejecutándolos. Validado contra django (2922 archivos: toda respuesta ≤ budget en chars) y probado interactivamente desde Claude Code (headless) leyendo el grafo de este mismo repo.
 
-Plan completo de 6 fases guardado en Engram (proyecto `visual-work`, topic `visual-work/plan`). **Fase 3** (siguiente): query engine con budget de tokens explícito + servidor MCP (los 7 tools no-DB), MCP antes que dashboard para forzar el query engine como librería pura.
+Fases 1 y 2 (pipeline TS/JS + Python, cache incremental, snapshots por sha, diff rename-aware, watch) completas — ver historial de commits.
+
+Plan completo de 6 fases guardado en Engram (proyecto `visual-work`, topic `visual-work/plan`). **Fase 4** (siguiente): capa DB — extractores estáticos Prisma + SQLAlchemy, `link.ts` (entidad↔tabla, el diferenciador `maps_to`), introspección viva Postgres, `drift.ts` y los 3 tools MCP de DB. El engine ya recorre `maps_to`/`fk` y renderiza tablas en impact — la Fase 4 solo tiene que poblar el grafo.
