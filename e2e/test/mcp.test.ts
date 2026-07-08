@@ -72,9 +72,24 @@ const SWEEP_ARGS: Record<string, Record<string, unknown>> = {
 };
 
 describe("tool surface", () => {
-  it("exposes exactly the 7 non-DB tools", async () => {
+  it("exposes exactly the 10 tools", async () => {
     const { tools } = await h.client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(TOOLS);
+    expect(tools.map((t) => t.name).sort()).toEqual(
+      [...TOOLS, "get_db_schema", "get_entity_relations", "get_schema_drift"].sort(),
+    );
+  });
+
+  it("get_db_schema on a repo without ORM declarations says so, in budget", async () => {
+    const { text, isError } = await h.callText("get_db_schema", { budget_tokens: 500 });
+    expect(isError).toBe(false);
+    expect(text).toContain("No entities or tables in the graph");
+    expect(text.length).toBeLessThanOrEqual(500 * 4);
+  });
+
+  it("get_schema_drift without introspection explains how to enable it", async () => {
+    const { text, isError } = await h.callText("get_schema_drift", {});
+    expect(isError).toBe(false);
+    expect(text).toContain("archmap db introspect");
   });
 });
 

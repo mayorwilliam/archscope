@@ -1,8 +1,10 @@
 import {
   DEFAULT_BUDGET,
+  dbSchemaView,
   dependenciesView,
   diffGraphs,
   ensureSnapshot,
+  entityRelationsView,
   fileContextView,
   type GraphIndex,
   gitRenames,
@@ -12,15 +14,19 @@ import {
   moduleView,
   overviewView,
   type RenderContext,
+  renderDbSchema,
   renderDependencies,
   renderDiff,
+  renderEntityRelations,
   renderFileContext,
   renderImpact,
   renderModule,
   renderNotFound,
   renderOverview,
+  renderSchemaDrift,
   renderSearch,
   type StalenessInfo,
+  schemaDriftView,
   searchView,
 } from "@archmap/core";
 import { NODE_KINDS } from "@archmap/schema";
@@ -198,6 +204,69 @@ export function createArchmapServer(options: ArchmapServerOptions): McpServer {
       const view = fileContextView(index, args.path);
       if (!view) return notFound(index, args.path, renderCtx);
       return text(renderFileContext(view, renderCtx));
+    }),
+  );
+
+  server.registerTool(
+    "get_db_schema",
+    {
+      title: "Database schema",
+      description:
+        "Tables grouped by DB schema with their mapped code entities, PKs, foreign keys and " +
+        "drift counts. Pass `table` for one table in column-level detail. Static declarations " +
+        "come from ORM code (Prisma, SQLAlchemy); live data appears after `archmap db introspect`.",
+      inputSchema: {
+        table: z.string().optional().describe('One table in detail: "users" or "public.users"'),
+        budget_tokens,
+      },
+    },
+    guarded(async (args) => {
+      const { index, staleness } = await source.load();
+      const renderCtx = ctx(args.budget_tokens, staleness);
+      if (args.table === undefined) {
+        return text(renderDbSchema(dbSchemaView(index), renderCtx));
+      }
+      const view = entityRelationsView(index, args.table, "table");
+      if (!view) return notFound(index, args.table, renderCtx);
+      return text(renderEntityRelations(view, renderCtx));
+    }),
+  );
+
+  server.registerTool(
+    "get_entity_relations",
+    {
+      title: "Entity relations",
+      description:
+        "One ORM entity (or table) and its neighborhood: declared fields, the table it maps to, " +
+        "FK relations in both directions and the entities behind those tables. Accepts an " +
+        'entity name ("User"), an ent: id, or a table reference.',
+      inputSchema: {
+        entity: z.string().describe("Entity name, ent: id, table name or tbl: id"),
+        budget_tokens,
+      },
+    },
+    guarded(async (args) => {
+      const { index, staleness } = await source.load();
+      const renderCtx = ctx(args.budget_tokens, staleness);
+      const view = entityRelationsView(index, args.entity);
+      if (!view) return notFound(index, args.entity, renderCtx);
+      return text(renderEntityRelations(view, renderCtx));
+    }),
+  );
+
+  server.registerTool(
+    "get_schema_drift",
+    {
+      title: "Schema drift",
+      description:
+        "Declared (code) vs live (database) schema discrepancies, per table: missing " +
+        "tables/columns, type and nullability mismatches, missing FK constraints. Requires a " +
+        "prior `archmap db introspect`; explains how to enable it otherwise.",
+      inputSchema: { budget_tokens },
+    },
+    guarded(async (args) => {
+      const { index, staleness } = await source.load();
+      return text(renderSchemaDrift(schemaDriftView(index), ctx(args.budget_tokens, staleness)));
     }),
   );
 
