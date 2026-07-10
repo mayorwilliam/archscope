@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   dbSchemaView,
   entityRelationsView,
+  erdView,
   type GraphIndex,
   indexGraph,
   schemaDriftView,
@@ -24,6 +25,30 @@ describe("DB query views over the sqlalchemy-app fixture", () => {
     const users = view.schemas[0]?.tables.find((t) => t.name === "users");
     expect(users?.entities.map((e) => e.id)).toEqual(["ent:app/models.py#User"]);
     expect(users?.pks).toEqual(["id"]);
+    expect(view.fks.map((f) => `${f.from}→${f.to}`)).toEqual([
+      "tbl:public.posts→tbl:public.users",
+      "tbl:public.users→tbl:public.teams",
+    ]);
+  });
+
+  it("erdView ships full columns with PK/FK marks, entities and drift per table", () => {
+    const view = erdView(index);
+    expect(view.live).toBeNull();
+    expect(view.totals).toEqual({ tables: 3, entities: 3, fks: 2, drift: 0 });
+    expect(view.tables.map((t) => t.id)).toEqual([
+      "tbl:public.posts",
+      "tbl:public.teams",
+      "tbl:public.users",
+    ]);
+    const users = view.tables.find((t) => t.name === "users");
+    expect(users?.schema).toBe("public");
+    expect(users?.columns.find((c) => c.name === "id")?.isPk).toBe(true);
+    expect(users?.columns.find((c) => c.name === "team_id")?.fkTo).toEqual({
+      table: "public.teams",
+      column: "id",
+    });
+    expect(users?.entities.map((e) => e.id)).toEqual(["ent:app/models.py#User"]);
+    expect(users?.drift).toEqual([]);
     expect(view.fks.map((f) => `${f.from}→${f.to}`)).toEqual([
       "tbl:public.posts→tbl:public.users",
       "tbl:public.users→tbl:public.teams",
@@ -92,5 +117,12 @@ describe("DB query views over the sqlalchemy-app fixture", () => {
     expect(byTable.get("tbl:public.teams")).toEqual(["column_missing_in_code"]);
     expect(byTable.get("tbl:public.users")).toEqual(["table_missing_in_db"]);
     expect(byTable.get("tbl:public.posts")).toEqual(["table_missing_in_db"]);
+
+    // The same entries back the ERD's per-table drift badges.
+    const erd = erdView(indexGraph(merged));
+    expect(erd.totals.drift).toBe(3);
+    expect(erd.tables.find((t) => t.name === "teams")?.drift.map((d) => d.kind)).toEqual([
+      "column_missing_in_code",
+    ]);
   });
 });

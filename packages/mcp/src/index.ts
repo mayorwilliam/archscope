@@ -1,7 +1,7 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { createArchmapServer } from "./server.js";
 
-export { GraphSource, type LoadedGraph, NoGraphError } from "./graph-source.js";
+export { GraphSource, type LoadedGraph, NoGraphError } from "@archmap/core";
 export { type ArchmapServerOptions, createArchmapServer } from "./server.js";
 
 /**

@@ -1,9 +1,10 @@
 export { CONFIG_FILENAME, loadConfig } from "./config-file.js";
 export { type DiffInput, diffGraphs } from "./diff/engine.js";
 export { gitRenames } from "./diff/rename.js";
-export { gitInfo } from "./git.js";
+export { type GitRef, gitInfo, gitRefs } from "./git.js";
 export { type BuildInput, buildGraph } from "./graph/build.js";
 export { pageRank } from "./graph/metrics.js";
+export { GraphSource, type LoadedGraph, NoGraphError } from "./graph-source.js";
 export {
   createModuleInferrer,
   type ModuleAssignment,
@@ -32,7 +33,10 @@ export {
   dbSchemaView,
   dependenciesView,
   type EntityRelationsView,
+  type ErdTable,
+  type ErdView,
   entityRelationsView,
+  erdView,
   type FileContextView,
   type FileExport,
   type FileSummary,

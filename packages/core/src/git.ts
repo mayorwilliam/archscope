@@ -18,6 +18,37 @@ export async function gitInfo(rootDir: string): Promise<GitInfo | null> {
   }
 }
 
+export interface GitRef {
+  name: string;
+  sha: string;
+  kind: "branch" | "tag";
+}
+
+/** Local branches and tags — the candidates for the dashboard's diff pickers. */
+export async function gitRefs(rootDir: string): Promise<GitRef[]> {
+  try {
+    const out = await git(rootDir, [
+      "for-each-ref",
+      "--format=%(refname) %(objectname)",
+      "refs/heads",
+      "refs/tags",
+    ]);
+    const refs: GitRef[] = [];
+    for (const line of out.split("\n")) {
+      const [refname, sha] = line.split(" ");
+      if (!refname || !sha) continue;
+      refs.push({
+        name: refname.replace(/^refs\/(heads|tags)\//, ""),
+        sha,
+        kind: refname.startsWith("refs/tags/") ? "tag" : "branch",
+      });
+    }
+    return refs;
+  } catch {
+    return [];
+  }
+}
+
 async function git(cwd: string, args: string[]): Promise<string> {
   const { stdout } = await execa("git", args, { cwd });
   return stdout.trim();

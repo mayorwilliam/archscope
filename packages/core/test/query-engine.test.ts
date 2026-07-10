@@ -84,6 +84,17 @@ describe("moduleView", () => {
     expect(login?.exports).toEqual(["LOGIN_TIMEOUT", "login"]);
   });
 
+  it("lists internal file→file imports, excluding edges that leave the module", () => {
+    const view = moduleView(index, "auth");
+    // login → utils/format crosses the module boundary and must not appear.
+    expect(view?.internalImports).toEqual([
+      { from: "file:src/auth/index.ts", to: "file:src/auth/login.ts" },
+      { from: "file:src/auth/index.ts", to: "file:src/auth/session.ts" },
+      { from: "file:src/auth/login.ts", to: "file:src/auth/session.ts" },
+      { from: "file:src/auth/session.ts", to: "file:src/auth/login.ts" },
+    ]);
+  });
+
   it("returns null for non-modules and unknown names", () => {
     expect(moduleView(index, "src/main.ts")).toBeNull();
     expect(moduleView(index, "ghost")).toBeNull();

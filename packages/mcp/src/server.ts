@@ -7,6 +7,7 @@ import {
   entityRelationsView,
   fileContextView,
   type GraphIndex,
+  GraphSource,
   gitRenames,
   impactView,
   MAX_BUDGET,
@@ -32,7 +33,6 @@ import {
 import { NODE_KINDS } from "@archmap/schema";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { GraphSource } from "./graph-source.js";
 
 /**
  * The MCP surface is a thin adapter: every handler loads the graph, calls ONE

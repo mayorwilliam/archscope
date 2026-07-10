@@ -1,12 +1,16 @@
 import fs from "node:fs";
-import { type GraphIndex, gitInfo, indexGraph, type StalenessInfo, Store } from "@archmap/core";
+import { gitInfo } from "./git.js";
+import { type GraphIndex, indexGraph } from "./query/engine.js";
+import type { StalenessInfo } from "./query/render.js";
+import { Store } from "./store/store.js";
 
 /**
- * Serves the current graph to tool handlers. The index is rebuilt only when
- * graph.json's mtime moves — which is exactly how `archmap watch` publishes
- * updates, so a long-lived MCP server and watch mode compose for free.
- * Staleness (current HEAD vs. the analyzed sha) is re-checked on every call:
- * it is the one fact that must never be cached.
+ * Serves the current graph to long-lived consumers — the MCP server and the
+ * dashboard's REST layer. The index is rebuilt only when graph.json's mtime
+ * moves — which is exactly how `archmap watch` publishes updates, so both
+ * servers compose with watch mode for free. Staleness (current HEAD vs. the
+ * analyzed sha) is re-checked on every call: it is the one fact that must
+ * never be cached.
  */
 
 export class NoGraphError extends Error {

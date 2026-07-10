@@ -200,6 +200,8 @@ export interface ModuleView {
   loc: number;
   rank: number;
   files: FileSummary[];
+  /** file→file imports where both ends live in this module. */
+  internalImports: Array<{ from: string; to: string }>;
   dependsOn: ModuleDependency[];
   dependents: ModuleDependency[];
   packages: PackageSummary[];
@@ -211,6 +213,7 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
 
   const files: FileSummary[] = [];
   const pkgFanIn = new Map<string, number>();
+  const internalImports: Array<{ from: string; to: string }> = [];
   for (const child of index.children.get(node.id) ?? []) {
     if (child.kind !== "file") continue;
     const exports: string[] = [];
@@ -229,10 +232,13 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
     for (const edge of index.outEdges.get(child.id) ?? []) {
       if (edge.kind === "imports_pkg") {
         pkgFanIn.set(edge.to, (pkgFanIn.get(edge.to) ?? 0) + 1);
+      } else if (edge.kind === "imports" && index.nodes.get(edge.to)?.parent === node.id) {
+        internalImports.push({ from: edge.from, to: edge.to });
       }
     }
   }
   files.sort((a, b) => b.rank - a.rank || a.id.localeCompare(b.id));
+  internalImports.sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to));
 
   const packages: PackageSummary[] = [...pkgFanIn.entries()].map(([id, fanIn]) => {
     const pkg = index.nodes.get(id);
@@ -254,6 +260,7 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
     loc: node.metrics.loc ?? 0,
     rank: node.metrics.rank,
     files,
+    internalImports,
     dependsOn,
     dependents,
     packages,
@@ -660,6 +667,77 @@ function splitTableRef(id: string, fallbackName: string): { schema: string; tabl
   const dot = rest.indexOf(".");
   if (dot === -1) return { schema: "public", table: fallbackName };
   return { schema: rest.slice(0, dot), table: rest.slice(dot + 1) };
+}
+
+// ---------------------------------------------------------------------------
+// ERD
+// ---------------------------------------------------------------------------
+
+export interface ErdTable {
+  id: string;
+  schema: string;
+  name: string;
+  origin: "declared" | "live" | "both";
+  /** Verbatim graph columns — fkTo/isPk carry the FK/PK marks the ERD draws. */
+  columns: TableColumn[];
+  entities: TableEntityRef[];
+  drift: DriftEntry[];
+}
+
+export interface ErdView {
+  live: LiveMeta | null;
+  tables: ErdTable[];
+  fks: FkRelation[];
+  totals: { tables: number; entities: number; fks: number; drift: number };
+}
+
+/**
+ * The ERD is the one view where full column detail is the point: unlike
+ * dbSchemaView, which summarizes for a token budget, the dashboard pays in
+ * pixels — every table ships its columns, mapped entities and drift entries.
+ */
+export function erdView(index: GraphIndex): ErdView {
+  const tables: ErdTable[] = [];
+  const fks: FkRelation[] = [];
+  let entities = 0;
+  let drift = 0;
+
+  for (const node of index.graph.nodes) {
+    if (node.kind === "entity") entities += 1;
+    if (node.kind !== "table" || node.attrs.kind !== "table") continue;
+    const { schema } = splitTableRef(node.id, node.name);
+    const entries = node.attrs.drift ?? [];
+    drift += entries.length;
+    tables.push({
+      id: node.id,
+      schema,
+      name: node.name,
+      origin: node.attrs.origin,
+      columns: node.attrs.columns,
+      entities: mappedEntities(index, node.id),
+      drift: entries,
+    });
+  }
+  for (const edge of index.graph.edges) {
+    if (edge.kind !== "fk") continue;
+    fks.push({
+      from: edge.from,
+      to: edge.to,
+      columns: edge.attrs?.columns ?? [],
+      source: edge.source,
+      confidence: edge.confidence,
+    });
+  }
+
+  tables.sort((a, b) => a.id.localeCompare(b.id));
+  fks.sort((a, b) => a.from.localeCompare(b.from) || a.to.localeCompare(b.to));
+
+  return {
+    live: index.graph.meta.live ?? null,
+    tables,
+    fks,
+    totals: { tables: tables.length, entities, fks: fks.length, drift },
+  };
 }
 
 // ---------------------------------------------------------------------------
