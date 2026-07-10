@@ -5,6 +5,7 @@ import { runDbDrift, runDbIntrospect } from "./commands/db.js";
 import { runDiff } from "./commands/diff.js";
 import { runInit } from "./commands/init.js";
 import { runMcp } from "./commands/mcp.js";
+import { runServe } from "./commands/serve.js";
 import { runWatch } from "./commands/watch.js";
 
 const program = new Command();
@@ -72,6 +73,14 @@ program
   .description("Re-analyze on file changes (incremental via the facts cache)")
   .action(async () => {
     await runWatch(process.cwd());
+  });
+
+program
+  .command("serve")
+  .description("Serve the dashboard: static app + REST + SSE, with watch mode in-process")
+  .option("--port <port>", "port to listen on", "4400")
+  .action(async (options: { port?: string }) => {
+    await runServe(process.cwd(), options);
   });
 
 program.parseAsync().catch((error: unknown) => {

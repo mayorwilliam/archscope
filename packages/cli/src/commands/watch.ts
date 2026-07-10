@@ -44,6 +44,15 @@ const WATCHED_FILENAMES = new Set([
 ]);
 
 export async function runWatch(rootDir: string): Promise<void> {
+  await startWatch(rootDir);
+}
+
+/**
+ * Shared by `watch` and `serve`: initial analyze + chokidar re-analysis on
+ * changes. Publishing means writing graph.json — consumers (MCP's GraphSource,
+ * serve's REST + SSE) pick that up by mtime, so there is no callback plumbing.
+ */
+export async function startWatch(rootDir: string): Promise<void> {
   const store = new Store(rootDir);
 
   let pending = new Set<string>();
