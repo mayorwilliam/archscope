@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:dashboard": "playwright test"
   },
   "dependencies": {
     "@archmap/core": "workspace:*",
@@ -13,6 +14,7 @@
     "execa": "^9.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "^22.15.0",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"

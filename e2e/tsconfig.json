@@ -8,5 +8,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["test"]
+  "include": ["test", "dashboard", "playwright.config.ts"]
 }
