@@ -1,3 +1,4 @@
+export { type AlembicInfo, detectAlembic } from "./alembic.js";
 export {
   DEFAULT_DB_SCHEMA,
   type DeclaredEntity,
@@ -21,6 +22,7 @@ export {
   type LiveTable,
   redactSecret,
 } from "./introspect.js";
+export { introspectMysql } from "./introspect-mysql.js";
 export {
   type LinkedDbSchema,
   type LinkedEntity,

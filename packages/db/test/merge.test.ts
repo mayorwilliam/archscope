@@ -126,3 +126,56 @@ describe("mergeLiveSchema", () => {
     expect(() => parseArchGraph(JSON.parse(JSON.stringify(graph)))).not.toThrow();
   });
 });
+
+describe("mergeLiveSchema — MySQL default-schema mapping", () => {
+  const mysqlLive: LiveSchema = {
+    dialect: "mysql",
+    defaultSchema: "appdb", // MySQL: schema == the connection's database
+    tables: [
+      {
+        schema: "appdb",
+        name: "users",
+        columns: [
+          { name: "id", sqlType: "int", nullable: false, isPk: true },
+          { name: "email", sqlType: "varchar", nullable: false, isPk: false },
+        ],
+        fks: [],
+      },
+      {
+        schema: "appdb",
+        name: "sessions",
+        columns: [
+          { name: "id", sqlType: "int", nullable: false, isPk: true },
+          { name: "user_id", sqlType: "int", nullable: false, isPk: false },
+        ],
+        fks: [{ fromColumns: ["user_id"], toSchema: "appdb", toTable: "users", toColumns: ["id"] }],
+      },
+    ],
+  };
+  const mysqlOptions = { ...options, dialect: "mysql" as const };
+  const { graph, drift } = mergeLiveSchema(baseGraph(), mysqlLive, mysqlOptions);
+
+  it("matches tbl:public.* against the connection's database, keeping the node id", () => {
+    const users = graph.nodes.find((n) => n.id === "tbl:public.users");
+    if (users?.attrs.kind !== "table") throw new Error("expected table attrs");
+    expect(users.attrs.origin).toBe("both");
+    expect(drift.byTable.has("appdb.users")).toBe(false); // clean match
+  });
+
+  it("live-only tables keep their real schema in the node id", () => {
+    const sessions = graph.nodes.find((n) => n.id === "tbl:appdb.sessions");
+    if (sessions?.attrs.kind !== "table") throw new Error("expected table attrs");
+    expect(sessions.attrs.origin).toBe("live");
+  });
+
+  it("live FKs resolve to the DECLARED node when the table matched", () => {
+    const fk = graph.edges.find((e) => e.kind === "fk" && e.source === "live");
+    expect(fk?.from).toBe("tbl:appdb.sessions");
+    expect(fk?.to).toBe("tbl:public.users"); // mapped, not tbl:appdb.users
+  });
+
+  it("stays idempotent under the mapping", () => {
+    const second = mergeLiveSchema(graph, mysqlLive, mysqlOptions);
+    expect(JSON.stringify(second.graph)).toBe(JSON.stringify(graph));
+  });
+});

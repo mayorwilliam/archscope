@@ -1,5 +1,5 @@
 import type { DriftEntry, TableColumn } from "@archmap/schema";
-import { tableKey } from "./declared.js";
+import { DEFAULT_DB_SCHEMA, tableKey } from "./declared.js";
 import type { LiveSchema, LiveTable } from "./introspect.js";
 
 /**
@@ -35,12 +35,18 @@ export function computeDrift(declared: DeclaredTableInput[], live: LiveSchema): 
     else byTable.set(key, [entry]);
   };
 
-  const declaredSchemas = new Set(declared.map((t) => t.schema));
+  // An unqualified declared table lives in the connection's default namespace
+  // ("public" on Postgres, the database on MySQL) — map the declared side for
+  // matching; report keys carry the live-real name.
+  const defaultSchema = live.defaultSchema ?? DEFAULT_DB_SCHEMA;
+  const mapSchema = (schema: string) => (schema === DEFAULT_DB_SCHEMA ? defaultSchema : schema);
+
+  const declaredSchemas = new Set(declared.map((t) => mapSchema(t.schema)));
   const liveByKey = new Map(live.tables.map((t) => [tableKey(t.schema, t.name), t]));
-  const declaredKeys = new Set(declared.map((t) => tableKey(t.schema, t.name)));
+  const declaredKeys = new Set(declared.map((t) => tableKey(mapSchema(t.schema), t.name)));
 
   for (const table of declared) {
-    const key = tableKey(table.schema, table.name);
+    const key = tableKey(mapSchema(table.schema), table.name);
     const liveTable = liveByKey.get(key);
     if (!liveTable) {
       push(key, {
@@ -211,6 +217,7 @@ const TYPE_FAMILIES: Record<string, string> = {
   smallint: "integer",
   mediumint: "integer",
   tinyint: "integer",
+  "tinyint(1)": "boolean", // MySQL's boolean, by universal ORM convention
   real: "double",
   doubleprecision: "double",
   // MySQL information_schema DATA_TYPE spellings
@@ -253,10 +260,11 @@ const TYPE_FAMILIES: Record<string, string> = {
 };
 
 export function normalizeSqlType(raw: string): string {
-  const base = raw
-    .toLowerCase()
-    .replace(/\(.*\)$/, "")
-    .trim();
+  const lower = raw.toLowerCase().trim();
+  // Width-qualified spellings first — tinyint(1) means boolean, tinyint(4) int.
+  const exact = TYPE_FAMILIES[lower];
+  if (exact) return exact;
+  const base = lower.replace(/\(.*\)$/, "").trim();
   const direct = TYPE_FAMILIES[base];
   if (direct) return direct;
   const lastSegment = base.split(".").pop() ?? base;

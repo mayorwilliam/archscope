@@ -33,7 +33,14 @@ export interface LiveTable {
 }
 
 export interface LiveSchema {
-  dialect: "postgres";
+  dialect: "postgres" | "mysql";
+  /**
+   * The namespace an UNQUALIFIED declared table lands in: "public" for
+   * Postgres, the connection's database for MySQL (where schema == database).
+   * Drift/merge map the declared DEFAULT_DB_SCHEMA onto this for matching —
+   * live table names are always reported with their real schema.
+   */
+  defaultSchema?: string;
   tables: LiveTable[];
 }
 
@@ -51,7 +58,7 @@ export async function introspectPostgres(
     await client.connect();
     await client.query("SET default_transaction_read_only = on");
     const tables = await loadTables(client, options.schemas);
-    return { dialect: "postgres", tables };
+    return { dialect: "postgres", defaultSchema: "public", tables };
   } catch (error) {
     throw redactError(error, url);
   } finally {

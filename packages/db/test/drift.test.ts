@@ -142,6 +142,51 @@ describe("computeDrift", () => {
   });
 });
 
+describe("computeDrift — MySQL default-schema mapping", () => {
+  const mysqlLive: LiveSchema = {
+    dialect: "mysql",
+    defaultSchema: "appdb",
+    tables: [
+      {
+        schema: "appdb",
+        name: "users",
+        columns: [
+          { name: "id", sqlType: "int", nullable: false, isPk: true },
+          { name: "active", sqlType: "tinyint(1)", nullable: false, isPk: false },
+        ],
+        fks: [],
+      },
+      {
+        schema: "appdb",
+        name: "stray",
+        columns: [],
+        fks: [],
+      },
+    ],
+  };
+  const mysqlDeclared: DeclaredTableInput[] = [
+    {
+      schema: "public", // unqualified declaration — maps onto appdb
+      name: "users",
+      columns: [
+        { name: "id", sqlType: "Int", nullable: false, isPk: true },
+        { name: "active", sqlType: "Boolean", nullable: false, isPk: false },
+      ],
+    },
+  ];
+  const report = computeDrift(mysqlDeclared, mysqlLive);
+
+  it("matches unqualified declared tables against the connection's database", () => {
+    expect(report.byTable.has("appdb.users")).toBe(false); // clean match, no entry
+    expect([...report.byTable.keys()]).toEqual(["appdb.stray"]);
+    expect(report.byTable.get("appdb.stray")?.[0]?.kind).toBe("table_missing_in_code");
+  });
+
+  it("declared Boolean matches live tinyint(1)", () => {
+    expect(report.total).toBe(1); // only the stray table — no type_mismatch on active
+  });
+});
+
 describe("normalizeSqlType", () => {
   const cases: Array<[string, string]> = [
     ["String", "text"],
@@ -164,6 +209,19 @@ describe("normalizeSqlType", () => {
     ["Json", "json"],
     ["jsonb", "json"],
     ["MyEnum", "myenum"], // unknown → its own lowercased base, same-vs-same still matches
+    // MySQL spellings — tinyint(1) is boolean by convention, wider tinyints are ints
+    ["tinyint(1)", "boolean"],
+    ["tinyint", "integer"],
+    ["tinyint(4)", "integer"],
+    ["longtext", "text"],
+    ["datetime", "timestamp"],
+    // Django field classes
+    ["CharField", "text"],
+    ["BigIntegerField", "bigint"],
+    ["DecimalField", "numeric"],
+    // TypeORM / Drizzle builders
+    ["doublePrecision", "double"],
+    ["smallserial", "integer"],
   ];
   for (const [raw, family] of cases) {
     it(`${raw} → ${family}`, () => {

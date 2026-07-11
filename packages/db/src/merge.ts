@@ -1,6 +1,6 @@
 import type { ArchGraph, GraphEdge, GraphNode, NodeKind, TableColumn } from "@archmap/schema";
 import { edgeId, tableId } from "@archmap/schema";
-import { tableKey } from "./declared.js";
+import { DEFAULT_DB_SCHEMA, tableKey } from "./declared.js";
 import { computeDrift, type DeclaredTableInput, type DriftReport } from "./drift.js";
 import type { LiveFk, LiveSchema, LiveTable } from "./introspect.js";
 
@@ -55,14 +55,24 @@ export function mergeLiveSchema(
     declared.push({ schema, name, columns: node.attrs.columns });
   }
   const drift = computeDrift(declared, live);
-  const declaredSchemas = new Set(declared.map((t) => t.schema));
+
+  // Same default-namespace mapping as computeDrift: a declared tbl:public.*
+  // matches the live table in the connection's default schema (the database,
+  // on MySQL). Node IDs keep their declared identity — only matching maps.
+  const defaultSchema = live.defaultSchema ?? DEFAULT_DB_SCHEMA;
+  const mapSchema = (schema: string) => (schema === DEFAULT_DB_SCHEMA ? defaultSchema : schema);
+  const declaredSchemas = new Set(declared.map((t) => mapSchema(t.schema)));
+
+  // live key (`schema.table`, live-real) → graph node id.
+  const nodeIdByLiveKey = new Map<string, string>();
 
   // Declared tables: attach drift, upgrade origin when the live side exists.
   const liveByKey = new Map(live.tables.map((t) => [tableKey(t.schema, t.name), t]));
   for (const node of nodes.values()) {
     if (node.kind !== "table" || node.attrs.kind !== "table") continue;
     const { schema, name } = splitTableId(node.id, node.name);
-    const key = tableKey(schema, name);
+    const key = tableKey(mapSchema(schema), name);
+    nodeIdByLiveKey.set(key, node.id);
     const entries = drift.byTable.get(key) ?? [];
     node.attrs = {
       ...node.attrs,
@@ -73,9 +83,11 @@ export function mergeLiveSchema(
 
   // Live-only tables (inside declared schemas): new nodes with live columns.
   for (const table of live.tables) {
+    const key = tableKey(table.schema, table.name);
+    if (nodeIdByLiveKey.has(key) || !declaredSchemas.has(table.schema)) continue;
     const id = tableId(table.schema, table.name);
-    if (nodes.has(id) || !declaredSchemas.has(table.schema)) continue;
-    const entries = drift.byTable.get(tableKey(table.schema, table.name)) ?? [];
+    const entries = drift.byTable.get(key) ?? [];
+    nodeIdByLiveKey.set(key, id);
     nodes.set(id, {
       id,
       kind: "table",
@@ -92,11 +104,11 @@ export function mergeLiveSchema(
 
   // Live FKs between tables present in the graph; static edges win on id.
   for (const table of live.tables) {
-    const fromId = tableId(table.schema, table.name);
-    if (!nodes.has(fromId)) continue;
+    const fromId = nodeIdByLiveKey.get(tableKey(table.schema, table.name));
+    if (fromId === undefined) continue;
     for (const fk of table.fks) {
-      const toId = tableId(fk.toSchema, fk.toTable);
-      if (!nodes.has(toId)) continue;
+      const toId = nodeIdByLiveKey.get(tableKey(fk.toSchema, fk.toTable));
+      if (toId === undefined) continue;
       const id = edgeId("fk", fromId, toId);
       if (edges.has(id)) continue;
       edges.set(id, {
