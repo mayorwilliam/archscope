@@ -23,6 +23,7 @@
     "get-tsconfig": "^4.10.1",
     "ignore": "^7.0.5",
     "picomatch": "^4.0.2",
+    "piscina": "^5.2.0",
     "tree-sitter-wasms": "^0.1.12",
     "web-tree-sitter": "^0.25.6",
     "yaml": "^2.8.0"

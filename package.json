@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "typecheck": "pnpm -r --filter './packages/*' typecheck"
+    "typecheck": "pnpm -r --filter './packages/*' typecheck",
+    "bench": "pnpm build && node e2e/bench/bench.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
