@@ -1,36 +1,59 @@
 {
   "name": "archmap",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Architecture graphs for humans and coding agents — deterministic static analysis, one graph, a dashboard and an MCP server.",
+  "keywords": [
+    "architecture",
+    "visualization",
+    "mcp",
+    "static-analysis",
+    "dependency-graph",
+    "erd"
+  ],
+  "license": "MIT",
   "type": "module",
   "bin": {
     "archmap": "dist/index.js"
   },
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
-  },
   "files": [
-    "dist"
+    "dist",
+    "dashboard"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "build": "tsc -b",
-    "typecheck": "tsc -b"
+    "build": "tsup",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/static": "^9.3.0",
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "@mrleebo/prisma-ast": "^0.16.0",
+    "chokidar": "^4.0.3",
+    "commander": "^14.0.0",
+    "enhanced-resolve": "^5.18.1",
+    "execa": "^9.6.0",
+    "fastify": "^5.10.0",
+    "get-tsconfig": "^4.10.1",
+    "ignore": "^7.0.5",
+    "mysql2": "^3.22.6",
+    "pg": "^8.22.0",
+    "picomatch": "^4.0.2",
+    "piscina": "^5.2.0",
+    "tree-sitter-wasms": "^0.1.12",
+    "web-tree-sitter": "^0.25.6",
+    "yaml": "^2.8.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
     "@archmap/core": "workspace:*",
     "@archmap/dashboard": "workspace:*",
     "@archmap/db": "workspace:*",
     "@archmap/mcp": "workspace:*",
     "@archmap/schema": "workspace:*",
-    "@fastify/static": "^9.3.0",
-    "chokidar": "^4.0.3",
-    "commander": "^14.0.0",
-    "fastify": "^5.10.0"
-  },
-  "devDependencies": {
     "@types/node": "^22.15.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   }
 }

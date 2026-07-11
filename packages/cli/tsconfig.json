@@ -1,15 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../schema" },
-    { "path": "../core" },
-    { "path": "../db" },
-    { "path": "../mcp" }
-  ]
+  "include": ["src", "tsup.config.ts"]
 }

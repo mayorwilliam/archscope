@@ -7,6 +7,7 @@ import { runInit } from "./commands/init.js";
 import { runMcp } from "./commands/mcp.js";
 import { runServe } from "./commands/serve.js";
 import { runWatch } from "./commands/watch.js";
+import { VERSION } from "./version.js";
 
 const program = new Command();
 
@@ -15,7 +16,7 @@ program
   .description(
     "Architecture graphs for humans and coding agents — from static analysis, deterministically.",
   )
-  .version("0.0.1");
+  .version(VERSION);
 
 program
   .command("init")

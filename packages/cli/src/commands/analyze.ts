@@ -1,10 +1,12 @@
 import { analyze, Store } from "@archmap/core";
+import { VERSION } from "../version.js";
 
 export async function runAnalyze(rootDir: string, options: { full?: boolean }): Promise<void> {
   const started = performance.now();
 
   const { graph, skipped, cache } = await analyze({
     rootDir,
+    toolVersion: VERSION,
     cache: options.full ? { refresh: true } : true,
   });
   const store = new Store(rootDir);

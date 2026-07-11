@@ -7,3 +7,6 @@ coverage/
 *.log
 test-results/
 playwright-report/
+# build artifact: the dashboard dist copied into the publishable CLI package
+packages/cli/dashboard/
+*.tgz

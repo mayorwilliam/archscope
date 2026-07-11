@@ -2,6 +2,7 @@ import fs from "node:fs";
 import type { ServerResponse } from "node:http";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   diffGraphs,
   ensureSnapshot,
@@ -183,14 +184,20 @@ function notFound(
   return reply.code(404).send({ error: `Not found: ${ref}`, suggestions });
 }
 
-/** The dashboard publishes only dist/ — resolve it through the package. */
+/**
+ * Monorepo dev: resolve @archmap/dashboard's dist through the workspace.
+ * Published package: the build copies that dist into <pkg>/dashboard, next to
+ * the bundled dist/ (see tsup.config.ts) — @archmap/* never ships to npm.
+ */
 function resolveDashboardDist(): string | null {
   try {
     const require = createRequire(import.meta.url);
     const pkgJson = require.resolve("@archmap/dashboard/package.json");
     const dist = path.join(path.dirname(pkgJson), "dist");
-    return fs.existsSync(path.join(dist, "index.html")) ? dist : null;
+    if (fs.existsSync(path.join(dist, "index.html"))) return dist;
   } catch {
-    return null;
+    // not installed as a package — fall through to the bundled copy
   }
+  const bundled = fileURLToPath(new URL("../dashboard", import.meta.url));
+  return fs.existsSync(path.join(bundled, "index.html")) ? bundled : null;
 }
