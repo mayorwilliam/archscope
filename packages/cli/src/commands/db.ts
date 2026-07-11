@@ -3,6 +3,8 @@ import {
   computeDrift,
   type DeclaredTableInput,
   type DriftReport,
+  detectAlembic,
+  introspectMysql,
   introspectPostgres,
   type LiveSchema,
   mergeLiveSchema,
@@ -63,7 +65,22 @@ export async function runDbDrift(
       for (const entry of entries) console.log(`  ⚠ ${entry.kind}: ${entry.detail}`);
     }
   }
+  logAlembicHint(rootDir);
   if (drift.total > 0) process.exitCode = 1;
+}
+
+/**
+ * Best-effort context line: when the repo manages its schema with alembic,
+ * drift readers want to know how many migrations exist and where the head is.
+ * Purely informational — never part of the graph, never affects the exit code.
+ */
+function logAlembicHint(rootDir: string): void {
+  const alembic = detectAlembic(rootDir);
+  if (!alembic) return;
+  console.log(
+    `ℹ alembic: ${alembic.count} migrations in ${alembic.versionsDir}, ` +
+      `head${alembic.heads.length > 1 ? "s" : ""} ${alembic.heads.join(", ")}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -80,11 +97,6 @@ async function introspectFromConfig(
 
   const sources = loadConfig(rootDir).db?.live ?? [];
   const source = pickSource(sources, options.source);
-  if (source.dialect !== "postgres") {
-    throw new Error(
-      `Live introspection for ${source.dialect} lands in a later phase — postgres only for now.`,
-    );
-  }
 
   const url = process.env[source.urlEnv];
   if (!url) {
@@ -94,6 +106,13 @@ async function introspectFromConfig(
     );
   }
 
+  if (source.dialect === "mysql") {
+    // "public" is the unqualified-declaration placeholder — on MySQL it maps
+    // to the connection's database, which the introspector scopes to itself.
+    const schemas = declaredSchemas(graph).filter((s) => s !== "public");
+    const live = await introspectMysql(url, schemas.length > 0 ? { schemas } : {});
+    return { store, graph, live, source };
+  }
   const schemas = declaredSchemas(graph);
   const live = await introspectPostgres(url, schemas.length > 0 ? { schemas } : {});
   return { store, graph, live, source };
