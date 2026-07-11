@@ -4,12 +4,14 @@ export {
   type DeclaredRelation,
   tableKey,
 } from "./declared.js";
+export { extractDjangoEntities } from "./django.js";
 export {
   computeDrift,
   type DeclaredTableInput,
   type DriftReport,
   normalizeSqlType,
 } from "./drift.js";
+export { extractDrizzleEntities } from "./drizzle.js";
 export {
   type IntrospectOptions,
   introspectPostgres,
@@ -29,3 +31,4 @@ export {
 export { type MergeOptions, type MergeResult, mergeLiveSchema } from "./merge.js";
 export { extractPrismaEntities } from "./prisma.js";
 export { extractSqlalchemyEntities } from "./sqlalchemy.js";
+export { extractTypeormEntities } from "./typeorm.js";
