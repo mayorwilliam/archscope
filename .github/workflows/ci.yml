@@ -1,0 +1,82 @@
+# CI: la aceptación de Fase 6 es que `npx archmap init && analyze && serve`
+# funcione en macOS/Linux/Windows SIN build steps — el job `npx-smoke` instala
+# el tarball empaquetado en un proyecto limpio y ejercita ese flujo exacto.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+      - run: pnpm test
+      - name: e2e MCP (CLI compilado)
+        run: pnpm -C e2e test
+
+      - name: npx smoke — init && analyze && serve desde el tarball
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd packages/cli && npm pack --pack-destination "$RUNNER_TEMP")
+          SMOKE="$RUNNER_TEMP/npx-smoke"
+          mkdir -p "$SMOKE/src"
+          cd "$SMOKE"
+          printf 'export function helper(){ return 1 }\n' > src/util.ts
+          printf 'import { helper } from "./util";\nexport const x = helper();\n' > src/main.ts
+          echo '{"name":"smoke-app","private":true}' > package.json
+          npm install --no-fund --no-audit "$RUNNER_TEMP"/archmap-*.tgz
+          npx archmap --version
+          npx archmap init
+          npx archmap analyze
+          node -e "const g=require('./.archmap/graph.json'); if (g.nodes.length < 4) { throw new Error('graph too small: ' + g.nodes.length) }"
+          npx archmap serve --port 4517 &
+          SERVER=$!
+          sleep 5
+          curl -sf http://127.0.0.1:4517/api/overview > /dev/null
+          curl -sf http://127.0.0.1:4517/ | grep -qi '<!doctype html'
+          kill $SERVER
+
+  dashboard-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -C e2e exec playwright install chromium --with-deps
+      - run: pnpm test:e2e:dashboard
+
+  bench:
+    # Tendencia de performance, no bloqueante: 5k archivos < 60s frío / < 5s caliente.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: node e2e/bench/bench.mjs --assert
