@@ -1,4 +1,4 @@
-import { type DeclaredEntity, extractSqlalchemyEntities } from "@archmap/db";
+import { type DeclaredEntity, extractDjangoEntities, extractSqlalchemyEntities } from "@archmap/db";
 import type { Lang, SymbolKind } from "@archmap/schema";
 import type { Node } from "web-tree-sitter";
 import type { FileFacts, ImportFact, SymbolFact } from "./facts.js";
@@ -61,10 +61,14 @@ export async function extractPyFacts(relPath: string, source: string): Promise<F
 
   // `__tablename__` in the source is the deterministic SQLAlchemy-declarative
   // marker — cheaper and more robust than chasing the Base class through
-  // imports (models often only import Base from a local module).
-  let entities: DeclaredEntity[] = [];
+  // imports (models often only import Base from a local module). Django's is
+  // the textual `models.Model` base (plus `Model` when imported directly).
+  const entities: DeclaredEntity[] = [];
   if (source.includes("__tablename__")) {
-    entities = extractSqlalchemyEntities(relPath, root);
+    entities.push(...extractSqlalchemyEntities(relPath, root));
+  }
+  if (source.includes("django")) {
+    entities.push(...extractDjangoEntities(relPath, root));
   }
 
   tree.delete();
@@ -76,7 +80,7 @@ export async function extractPyFacts(relPath: string, source: string): Promise<F
     imports,
     symbols,
     ormHints: entities.map((e) => ({
-      framework: "sqlalchemy",
+      framework: e.orm,
       startLine: e.startLine,
       endLine: e.endLine,
     })),

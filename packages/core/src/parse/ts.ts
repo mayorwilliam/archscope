@@ -1,6 +1,7 @@
+import { type DeclaredEntity, extractDrizzleEntities, extractTypeormEntities } from "@archmap/db";
 import type { Lang, SymbolKind } from "@archmap/schema";
 import type { Node } from "web-tree-sitter";
-import type { FileFacts, ImportFact, SymbolFact } from "./facts.js";
+import type { FileFacts, ImportFact, OrmHint, SymbolFact } from "./facts.js";
 import { grammarForFile, parseSource } from "./parser.js";
 
 /**
@@ -49,6 +50,16 @@ export async function extractTsFacts(relPath: string, source: string): Promise<F
     if (exportedNames.has(sym.name)) sym.exported = true;
   }
 
+  // The import IS the deterministic ORM marker — a file can't declare TypeORM
+  // or Drizzle tables without importing from the package.
+  const entities: DeclaredEntity[] = [];
+  if (imports.some((i) => i.specifier === "typeorm")) {
+    entities.push(...extractTypeormEntities(relPath, root));
+  }
+  if (imports.some((i) => i.specifier.startsWith("drizzle-orm"))) {
+    entities.push(...extractDrizzleEntities(relPath, root));
+  }
+
   tree.delete();
 
   return {
@@ -57,7 +68,10 @@ export async function extractTsFacts(relPath: string, source: string): Promise<F
     loc: countLines(source),
     imports,
     symbols,
-    ormHints: [],
+    ormHints: entities.map(
+      (e): OrmHint => ({ framework: e.orm, startLine: e.startLine, endLine: e.endLine }),
+    ),
+    ...(entities.length > 0 ? { entities } : {}),
   };
 }
 

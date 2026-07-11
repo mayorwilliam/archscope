@@ -1,0 +1,391 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 1,
+      "file": 2,
+      "symbol": 3,
+      "entity": 2,
+      "table": 2,
+      "extpkg": 1
+    }
+  },
+  "nodes": [
+    {
+      "id": "ent:src/schema.ts#teams",
+      "kind": "entity",
+      "name": "teams",
+      "parent": "file:src/schema.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "entity",
+        "orm": "drizzle",
+        "declaredTable": "public.teams",
+        "fields": [
+          {
+            "name": "id",
+            "type": "serial",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "name",
+            "type": "text",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/schema.ts",
+        "startLine": 3,
+        "endLine": 6
+      }
+    },
+    {
+      "id": "ent:src/schema.ts#users",
+      "kind": "entity",
+      "name": "users",
+      "parent": "file:src/schema.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "entity",
+        "orm": "drizzle",
+        "declaredTable": "auth.users",
+        "fields": [
+          {
+            "name": "id",
+            "type": "serial",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "email",
+            "type": "varchar",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "teamId",
+            "type": "integer",
+            "column": "team_id",
+            "nullable": true,
+            "isPk": false,
+            "isFk": true
+          },
+          {
+            "name": "bio",
+            "type": "text",
+            "nullable": true,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "createdAt",
+            "type": "timestamp",
+            "column": "created_at",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/schema.ts",
+        "startLine": 10,
+        "endLine": 16
+      }
+    },
+    {
+      "id": "file:src/queries.ts",
+      "kind": "file",
+      "name": "queries.ts",
+      "parent": "mod:drizzle-app",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.350877
+      }
+    },
+    {
+      "id": "file:src/schema.ts",
+      "kind": "file",
+      "name": "schema.ts",
+      "parent": "mod:drizzle-app",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 17,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.649123
+      }
+    },
+    {
+      "id": "mod:drizzle-app",
+      "kind": "module",
+      "name": "drizzle-app",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 23,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 1
+      }
+    },
+    {
+      "id": "pkg:drizzle-orm",
+      "kind": "extpkg",
+      "name": "drizzle-orm",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "npm"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "sym:src/queries.ts#tableNames",
+      "kind": "symbol",
+      "name": "tableNames",
+      "parent": "file:src/queries.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/queries.ts",
+        "startLine": 3,
+        "endLine": 5
+      }
+    },
+    {
+      "id": "sym:src/schema.ts#teams",
+      "kind": "symbol",
+      "name": "teams",
+      "parent": "file:src/schema.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/schema.ts",
+        "startLine": 3,
+        "endLine": 6
+      }
+    },
+    {
+      "id": "sym:src/schema.ts#users",
+      "kind": "symbol",
+      "name": "users",
+      "parent": "file:src/schema.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/schema.ts",
+        "startLine": 10,
+        "endLine": 16
+      }
+    },
+    {
+      "id": "tbl:auth.users",
+      "kind": "table",
+      "name": "users",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "bio",
+            "sqlType": "text",
+            "nullable": true,
+            "isPk": false
+          },
+          {
+            "name": "created_at",
+            "sqlType": "timestamp",
+            "nullable": false,
+            "isPk": false
+          },
+          {
+            "name": "email",
+            "sqlType": "varchar",
+            "nullable": false,
+            "isPk": false
+          },
+          {
+            "name": "id",
+            "sqlType": "serial",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "team_id",
+            "sqlType": "integer",
+            "nullable": true,
+            "isPk": false,
+            "fkTo": {
+              "table": "public.teams",
+              "column": "id"
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0
+      }
+    },
+    {
+      "id": "tbl:public.teams",
+      "kind": "table",
+      "name": "teams",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "id",
+            "sqlType": "serial",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "name",
+            "sqlType": "text",
+            "nullable": false,
+            "isPk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "fk|tbl:auth.users|tbl:public.teams",
+      "kind": "fk",
+      "from": "tbl:auth.users",
+      "to": "tbl:public.teams",
+      "attrs": {
+        "columns": [
+          [
+            "team_id",
+            "id"
+          ]
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/schema.ts|pkg:drizzle-orm",
+      "kind": "imports_pkg",
+      "from": "file:src/schema.ts",
+      "to": "pkg:drizzle-orm",
+      "attrs": {
+        "symbols": [
+          "integer",
+          "pgSchema",
+          "pgTable",
+          "serial",
+          "text",
+          "timestamp",
+          "varchar"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/queries.ts|file:src/schema.ts",
+      "kind": "imports",
+      "from": "file:src/queries.ts",
+      "to": "file:src/schema.ts",
+      "attrs": {
+        "symbols": [
+          "teams",
+          "users"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:src/schema.ts#teams|tbl:public.teams",
+      "kind": "maps_to",
+      "from": "ent:src/schema.ts#teams",
+      "to": "tbl:public.teams",
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:src/schema.ts#users|tbl:auth.users",
+      "kind": "maps_to",
+      "from": "ent:src/schema.ts#users",
+      "to": "tbl:auth.users",
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}

@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 1,
+      "file": 3,
+      "symbol": 4,
+      "entity": 2,
+      "table": 2,
+      "extpkg": 1
+    }
+  },
+  "nodes": [
+    {
+      "id": "ent:shop/models.py#Customer",
+      "kind": "entity",
+      "name": "Customer",
+      "parent": "file:shop/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "entity",
+        "orm": "django",
+        "declaredTable": "public.shop_customer",
+        "fields": [
+          {
+            "name": "id",
+            "type": "unknown",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "email",
+            "type": "EmailField",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "nick",
+            "type": "CharField",
+            "column": "nickname",
+            "nullable": true,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "team",
+            "type": "unknown",
+            "column": "team_id",
+            "nullable": true,
+            "isPk": false,
+            "isFk": true
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "shop/models.py",
+        "startLine": 11,
+        "endLine": 14
+      }
+    },
+    {
+      "id": "ent:shop/models.py#Team",
+      "kind": "entity",
+      "name": "Team",
+      "parent": "file:shop/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "entity",
+        "orm": "django",
+        "declaredTable": "public.orgs_team",
+        "fields": [
+          {
+            "name": "id",
+            "type": "unknown",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "name",
+            "type": "CharField",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "shop/models.py",
+        "startLine": 4,
+        "endLine": 8
+      }
+    },
+    {
+      "id": "file:shop/__init__.py",
+      "kind": "file",
+      "name": "__init__.py",
+      "parent": "mod:shop",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 0,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0.25974
+      }
+    },
+    {
+      "id": "file:shop/models.py",
+      "kind": "file",
+      "name": "models.py",
+      "parent": "mod:shop",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 22,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.480519
+      }
+    },
+    {
+      "id": "file:shop/views.py",
+      "kind": "file",
+      "name": "views.py",
+      "parent": "mod:shop",
+      "lang": "py",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 6,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.25974
+      }
+    },
+    {
+      "id": "mod:shop",
+      "kind": "module",
+      "name": "shop",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 28,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0.999999
+      }
+    },
+    {
+      "id": "pkg:django",
+      "kind": "extpkg",
+      "name": "django",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "pypi"
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "sym:shop/models.py#AbstractAudit",
+      "kind": "symbol",
+      "name": "AbstractAudit",
+      "parent": "file:shop/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "shop/models.py",
+        "startLine": 17,
+        "endLine": 21
+      }
+    },
+    {
+      "id": "sym:shop/models.py#Customer",
+      "kind": "symbol",
+      "name": "Customer",
+      "parent": "file:shop/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "shop/models.py",
+        "startLine": 11,
+        "endLine": 14
+      }
+    },
+    {
+      "id": "sym:shop/models.py#Team",
+      "kind": "symbol",
+      "name": "Team",
+      "parent": "file:shop/models.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "shop/models.py",
+        "startLine": 4,
+        "endLine": 8
+      }
+    },
+    {
+      "id": "sym:shop/views.py#customer_email",
+      "kind": "symbol",
+      "name": "customer_email",
+      "parent": "file:shop/views.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "shop/views.py",
+        "startLine": 4,
+        "endLine": 5
+      }
+    },
+    {
+      "id": "tbl:public.orgs_team",
+      "kind": "table",
+      "name": "orgs_team",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "id",
+            "sqlType": "unknown",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "name",
+            "sqlType": "CharField",
+            "nullable": false,
+            "isPk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "tbl:public.shop_customer",
+      "kind": "table",
+      "name": "shop_customer",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "email",
+            "sqlType": "EmailField",
+            "nullable": false,
+            "isPk": false
+          },
+          {
+            "name": "id",
+            "sqlType": "unknown",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "nickname",
+            "sqlType": "CharField",
+            "nullable": true,
+            "isPk": false
+          },
+          {
+            "name": "team_id",
+            "sqlType": "unknown",
+            "nullable": true,
+            "isPk": false,
+            "fkTo": {
+              "table": "public.orgs_team",
+              "column": "id"
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "fk|tbl:public.shop_customer|tbl:public.orgs_team",
+      "kind": "fk",
+      "from": "tbl:public.shop_customer",
+      "to": "tbl:public.orgs_team",
+      "attrs": {
+        "columns": [
+          [
+            "team_id",
+            "id"
+          ]
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:shop/models.py|pkg:django",
+      "kind": "imports_pkg",
+      "from": "file:shop/models.py",
+      "to": "pkg:django",
+      "attrs": {
+        "symbols": [
+          "models"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:shop/views.py|file:shop/models.py",
+      "kind": "imports",
+      "from": "file:shop/views.py",
+      "to": "file:shop/models.py",
+      "attrs": {
+        "symbols": [
+          "Customer"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:shop/models.py#Customer|tbl:public.shop_customer",
+      "kind": "maps_to",
+      "from": "ent:shop/models.py#Customer",
+      "to": "tbl:public.shop_customer",
+      "source": "static",
+      "confidence": "inferred"
+    },
+    {
+      "id": "maps_to|ent:shop/models.py#Team|tbl:public.orgs_team",
+      "kind": "maps_to",
+      "from": "ent:shop/models.py#Team",
+      "to": "tbl:public.orgs_team",
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}

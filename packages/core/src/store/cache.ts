@@ -14,7 +14,7 @@ import type { FileFacts } from "../parse/facts.js";
  */
 
 /** Bump whenever extraction output changes shape or semantics. */
-export const EXTRACTOR_VERSION = 2; // v2: FileFacts.entities (phase 4 DB layer)
+export const EXTRACTOR_VERSION = 3; // v3: TypeORM/Drizzle/Django extractors (phase 6)
 
 export interface CacheStats {
   hits: number;

@@ -1,0 +1,472 @@
+{
+  "schemaVersion": 1,
+  "meta": {
+    "tool": "archmap",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 2,
+      "file": 3,
+      "symbol": 3,
+      "entity": 2,
+      "table": 2,
+      "extpkg": 1
+    }
+  },
+  "nodes": [
+    {
+      "id": "ent:src/entities/team.ts#Team",
+      "kind": "entity",
+      "name": "Team",
+      "parent": "file:src/entities/team.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "entity",
+        "orm": "typeorm",
+        "declaredTable": "org.teams",
+        "fields": [
+          {
+            "name": "id",
+            "type": "int",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "name",
+            "type": "varchar",
+            "column": "team_name",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/entities/team.ts",
+        "startLine": 4,
+        "endLine": 10
+      }
+    },
+    {
+      "id": "ent:src/entities/user.ts#UserAccount",
+      "kind": "entity",
+      "name": "UserAccount",
+      "parent": "file:src/entities/user.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "entity",
+        "orm": "typeorm",
+        "declaredTable": "public.user_account",
+        "fields": [
+          {
+            "name": "id",
+            "type": "int",
+            "nullable": false,
+            "isPk": true,
+            "isFk": false
+          },
+          {
+            "name": "email",
+            "type": "varchar",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "bio",
+            "type": "varchar",
+            "nullable": true,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "createdAt",
+            "type": "timestamp",
+            "nullable": false,
+            "isPk": false,
+            "isFk": false
+          },
+          {
+            "name": "team",
+            "type": "unknown",
+            "column": "team_id",
+            "nullable": false,
+            "isPk": false,
+            "isFk": true
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/entities/user.ts",
+        "startLine": 13,
+        "endLine": 29
+      }
+    },
+    {
+      "id": "file:src/entities/team.ts",
+      "kind": "file",
+      "name": "team.ts",
+      "parent": "mod:entities",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 11,
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0.520869
+      }
+    },
+    {
+      "id": "file:src/entities/user.ts",
+      "kind": "file",
+      "name": "user.ts",
+      "parent": "mod:entities",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 30,
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0.281551
+      }
+    },
+    {
+      "id": "file:src/service.ts",
+      "kind": "file",
+      "name": "service.ts",
+      "parent": "mod:typeorm-app",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 7,
+        "fanIn": 0,
+        "fanOut": 2,
+        "rank": 0.19758
+      }
+    },
+    {
+      "id": "mod:entities",
+      "kind": "module",
+      "name": "entities",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 41,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.80242
+      }
+    },
+    {
+      "id": "mod:typeorm-app",
+      "kind": "module",
+      "name": "typeorm-app",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 7,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.19758
+      }
+    },
+    {
+      "id": "pkg:typeorm",
+      "kind": "extpkg",
+      "name": "typeorm",
+      "attrs": {
+        "kind": "extpkg",
+        "registry": "npm"
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "sym:src/entities/team.ts#Team",
+      "kind": "symbol",
+      "name": "Team",
+      "parent": "file:src/entities/team.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/entities/team.ts",
+        "startLine": 4,
+        "endLine": 10
+      }
+    },
+    {
+      "id": "sym:src/entities/user.ts#UserAccount",
+      "kind": "symbol",
+      "name": "UserAccount",
+      "parent": "file:src/entities/user.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/entities/user.ts",
+        "startLine": 13,
+        "endLine": 29
+      }
+    },
+    {
+      "id": "sym:src/service.ts#describeUser",
+      "kind": "symbol",
+      "name": "describeUser",
+      "parent": "file:src/service.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/service.ts",
+        "startLine": 4,
+        "endLine": 6
+      }
+    },
+    {
+      "id": "tbl:org.teams",
+      "kind": "table",
+      "name": "teams",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "id",
+            "sqlType": "int",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "team_name",
+            "sqlType": "varchar",
+            "nullable": false,
+            "isPk": false
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "tbl:public.user_account",
+      "kind": "table",
+      "name": "user_account",
+      "attrs": {
+        "kind": "table",
+        "origin": "declared",
+        "columns": [
+          {
+            "name": "bio",
+            "sqlType": "varchar",
+            "nullable": true,
+            "isPk": false
+          },
+          {
+            "name": "createdAt",
+            "sqlType": "timestamp",
+            "nullable": false,
+            "isPk": false
+          },
+          {
+            "name": "email",
+            "sqlType": "varchar",
+            "nullable": false,
+            "isPk": false
+          },
+          {
+            "name": "id",
+            "sqlType": "int",
+            "nullable": false,
+            "isPk": true
+          },
+          {
+            "name": "team_id",
+            "sqlType": "unknown",
+            "nullable": false,
+            "isPk": false,
+            "fkTo": {
+              "table": "org.teams",
+              "column": "id"
+            }
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 1,
+        "fanOut": 1,
+        "rank": 0
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "depends_on|mod:typeorm-app|mod:entities",
+      "kind": "depends_on",
+      "from": "mod:typeorm-app",
+      "to": "mod:entities",
+      "attrs": {
+        "weight": 2
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "fk|tbl:public.user_account|tbl:org.teams",
+      "kind": "fk",
+      "from": "tbl:public.user_account",
+      "to": "tbl:org.teams",
+      "attrs": {
+        "columns": [
+          [
+            "team_id",
+            "id"
+          ]
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/entities/team.ts|pkg:typeorm",
+      "kind": "imports_pkg",
+      "from": "file:src/entities/team.ts",
+      "to": "pkg:typeorm",
+      "attrs": {
+        "symbols": [
+          "Column",
+          "Entity",
+          "PrimaryGeneratedColumn"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports_pkg|file:src/entities/user.ts|pkg:typeorm",
+      "kind": "imports_pkg",
+      "from": "file:src/entities/user.ts",
+      "to": "pkg:typeorm",
+      "attrs": {
+        "symbols": [
+          "Column",
+          "CreateDateColumn",
+          "Entity",
+          "JoinColumn",
+          "ManyToOne",
+          "PrimaryGeneratedColumn"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/entities/user.ts|file:src/entities/team.ts",
+      "kind": "imports",
+      "from": "file:src/entities/user.ts",
+      "to": "file:src/entities/team.ts",
+      "attrs": {
+        "symbols": [
+          "Team"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/service.ts|file:src/entities/team.ts",
+      "kind": "imports",
+      "from": "file:src/service.ts",
+      "to": "file:src/entities/team.ts",
+      "attrs": {
+        "symbols": [
+          "Team"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/service.ts|file:src/entities/user.ts",
+      "kind": "imports",
+      "from": "file:src/service.ts",
+      "to": "file:src/entities/user.ts",
+      "attrs": {
+        "symbols": [
+          "UserAccount"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:src/entities/team.ts#Team|tbl:org.teams",
+      "kind": "maps_to",
+      "from": "ent:src/entities/team.ts#Team",
+      "to": "tbl:org.teams",
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "maps_to|ent:src/entities/user.ts#UserAccount|tbl:public.user_account",
+      "kind": "maps_to",
+      "from": "ent:src/entities/user.ts#UserAccount",
+      "to": "tbl:public.user_account",
+      "source": "static",
+      "confidence": "inferred"
+    }
+  ]
+}
