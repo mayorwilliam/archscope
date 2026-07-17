@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { CONFIG_FILENAME, discoverWorkspacePackages, scanSourceFiles } from "@archmap/core";
-import { parseArchmapConfig } from "@archmap/schema";
+import { CONFIG_FILENAME, discoverWorkspacePackages, scanSourceFiles } from "@archscope/core";
+import { parseArchscopeConfig } from "@archscope/schema";
 
 /**
- * `archmap init`: detect the stack, write a config that teaches its own
- * format (suggestions arrive as comments, not decisions), gitignore .archmap/.
+ * `archscope init`: detect the stack, write a config that teaches its own
+ * format (suggestions arrive as comments, not decisions), gitignore .archscope/.
  */
 
 interface Detection {
@@ -52,11 +52,11 @@ export async function runInit(rootDir: string): Promise<void> {
     console.log(`Detected ORM/schema files: ${detection.ormFiles.join(", ")}`);
   }
   console.log("\nNext steps:");
-  console.log("  archmap analyze     # build the architecture graph");
+  console.log("  archscope analyze     # build the architecture graph");
 }
 
 function detect(rootDir: string): Detection {
-  const files = scanSourceFiles(rootDir, parseArchmapConfig({}));
+  const files = scanSourceFiles(rootDir, parseArchscopeConfig({}));
   const workspaceNames = discoverWorkspacePackages(rootDir).map((p) => p.name);
 
   const ormFiles: string[] = [];
@@ -89,7 +89,7 @@ function detect(rootDir: string): Detection {
 
 function renderConfig(d: Detection): string {
   const lines: string[] = [
-    "# archmap configuration — commit this file.",
+    "# archscope configuration — commit this file.",
     "# Everything here is optional: without it, workspace packages and",
     "# first-level directories become modules automatically.",
     "version: 1",
@@ -140,10 +140,10 @@ function renderConfig(d: Detection): string {
 
 function ensureGitignore(rootDir: string): void {
   const gitignorePath = path.join(rootDir, ".gitignore");
-  const entry = ".archmap/";
+  const entry = ".archscope/";
   if (fs.existsSync(gitignorePath)) {
     const content = fs.readFileSync(gitignorePath, "utf8");
-    if (!content.split("\n").some((l) => l.trim() === entry || l.trim() === ".archmap")) {
+    if (!content.split("\n").some((l) => l.trim() === entry || l.trim() === ".archscope")) {
       fs.appendFileSync(gitignorePath, `${content.endsWith("\n") ? "" : "\n"}${entry}\n`);
       console.log(`Added ${entry} to .gitignore`);
     }

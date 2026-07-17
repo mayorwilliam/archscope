@@ -1,5 +1,5 @@
-import type { GitRef, OverviewView, StalenessInfo } from "@archmap/core";
-import type { ArchDiff, GitInfo } from "@archmap/schema";
+import type { GitRef, OverviewView, StalenessInfo } from "@archscope/core";
+import type { ArchDiff, GitInfo } from "@archscope/schema";
 
 /**
  * The dashboard consumes core/query view-models VERBATIM — these re-exports
@@ -20,8 +20,8 @@ export type {
   SearchResult,
   StalenessInfo,
   TableEntityRef,
-} from "@archmap/core";
-export type { ArchDiff, DriftEntry, TableColumn } from "@archmap/schema";
+} from "@archscope/core";
+export type { ArchDiff, DriftEntry, TableColumn } from "@archscope/schema";
 
 export interface MetaResponse {
   staleness: StalenessInfo;

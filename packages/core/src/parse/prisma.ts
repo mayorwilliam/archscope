@@ -1,4 +1,4 @@
-import { extractPrismaEntities } from "@archmap/db";
+import { extractPrismaEntities } from "@archscope/db";
 import type { FileFacts } from "./facts.js";
 
 /**

@@ -1,5 +1,5 @@
 {
-  "name": "@archmap/db",
+  "name": "@archscope/db",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@archmap/schema": "workspace:*",
+    "@archscope/schema": "workspace:*",
     "@mrleebo/prisma-ast": "^0.16.0",
     "mysql2": "^3.22.6",
     "pg": "^8.22.0",

@@ -25,7 +25,7 @@ export interface CacheStats {
 export function factsKey(relPath: string, source: string): string {
   return crypto
     .createHash("sha1")
-    .update(`archmap-facts\n${EXTRACTOR_VERSION}\n${relPath}\n`)
+    .update(`archscope-facts\n${EXTRACTOR_VERSION}\n${relPath}\n`)
     .update(source)
     .digest("hex");
 }

@@ -1,6 +1,6 @@
 import path from "node:path";
-import type { ArchmapConfig } from "@archmap/schema";
-import { normalizePath } from "@archmap/schema";
+import type { ArchscopeConfig } from "@archscope/schema";
+import { normalizePath } from "@archscope/schema";
 import picomatch from "picomatch";
 import type { WorkspacePackage } from "../resolve/workspace.js";
 
@@ -9,7 +9,7 @@ import type { WorkspacePackage } from "../resolve/workspace.js";
  * wins — and each tier is deliberately *predictable* (a heuristic the user
  * can simulate in their head beats a clever one they can't):
  *
- *   1. `.archmap.yaml` module rules (user intent always wins)
+ *   1. `.archscope.yaml` module rules (user intent always wins)
  *   2. workspace packages (the right answer in most monorepos)
  *   3. first-level directory under the source root
  */
@@ -24,7 +24,7 @@ export type ModuleInferrer = (relPath: string) => ModuleAssignment;
 
 export function createModuleInferrer(
   rootDir: string,
-  config: ArchmapConfig,
+  config: ArchscopeConfig,
   workspacePackages: WorkspacePackage[],
   rootName?: string,
 ): ModuleInferrer {

@@ -3,9 +3,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Ship the dashboard inside the CLI package: @archmap/dashboard publishes
+ * Ship the dashboard inside the CLI package: @archscope/dashboard publishes
  * nothing (private), so its built dist/ is copied to <pkg>/dashboard, where
- * `archmap serve` falls back when the workspace package isn't resolvable
+ * `archscope serve` falls back when the workspace package isn't resolvable
  * (i.e. every npm install).
  */
 const pkgDir = path.resolve(fileURLToPath(import.meta.url), "../..");

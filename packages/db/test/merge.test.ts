@@ -1,5 +1,5 @@
-import type { ArchGraph } from "@archmap/schema";
-import { parseArchGraph } from "@archmap/schema";
+import type { ArchGraph } from "@archscope/schema";
+import { parseArchGraph } from "@archscope/schema";
 import { describe, expect, it } from "vitest";
 import type { LiveSchema } from "../src/introspect.js";
 import { mergeLiveSchema } from "../src/merge.js";
@@ -8,7 +8,7 @@ function baseGraph(): ArchGraph {
   return parseArchGraph({
     schemaVersion: 1,
     meta: {
-      tool: "archmap",
+      tool: "archscope",
       toolVersion: "test",
       createdAt: "1970-01-01T00:00:00.000Z",
       root: "<test>",

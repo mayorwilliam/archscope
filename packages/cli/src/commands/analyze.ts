@@ -1,4 +1,4 @@
-import { analyze, Store } from "@archmap/core";
+import { analyze, Store } from "@archscope/core";
 import { VERSION } from "../version.js";
 
 export async function runAnalyze(rootDir: string, options: { full?: boolean }): Promise<void> {

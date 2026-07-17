@@ -1,4 +1,4 @@
-import type { EntityField, Orm } from "@archmap/schema";
+import type { EntityField, Orm } from "@archscope/schema";
 
 /**
  * DeclaredSchema: the ORM-neutral intermediate every static extractor emits.

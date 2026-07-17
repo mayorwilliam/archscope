@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { parseArchmapConfig } from "@archmap/schema";
+import { parseArchscopeConfig } from "@archscope/schema";
 import { afterAll, describe, expect, it } from "vitest";
 import { createModuleInferrer } from "../src/modules/infer.js";
 import { discoverWorkspacePackages } from "../src/resolve/workspace.js";
 
-const noConfig = parseArchmapConfig({});
+const noConfig = parseArchscopeConfig({});
 
 describe("module inference (tier 3: directory heuristic)", () => {
   const infer = createModuleInferrer("/repo/myapp", noConfig, []);
@@ -34,7 +34,7 @@ describe("module inference (tier 3: directory heuristic)", () => {
   });
 
   it("config rules beat everything", () => {
-    const config = parseArchmapConfig({
+    const config = parseArchscopeConfig({
       modules: [{ name: "API", layer: "api", include: ["src/auth/**"] }],
     });
     const inferWithConfig = createModuleInferrer("/repo/myapp", config, []);
@@ -44,7 +44,7 @@ describe("module inference (tier 3: directory heuristic)", () => {
 });
 
 describe("workspace discovery via lerna.json", () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-lerna-"));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-lerna-"));
 
   afterAll(() => {
     fs.rmSync(tmp, { recursive: true, force: true });

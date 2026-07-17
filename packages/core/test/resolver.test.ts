@@ -74,7 +74,7 @@ describe("TsResolver under a symlinked root", () => {
   // macOS os.tmpdir() lives under /var → /private/var. enhanced-resolve
   // returns symlink-free paths, so an un-realpathed root made every file
   // classify as outside the repo (bug found by the Phase 2 diff tests).
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-symlink-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-symlink-"));
   fs.cpSync(fixturePath("ts-basic"), root, { recursive: true });
 
   afterAll(() => {

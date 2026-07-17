@@ -15,7 +15,7 @@ describe("incremental facts cache", () => {
   let root: string;
 
   beforeAll(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-cache-"));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-cache-"));
     fs.cpSync(fixturePath("py-basic"), root, { recursive: true });
   });
 
@@ -61,9 +61,9 @@ describe("incremental facts cache", () => {
   });
 
   it("cache: false never reads nor writes the cache dir", async () => {
-    const before = fs.readdirSync(path.join(root, ".archmap/cache")).length;
+    const before = fs.readdirSync(path.join(root, ".archscope/cache")).length;
     const result = await run(false);
     expect(result.cache).toEqual({ hits: 0, misses: 10 });
-    expect(fs.readdirSync(path.join(root, ".archmap/cache")).length).toBe(before);
+    expect(fs.readdirSync(path.join(root, ".archscope/cache")).length).toBe(before);
   });
 });

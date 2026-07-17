@@ -94,21 +94,21 @@ describe.runIf(LIVE)("live MySQL introspection + drift (TEST_LIVE_DB=1)", () => 
     );
   });
 
-  it("credential guard: nothing under .archmap/ contains the URL or password", () => {
+  it("credential guard: nothing under .archscope/ contains the URL or password", () => {
     const { graph } = mergeLiveSchema(baseGraphWithUsers(), live, {
       source: "main",
       dialect: "mysql",
       introspectedAt: new Date().toISOString(),
     });
 
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-cred-guard-"));
-    const archmapDir = path.join(dir, ".archmap");
-    fs.mkdirSync(archmapDir, { recursive: true });
-    fs.writeFileSync(path.join(archmapDir, "graph.json"), JSON.stringify(graph, null, 2));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-cred-guard-"));
+    const archscopeDir = path.join(dir, ".archscope");
+    fs.mkdirSync(archscopeDir, { recursive: true });
+    fs.writeFileSync(path.join(archscopeDir, "graph.json"), JSON.stringify(graph, null, 2));
 
     const password = "s3cr3t-planted-password";
-    for (const file of fs.readdirSync(archmapDir)) {
-      const body = fs.readFileSync(path.join(archmapDir, file), "utf8");
+    for (const file of fs.readdirSync(archscopeDir)) {
+      const body = fs.readFileSync(path.join(archscopeDir, file), "utf8");
       expect(body).not.toContain(password);
       expect(body).not.toContain(url);
       expect(body).not.toContain("mysql://");

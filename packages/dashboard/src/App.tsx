@@ -20,7 +20,7 @@ export function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="brand">ArchMap</span>
+        <span className="brand">ArchScope</span>
         <nav className="tabs">
           {TABS.map((tab) => (
             <button

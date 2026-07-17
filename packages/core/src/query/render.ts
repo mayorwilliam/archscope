@@ -1,5 +1,5 @@
-import type { ArchDiff, DriftEntry, EntityField, TableColumn } from "@archmap/schema";
-import { parseNodeId } from "@archmap/schema";
+import type { ArchDiff, DriftEntry, EntityField, TableColumn } from "@archscope/schema";
+import { parseNodeId } from "@archscope/schema";
 import { BudgetWriter, clampBudget, suggestBudget } from "./budget.js";
 import type {
   DbSchemaView,
@@ -349,7 +349,7 @@ export function renderDbSchema(view: DbSchemaView, ctx: RenderContext): string {
     w.blank();
     w.line(
       "No entities or tables in the graph — the repo declares no supported ORM schema " +
-        "(Prisma, SQLAlchemy) or `archmap analyze` predates the DB layer.",
+        "(Prisma, SQLAlchemy) or `archscope analyze` predates the DB layer.",
     );
     return w.toString();
   }
@@ -455,8 +455,8 @@ export function renderSchemaDrift(view: SchemaDriftView, ctx: RenderContext): st
   if (!view.live) {
     w.blank();
     w.line(
-      "No live introspection data in the graph. Configure `db.live` in .archmap.yaml " +
-        "and run `archmap db introspect` — then this tool compares code against the database.",
+      "No live introspection data in the graph. Configure `db.live` in .archscope.yaml " +
+        "and run `archscope db introspect` — then this tool compares code against the database.",
     );
     return w.toString();
   }
@@ -485,7 +485,7 @@ export function renderSchemaDrift(view: SchemaDriftView, ctx: RenderContext): st
 // ---------------------------------------------------------------------------
 
 function liveLine(live: LiveMeta | null, ctx: RenderContext): string {
-  if (!live) return "static declarations only — `archmap db introspect` adds live drift";
+  if (!live) return "static declarations only — `archscope db introspect` adds live drift";
   const when = ago(live.introspectedAt, ctx.staleness.now ?? new Date());
   return `live: "${live.source}" (${live.dialect}) introspected ${when}`;
 }
@@ -548,7 +548,7 @@ export function stalenessLines(info: StalenessInfo): string[] {
   }
   if (info.builtSha && info.currentSha && info.builtSha !== info.currentSha) {
     lines.push(
-      `⚠ stale: HEAD is now ${shortSha(info.currentSha)} — run \`archmap analyze\` to refresh`,
+      `⚠ stale: HEAD is now ${shortSha(info.currentSha)} — run \`archscope analyze\` to refresh`,
     );
   }
   return lines;

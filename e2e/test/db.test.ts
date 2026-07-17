@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { estimateTokens } from "@archmap/core";
+import { estimateTokens } from "@archscope/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   analyzeAndSave,
@@ -51,7 +51,7 @@ let root: string;
 let h: Harness;
 
 beforeAll(async () => {
-  root = makeTmpDir("archmap-e2e-db-");
+  root = makeTmpDir("archscope-e2e-db-");
   fs.mkdirSync(path.join(root, "prisma"), { recursive: true });
   fs.writeFileSync(path.join(root, "prisma", "schema.prisma"), `${SCHEMA}\n${wideSchema}`);
   fs.mkdirSync(path.join(root, "src"), { recursive: true });

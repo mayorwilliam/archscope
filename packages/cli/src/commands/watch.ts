@@ -1,5 +1,5 @@
 import path from "node:path";
-import { analyze, Store } from "@archmap/core";
+import { analyze, Store } from "@archscope/core";
 import chokidar from "chokidar";
 
 /**
@@ -13,7 +13,7 @@ const DEBOUNCE_MS = 300;
 const IGNORED_DIRS = new Set([
   "node_modules",
   ".git",
-  ".archmap",
+  ".archscope",
   "dist",
   "build",
   "coverage",
@@ -35,7 +35,7 @@ const WATCHED_EXTENSIONS = new Set([
 ]);
 
 const WATCHED_FILENAMES = new Set([
-  ".archmap.yaml",
+  ".archscope.yaml",
   "package.json",
   "tsconfig.json",
   "pnpm-workspace.yaml",

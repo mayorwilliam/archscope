@@ -43,10 +43,10 @@ describe("architecture diff on scripted git history", () => {
   }
 
   beforeAll(async () => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-diff-"));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-diff-"));
     await git("init", "-b", "main");
-    await git("config", "user.email", "test@archmap.local");
-    await git("config", "user.name", "archmap-test");
+    await git("config", "user.email", "test@archscope.local");
+    await git("config", "user.name", "archscope-test");
 
     // C1
     write(
@@ -155,9 +155,9 @@ describe("architecture diff on scripted git history", () => {
     expect(again.created).toBe(false);
   });
 
-  it("archmap's own .archmap/ output never makes the repo dirty", async () => {
-    // This repo does NOT gitignore .archmap, and the snapshot runs above
-    // already populated .archmap/cache — the tree must still read clean.
+  it("archscope's own .archscope/ output never makes the repo dirty", async () => {
+    // This repo does NOT gitignore .archscope, and the snapshot runs above
+    // already populated .archscope/cache — the tree must still read clean.
     const { graph } = await analyze({ rootDir: root, toolVersion: "test" });
     expect(graph.meta.git?.dirty).toBe(false);
   });

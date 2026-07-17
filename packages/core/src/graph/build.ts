@@ -1,14 +1,14 @@
-import { linkDeclaredSchema } from "@archmap/db";
+import { linkDeclaredSchema } from "@archscope/db";
 import type {
   ArchGraph,
-  ArchmapConfig,
+  ArchscopeConfig,
   EdgeAttrs,
   GitInfo,
   GraphEdge,
   GraphNode,
   NodeKind,
-} from "@archmap/schema";
-import { edgeId, fileId, moduleId, packageId, symbolId } from "@archmap/schema";
+} from "@archscope/schema";
+import { edgeId, fileId, moduleId, packageId, symbolId } from "@archscope/schema";
 import type { ModuleInferrer } from "../modules/infer.js";
 import type { FileFacts } from "../parse/facts.js";
 import type { ImportResolver } from "../resolve/resolver.js";
@@ -28,7 +28,7 @@ export interface BuildInput {
   facts: FileFacts[];
   resolver: ImportResolver;
   inferModule: ModuleInferrer;
-  config: ArchmapConfig;
+  config: ArchscopeConfig;
   git: GitInfo | null;
   createdAt: string;
 }
@@ -227,7 +227,7 @@ export function buildGraph(input: BuildInput): ArchGraph {
   return {
     schemaVersion: 1,
     meta: {
-      tool: "archmap",
+      tool: "archscope",
       toolVersion: input.toolVersion,
       createdAt: input.createdAt,
       root: input.rootDir,

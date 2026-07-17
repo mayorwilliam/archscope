@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { parseArchGraph } from "@archmap/schema";
+import { parseArchGraph } from "@archscope/schema";
 import { describe, expect, it } from "vitest";
 import {
   dependenciesView,

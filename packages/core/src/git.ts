@@ -1,4 +1,4 @@
-import type { GitInfo } from "@archmap/schema";
+import type { GitInfo } from "@archscope/schema";
 import { execa } from "execa";
 
 /** Best-effort git metadata; a repo without git is a valid analysis target. */
@@ -8,9 +8,9 @@ export async function gitInfo(rootDir: string): Promise<GitInfo | null> {
       git(rootDir, ["rev-parse", "HEAD"]),
       git(rootDir, ["rev-parse", "--abbrev-ref", "HEAD"]),
       // Our own output must never count as dirt: without the exclusion, a
-      // repo that doesn't gitignore .archmap/ reads dirty forever after the
+      // repo that doesn't gitignore .archscope/ reads dirty forever after the
       // first analyze — and dirty repos never get snapshots.
-      git(rootDir, ["status", "--porcelain", "--", ":(exclude).archmap"]),
+      git(rootDir, ["status", "--porcelain", "--", ":(exclude).archscope"]),
     ]);
     return { sha, branch, dirty: status.length > 0 };
   } catch {

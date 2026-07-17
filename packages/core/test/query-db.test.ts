@@ -1,4 +1,4 @@
-import { mergeLiveSchema } from "@archmap/db";
+import { mergeLiveSchema } from "@archscope/db";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   dbSchemaView,

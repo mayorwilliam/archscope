@@ -1,5 +1,5 @@
-import type { DeclaredEntity } from "@archmap/db";
-import type { Lang, SymbolKind } from "@archmap/schema";
+import type { DeclaredEntity } from "@archscope/db";
+import type { Lang, SymbolKind } from "@archscope/schema";
 
 /**
  * FileFacts: the per-file extraction result. This is the unit of caching —

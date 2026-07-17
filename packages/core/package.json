@@ -1,5 +1,5 @@
 {
-  "name": "@archmap/core",
+  "name": "@archscope/core",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,8 +17,8 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@archmap/db": "workspace:*",
-    "@archmap/schema": "workspace:*",
+    "@archscope/db": "workspace:*",
+    "@archscope/schema": "workspace:*",
     "enhanced-resolve": "^5.18.1",
     "execa": "^9.6.0",
     "get-tsconfig": "^4.10.1",

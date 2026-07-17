@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "archmap": {
+    "archscope": {
       "command": "node",
       "args": ["packages/cli/dist/index.js", "mcp"]
     }

@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
-import type { ArchGraph } from "@archmap/schema";
-import { parseArchGraph } from "@archmap/schema";
+import type { ArchGraph } from "@archscope/schema";
+import { parseArchGraph } from "@archscope/schema";
 
 /**
- * All `.archmap/` disk I/O goes through this class — it is the interface
+ * All `.archscope/` disk I/O goes through this class — it is the interface
  * boundary that lets very large repos swap JSON for SQLite later without
  * touching any consumer.
  */
@@ -14,7 +14,7 @@ export class Store {
   readonly dir: string;
 
   constructor(rootDir: string) {
-    this.dir = path.join(rootDir, ".archmap");
+    this.dir = path.join(rootDir, ".archscope");
   }
 
   get graphPath(): string {

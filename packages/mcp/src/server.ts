@@ -29,8 +29,8 @@ import {
   type StalenessInfo,
   schemaDriftView,
   searchView,
-} from "@archmap/core";
-import { NODE_KINDS } from "@archmap/schema";
+} from "@archscope/core";
+import { NODE_KINDS } from "@archscope/schema";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
@@ -41,7 +41,7 @@ import { z } from "zod";
  * architecture. Handlers stay ≤30 lines by construction.
  */
 
-export interface ArchmapServerOptions {
+export interface ArchscopeServerOptions {
   rootDir: string;
   version?: string;
 }
@@ -76,10 +76,10 @@ function notFound(index: GraphIndex, ref: string, renderCtx: RenderContext): Too
   return failure(renderNotFound(ref, suggestions, renderCtx));
 }
 
-export function createArchmapServer(options: ArchmapServerOptions): McpServer {
+export function createArchscopeServer(options: ArchscopeServerOptions): McpServer {
   const { rootDir } = options;
   const source = new GraphSource(rootDir);
-  const server = new McpServer({ name: "archmap", version: options.version ?? "0.0.1" });
+  const server = new McpServer({ name: "archscope", version: options.version ?? "0.0.1" });
 
   const guarded =
     <A>(handler: (args: A) => Promise<ToolResult>) =>
@@ -214,7 +214,7 @@ export function createArchmapServer(options: ArchmapServerOptions): McpServer {
       description:
         "Tables grouped by DB schema with their mapped code entities, PKs, foreign keys and " +
         "drift counts. Pass `table` for one table in column-level detail. Static declarations " +
-        "come from ORM code (Prisma, SQLAlchemy); live data appears after `archmap db introspect`.",
+        "come from ORM code (Prisma, SQLAlchemy); live data appears after `archscope db introspect`.",
       inputSchema: {
         table: z.string().optional().describe('One table in detail: "users" or "public.users"'),
         budget_tokens,
@@ -261,7 +261,7 @@ export function createArchmapServer(options: ArchmapServerOptions): McpServer {
       description:
         "Declared (code) vs live (database) schema discrepancies, per table: missing " +
         "tables/columns, type and nullability mismatches, missing FK constraints. Requires a " +
-        "prior `archmap db introspect`; explains how to enable it otherwise.",
+        "prior `archscope db introspect`; explains how to enable it otherwise.",
       inputSchema: { budget_tokens },
     },
     guarded(async (args) => {

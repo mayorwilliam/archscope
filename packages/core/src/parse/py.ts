@@ -1,5 +1,9 @@
-import { type DeclaredEntity, extractDjangoEntities, extractSqlalchemyEntities } from "@archmap/db";
-import type { Lang, SymbolKind } from "@archmap/schema";
+import {
+  type DeclaredEntity,
+  extractDjangoEntities,
+  extractSqlalchemyEntities,
+} from "@archscope/db";
+import type { Lang, SymbolKind } from "@archscope/schema";
 import type { Node } from "web-tree-sitter";
 import type { FileFacts, ImportFact, SymbolFact } from "./facts.js";
 import { parseSource } from "./parser.js";

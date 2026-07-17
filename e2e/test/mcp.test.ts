@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { estimateTokens } from "@archmap/core";
+import { estimateTokens } from "@archscope/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   analyzeAndSave,
@@ -27,7 +27,7 @@ let root: string;
 let h: Harness;
 
 beforeAll(async () => {
-  root = makeTmpDir("archmap-e2e-");
+  root = makeTmpDir("archscope-e2e-");
   generateRepo(root, AREAS, FILES);
   await initGitRepo(root);
   await git(root, "add", "-A");
@@ -89,7 +89,7 @@ describe("tool surface", () => {
   it("get_schema_drift without introspection explains how to enable it", async () => {
     const { text, isError } = await h.callText("get_schema_drift", {});
     expect(isError).toBe(false);
-    expect(text).toContain("archmap db introspect");
+    expect(text).toContain("archscope db introspect");
   });
 });
 
@@ -213,6 +213,6 @@ describe("staleness", () => {
     await git(root, "commit", "-q", "--allow-empty", "-m", "move head");
     const { text } = await h.callText("get_architecture_overview", {});
     expect(text).toContain("⚠ stale: HEAD is now");
-    expect(text).toContain("archmap analyze");
+    expect(text).toContain("archscope analyze");
   });
 });

@@ -12,7 +12,7 @@ import { VERSION } from "./version.js";
 const program = new Command();
 
 program
-  .name("archmap")
+  .name("archscope")
   .description(
     "Architecture graphs for humans and coding agents — from static analysis, deterministically.",
   )
@@ -20,14 +20,14 @@ program
 
 program
   .command("init")
-  .description("Detect the stack and write .archmap.yaml with commented suggestions")
+  .description("Detect the stack and write .archscope.yaml with commented suggestions")
   .action(async () => {
     await runInit(process.cwd());
   });
 
 program
   .command("analyze")
-  .description("Build the architecture graph and write .archmap/graph.json")
+  .description("Build the architecture graph and write .archscope/graph.json")
   .option("--full", "re-extract every file, ignoring the incremental cache")
   .action(async (options: { full?: boolean }) => {
     await runAnalyze(process.cwd(), options);
@@ -56,14 +56,14 @@ const db = program
 
 db.command("introspect")
   .description("Introspect the live DB (read-only) and merge tables + drift into graph.json")
-  .option("--source <name>", "live source from .archmap.yaml (db.live)")
+  .option("--source <name>", "live source from .archscope.yaml (db.live)")
   .action(async (options: { source?: string }) => {
     await runDbIntrospect(process.cwd(), options);
   });
 
 db.command("drift")
   .description("Compare declared vs live schema; exits 1 when drift exists")
-  .option("--source <name>", "live source from .archmap.yaml (db.live)")
+  .option("--source <name>", "live source from .archscope.yaml (db.live)")
   .option("--json", "print the full drift report as JSON")
   .action(async (options: { source?: string; json?: boolean }) => {
     await runDbDrift(process.cwd(), options);

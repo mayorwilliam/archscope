@@ -1,26 +1,26 @@
-# ArchMap
+# ArchScope
 
 **Architecture graphs for humans and coding agents — from deterministic static analysis.**
 
-ArchMap extracts the architecture of a repository — modules, dependencies, DB schema, and how it all changes over time — into a single graph, and serves that same graph to two consumers:
+ArchScope extracts the architecture of a repository — modules, dependencies, DB schema, and how it all changes over time — into a single graph, and serves that same graph to two consumers:
 
-- **A local dashboard** (`archmap serve`): module overview, drill-down, ERD and architectural diff.
-- **An MCP server** (`archmap mcp`): 10 tools that give coding agents (Claude Code, Cursor, …) structured, token-budgeted context about your codebase.
+- **A local dashboard** (`archscope serve`): module overview, drill-down, ERD and architectural diff.
+- **An MCP server** (`archscope mcp`): 10 tools that give coding agents (Claude Code, Cursor, …) structured, token-budgeted context about your codebase.
 
 No LLM anywhere in the pipeline. The same repo analyzed twice produces the same graph, byte for byte. Every edge carries its provenance (`static` / `live` / `manual`) and confidence (`certain` / `inferred`) — the tool never presents a guess as a fact.
 
 ## Quickstart
 
 ```bash
-npx archmap init      # detect the stack, write .archmap.yaml
-npx archmap analyze   # build .archmap/graph.json
-npx archmap serve     # dashboard at http://localhost:4400
+npx archscope init      # detect the stack, write .archscope.yaml
+npx archscope analyze   # build .archscope/graph.json
+npx archscope serve     # dashboard at http://localhost:4400
 ```
 
 For coding agents:
 
 ```bash
-claude mcp add archmap -- npx -y archmap mcp
+claude mcp add archscope -- npx -y archscope mcp
 ```
 
 ## What it understands
@@ -31,26 +31,26 @@ claude mcp add archmap -- npx -y archmap mcp
 | **ORMs (static)** | Prisma, SQLAlchemy (classic + 2.0 Mapped), TypeORM, Drizzle, Django |
 | **Live databases** | Postgres and MySQL introspection (read-only) with **drift detection**: declared schema vs live schema, compared by normalized type families |
 | **Migrations** | Alembic detection (best-effort): migration count + current head(s), reported as context — never used to reconstruct the schema |
-| **History** | Snapshots per git sha, rename-aware architectural diff (`archmap diff main HEAD`), watch mode with incremental re-analysis |
+| **History** | Snapshots per git sha, rename-aware architectural diff (`archscope diff main HEAD`), watch mode with incremental re-analysis |
 
 The `maps_to` edge (entity ↔ table) connects both worlds: ask "what code do I touch if I alter `public.users`?" and get an answer that crosses from the database into the import graph.
 
 ## CLI
 
 ```
-archmap init                      # detect stack, write config + gitignore
-archmap analyze [--full]          # build the graph (incremental cache; --full re-extracts)
-archmap serve [--port 4400]       # dashboard + REST + SSE + watch, 127.0.0.1 only
-archmap mcp                       # MCP server over stdio
-archmap diff <base> [head] [--json]   # architectural diff between two refs
-archmap watch                     # re-analyze on change
-archmap db introspect [--source]  # merge live DB tables + drift into the graph
-archmap db drift [--source] [--json]  # report drift; exit 1 if any (CI-friendly)
+archscope init                      # detect stack, write config + gitignore
+archscope analyze [--full]          # build the graph (incremental cache; --full re-extracts)
+archscope serve [--port 4400]       # dashboard + REST + SSE + watch, 127.0.0.1 only
+archscope mcp                       # MCP server over stdio
+archscope diff <base> [head] [--json]   # architectural diff between two refs
+archscope watch                     # re-analyze on change
+archscope db introspect [--source]  # merge live DB tables + drift into the graph
+archscope db drift [--source] [--json]  # report drift; exit 1 if any (CI-friendly)
 ```
 
 ### Live DB credentials
 
-Connection URLs are read from an env var **named** in `.archmap.yaml` — the value never touches disk, never appears in the graph, and driver errors are redacted before they propagate:
+Connection URLs are read from an env var **named** in `.archscope.yaml` — the value never touches disk, never appears in the graph, and driver errors are redacted before they propagate:
 
 ```yaml
 db:
@@ -70,7 +70,7 @@ Every tool accepts `budget_tokens` (clamped to [200, 20000]). Responses are rank
 
 Honesty over coverage — these are deliberate, visible boundaries, not silent gaps:
 
-- **Dynamic imports**: `require(variable)`, computed `importlib` calls and framework magic are invisible to static analysis. Declare `manual` edges in `.archmap.yaml` for those; they render dashed in the dashboard and labeled over MCP.
+- **Dynamic imports**: `require(variable)`, computed `importlib` calls and framework magic are invisible to static analysis. Declare `manual` edges in `.archscope.yaml` for those; they render dashed in the dashboard and labeled over MCP.
 - **TypeORM**: custom naming strategies, embedded entities, single-table inheritance, `@ManyToMany` junction tables and `EntitySchema` are out of scope.
 - **Drizzle**: composite PKs in the third config argument and `relations()` helpers (navigation-only) are not extracted.
 - **Django**: only direct `models.Model` bases are recognized (custom abstract bases are not chased through imports); implicit PK and FK column types are declared `unknown` — drift treats them as incomparable instead of guessing.
@@ -92,7 +92,7 @@ pnpm bench          # 5k-file synthetic repo: < 60s cold / < 5s warm
 TEST_LIVE_DB=1 pnpm vitest run --project db   # Testcontainers (Postgres + MySQL)
 ```
 
-The published `archmap` package is a single tsup bundle: `@archmap/*` workspace packages are inlined, the dashboard ships as static assets inside the package, and only third-party runtime deps are installed from the registry. Analysis never executes code from the target repo.
+The published `archscope` package is a single tsup bundle: `@archscope/*` workspace packages are inlined, the dashboard ships as static assets inside the package, and only third-party runtime deps are installed from the registry. Analysis never executes code from the target repo.
 
 ## License
 

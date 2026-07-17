@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { analyze, Store } from "@archmap/core";
+import { analyze, Store } from "@archscope/core";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { execa } from "execa";
@@ -47,9 +47,9 @@ export async function git(cwd: string, ...args: string[]): Promise<string> {
 
 export async function initGitRepo(dir: string): Promise<void> {
   await git(dir, "init", "-q", "-b", "main");
-  await git(dir, "config", "user.email", "e2e@archmap.test");
-  await git(dir, "config", "user.name", "archmap e2e");
-  fs.writeFileSync(path.join(dir, ".gitignore"), ".archmap/\n");
+  await git(dir, "config", "user.email", "e2e@archscope.test");
+  await git(dir, "config", "user.name", "archscope e2e");
+  fs.writeFileSync(path.join(dir, ".gitignore"), ".archscope/\n");
 }
 
 export async function analyzeAndSave(dir: string): Promise<void> {
@@ -69,7 +69,7 @@ export interface Harness {
 
 /** Spawn the BUILT CLI as an MCP server and connect the SDK client to it. */
 export async function connectHarness(root: string): Promise<Harness> {
-  const client = new Client({ name: "archmap-e2e", version: "0.0.1" });
+  const client = new Client({ name: "archscope-e2e", version: "0.0.1" });
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [CLI_BIN, "mcp"],

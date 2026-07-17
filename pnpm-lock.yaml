@@ -20,10 +20,10 @@ importers:
 
   e2e:
     dependencies:
-      '@archmap/core':
+      '@archscope/core':
         specifier: workspace:*
         version: link:../packages/core
-      '@archmap/schema':
+      '@archscope/schema':
         specifier: workspace:*
         version: link:../packages/schema
       '@modelcontextprotocol/sdk':
@@ -103,19 +103,19 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
-      '@archmap/core':
+      '@archscope/core':
         specifier: workspace:*
         version: link:../core
-      '@archmap/dashboard':
+      '@archscope/dashboard':
         specifier: workspace:*
         version: link:../dashboard
-      '@archmap/db':
+      '@archscope/db':
         specifier: workspace:*
         version: link:../db
-      '@archmap/mcp':
+      '@archscope/mcp':
         specifier: workspace:*
         version: link:../mcp
-      '@archmap/schema':
+      '@archscope/schema':
         specifier: workspace:*
         version: link:../schema
       '@types/node':
@@ -130,10 +130,10 @@ importers:
 
   packages/core:
     dependencies:
-      '@archmap/db':
+      '@archscope/db':
         specifier: workspace:*
         version: link:../db
-      '@archmap/schema':
+      '@archscope/schema':
         specifier: workspace:*
         version: link:../schema
       enhanced-resolve:
@@ -179,10 +179,10 @@ importers:
 
   packages/dashboard:
     devDependencies:
-      '@archmap/core':
+      '@archscope/core':
         specifier: workspace:*
         version: link:../core
-      '@archmap/schema':
+      '@archscope/schema':
         specifier: workspace:*
         version: link:../schema
       '@tanstack/react-query':
@@ -221,7 +221,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@archmap/schema':
+      '@archscope/schema':
         specifier: workspace:*
         version: link:../schema
       '@mrleebo/prisma-ast':
@@ -261,10 +261,10 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@archmap/core':
+      '@archscope/core':
         specifier: workspace:*
         version: link:../core
-      '@archmap/schema':
+      '@archscope/schema':
         specifier: workspace:*
         version: link:../schema
       '@modelcontextprotocol/sdk':

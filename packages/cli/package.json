@@ -1,5 +1,5 @@
 {
-  "name": "archmap",
+  "name": "archscope",
   "version": "0.1.0",
   "description": "Architecture graphs for humans and coding agents — deterministic static analysis, one graph, a dashboard and an MCP server.",
   "keywords": [
@@ -13,7 +13,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "archmap": "dist/index.js"
+    "archscope": "dist/index.js"
   },
   "files": [
     "dist",
@@ -47,11 +47,11 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@archmap/core": "workspace:*",
-    "@archmap/dashboard": "workspace:*",
-    "@archmap/db": "workspace:*",
-    "@archmap/mcp": "workspace:*",
-    "@archmap/schema": "workspace:*",
+    "@archscope/core": "workspace:*",
+    "@archscope/dashboard": "workspace:*",
+    "@archscope/db": "workspace:*",
+    "@archscope/mcp": "workspace:*",
+    "@archscope/schema": "workspace:*",
     "@types/node": "^22.15.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"

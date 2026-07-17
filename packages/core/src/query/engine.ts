@@ -6,8 +6,8 @@ import type {
   GraphNode,
   NodeKind,
   TableColumn,
-} from "@archmap/schema";
-import { fileId, moduleId, packageId, parseNodeId, tableId } from "@archmap/schema";
+} from "@archscope/schema";
+import { fileId, moduleId, packageId, parseNodeId, tableId } from "@archscope/schema";
 
 /**
  * The query engine is a pure library over an already-built ArchGraph: no I/O,

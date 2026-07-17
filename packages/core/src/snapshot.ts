@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { ArchGraph } from "@archmap/schema";
+import type { ArchGraph } from "@archscope/schema";
 import { execa } from "execa";
 import { analyze } from "./pipeline.js";
 import { Store } from "./store/store.js";
@@ -42,7 +42,7 @@ export async function ensureSnapshot(
   const existing = store.loadSnapshot(sha);
   if (existing) return { sha, graph: existing, created: false };
 
-  const worktree = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-worktree-"));
+  const worktree = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-worktree-"));
   try {
     await execa("git", ["worktree", "add", "--detach", worktree, sha], { cwd: rootDir });
     const { graph } = await analyze({

@@ -18,7 +18,7 @@ describe("detectAlembic", () => {
   let root: string;
 
   beforeAll(() => {
-    root = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-alembic-"));
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-alembic-"));
     const versions = path.join(root, "migrations", "versions");
     fs.mkdirSync(versions, { recursive: true });
     fs.writeFileSync(path.join(root, "migrations", "env.py"), "# alembic env\n");
@@ -55,7 +55,7 @@ describe("detectAlembic", () => {
   });
 
   it("returns null when there is nothing alembic-shaped", () => {
-    const empty = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-noalembic-"));
+    const empty = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-noalembic-"));
     expect(detectAlembic(empty)).toBeNull();
     fs.rmSync(empty, { recursive: true, force: true });
   });

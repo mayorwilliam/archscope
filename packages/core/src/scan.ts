@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ArchmapConfig } from "@archmap/schema";
-import { normalizePath } from "@archmap/schema";
+import type { ArchscopeConfig } from "@archscope/schema";
+import { normalizePath } from "@archscope/schema";
 import ignore from "ignore";
 import picomatch from "picomatch";
 
@@ -27,7 +27,7 @@ const SOURCE_EXTENSIONS = new Set([
 const ALWAYS_IGNORED_DIRS = new Set([
   "node_modules",
   ".git",
-  ".archmap",
+  ".archscope",
   "dist",
   "build",
   "coverage",
@@ -36,7 +36,7 @@ const ALWAYS_IGNORED_DIRS = new Set([
   "venv",
 ]);
 
-export function scanSourceFiles(rootDir: string, config: ArchmapConfig): string[] {
+export function scanSourceFiles(rootDir: string, config: ArchscopeConfig): string[] {
   const ig = ignore();
   const gitignorePath = path.join(rootDir, ".gitignore");
   if (fs.existsSync(gitignorePath)) {

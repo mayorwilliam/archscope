@@ -70,12 +70,12 @@ async function git(cwd: string, ...args: string[]): Promise<void> {
 }
 
 export async function buildFixtureRepo(): Promise<string> {
-  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "archmap-dash-")));
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "archscope-dash-")));
 
   await git(dir, "init", "-q", "-b", "main");
-  await git(dir, "config", "user.email", "e2e@archmap.test");
-  await git(dir, "config", "user.name", "archmap e2e");
-  write(dir, ".gitignore", ".archmap/\n");
+  await git(dir, "config", "user.email", "e2e@archscope.test");
+  await git(dir, "config", "user.name", "archscope e2e");
+  write(dir, ".gitignore", ".archscope/\n");
 
   // --- base state ------------------------------------------------------------
   write(dir, "utils/fmt.ts", "export function fmt(v: string): string {\n  return v.trim();\n}\n");
@@ -148,7 +148,7 @@ export async function startServe(repoDir: string): Promise<ServeHandle> {
     }
     if (httpUp && output.includes("watching ")) break;
     if (Date.now() > deadline) {
-      throw new Error(`archmap serve did not come up in 30s. Output:\n${output}`);
+      throw new Error(`archscope serve did not come up in 30s. Output:\n${output}`);
     }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
@@ -167,7 +167,7 @@ export async function startServe(repoDir: string): Promise<ServeHandle> {
 /** Plant drift directly in graph.json — the dashboard renders what the graph
  * says, and rewriting the file is exactly how live overlays publish too. */
 export function injectDrift(repoDir: string, tableName: string): void {
-  const graphPath = path.join(repoDir, ".archmap", "graph.json");
+  const graphPath = path.join(repoDir, ".archscope", "graph.json");
   const graph = JSON.parse(fs.readFileSync(graphPath, "utf8"));
   const table = graph.nodes.find(
     (node: { kind: string; name: string }) => node.kind === "table" && node.name === tableName,

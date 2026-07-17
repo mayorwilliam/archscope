@@ -13,7 +13,7 @@ import { baseGraphWithUsers } from "./live-helpers.js";
  *
  * The database is planted with EXACT drift against the declared schema below;
  * the report must contain those findings and nothing else. The credential
- * guard then proves the connection URL never reaches any .archmap/ artifact.
+ * guard then proves the connection URL never reaches any .archscope/ artifact.
  */
 
 const LIVE = process.env.TEST_LIVE_DB === "1";
@@ -105,7 +105,7 @@ describe.runIf(LIVE)("live Postgres introspection + drift (TEST_LIVE_DB=1)", () 
     );
   });
 
-  it("credential guard: nothing under .archmap/ contains the URL or password", () => {
+  it("credential guard: nothing under .archscope/ contains the URL or password", () => {
     const { graph } = mergeLiveSchema(baseGraphWithUsers(), live, {
       source: "main",
       dialect: "postgres",
@@ -113,14 +113,14 @@ describe.runIf(LIVE)("live Postgres introspection + drift (TEST_LIVE_DB=1)", () 
     });
 
     // Write the artifact exactly like the CLI does, then grep every byte.
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-cred-guard-"));
-    const archmapDir = path.join(dir, ".archmap");
-    fs.mkdirSync(archmapDir, { recursive: true });
-    fs.writeFileSync(path.join(archmapDir, "graph.json"), JSON.stringify(graph, null, 2));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-cred-guard-"));
+    const archscopeDir = path.join(dir, ".archscope");
+    fs.mkdirSync(archscopeDir, { recursive: true });
+    fs.writeFileSync(path.join(archscopeDir, "graph.json"), JSON.stringify(graph, null, 2));
 
     const password = "s3cr3t-planted-password";
-    for (const file of fs.readdirSync(archmapDir)) {
-      const body = fs.readFileSync(path.join(archmapDir, file), "utf8");
+    for (const file of fs.readdirSync(archscopeDir)) {
+      const body = fs.readFileSync(path.join(archscopeDir, file), "utf8");
       expect(body).not.toContain(password);
       expect(body).not.toContain(url);
       expect(body).not.toContain("postgres://");

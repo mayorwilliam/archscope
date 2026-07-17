@@ -1,5 +1,5 @@
 {
-  "name": "@archmap/mcp",
+  "name": "@archscope/mcp",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -17,8 +17,8 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@archmap/core": "workspace:*",
-    "@archmap/schema": "workspace:*",
+    "@archscope/core": "workspace:*",
+    "@archscope/schema": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.17.0",
     "zod": "^3.25.76"
   },

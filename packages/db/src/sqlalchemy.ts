@@ -1,4 +1,4 @@
-import type { EntityField } from "@archmap/schema";
+import type { EntityField } from "@archscope/schema";
 import type { Node } from "web-tree-sitter";
 import { DEFAULT_DB_SCHEMA, type DeclaredEntity, type DeclaredRelation } from "./declared.js";
 

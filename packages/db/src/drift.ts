@@ -1,4 +1,4 @@
-import type { DriftEntry, TableColumn } from "@archmap/schema";
+import type { DriftEntry, TableColumn } from "@archscope/schema";
 import { DEFAULT_DB_SCHEMA, tableKey } from "./declared.js";
 import type { LiveSchema, LiveTable } from "./introspect.js";
 

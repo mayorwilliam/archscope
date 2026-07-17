@@ -1,5 +1,5 @@
-import { type DeclaredEntity, extractDrizzleEntities, extractTypeormEntities } from "@archmap/db";
-import type { Lang, SymbolKind } from "@archmap/schema";
+import { type DeclaredEntity, extractDrizzleEntities, extractTypeormEntities } from "@archscope/db";
+import type { Lang, SymbolKind } from "@archscope/schema";
 import type { Node } from "web-tree-sitter";
 import type { FileFacts, ImportFact, OrmHint, SymbolFact } from "./facts.js";
 import { grammarForFile, parseSource } from "./parser.js";

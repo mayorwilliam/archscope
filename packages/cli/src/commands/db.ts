@@ -1,4 +1,4 @@
-import { loadConfig, Store } from "@archmap/core";
+import { loadConfig, Store } from "@archscope/core";
 import {
   computeDrift,
   type DeclaredTableInput,
@@ -8,15 +8,15 @@ import {
   introspectPostgres,
   type LiveSchema,
   mergeLiveSchema,
-} from "@archmap/db";
-import type { ArchGraph, DbLiveSource } from "@archmap/schema";
+} from "@archscope/db";
+import type { ArchGraph, DbLiveSource } from "@archscope/schema";
 
 /**
- * `archmap db introspect` — introspect the live DB and MERGE it into
- * graph.json (origin both/live, drift entries, meta.live). `archmap db drift`
+ * `archscope db introspect` — introspect the live DB and MERGE it into
+ * graph.json (origin both/live, drift entries, meta.live). `archscope db drift`
  * — same comparison, report only, exit 1 when drift exists (CI-friendly).
  *
- * The connection URL is read from the env var NAMED in .archmap.yaml
+ * The connection URL is read from the env var NAMED in .archscope.yaml
  * (db.live[].urlEnv), lives only in this process, and is never printed nor
  * persisted — errors from the driver are redacted upstream.
  */
@@ -92,7 +92,7 @@ async function introspectFromConfig(
   const store = new Store(rootDir);
   const graph = store.loadGraph();
   if (!graph) {
-    throw new Error("No graph found — run `archmap analyze` first.");
+    throw new Error("No graph found — run `archscope analyze` first.");
   }
 
   const sources = loadConfig(rootDir).db?.live ?? [];
@@ -121,7 +121,7 @@ async function introspectFromConfig(
 function pickSource(sources: DbLiveSource[], name?: string): DbLiveSource {
   if (sources.length === 0) {
     throw new Error(
-      "No live DB sources configured. Add to .archmap.yaml:\n" +
+      "No live DB sources configured. Add to .archscope.yaml:\n" +
         "  db:\n    live:\n      - name: main\n        dialect: postgres\n        urlEnv: DATABASE_URL",
     );
   }
@@ -164,5 +164,5 @@ function driftSummary(drift: DriftReport): string {
   return drift.total === 0
     ? `✓ No drift across ${drift.tablesChecked} declared tables.`
     : `⚠ ${drift.total} drift findings across ${drift.byTable.size} tables ` +
-        `(${drift.tablesChecked} declared tables checked) — see \`archmap db drift\` or get_schema_drift.`;
+        `(${drift.tablesChecked} declared tables checked) — see \`archscope db drift\` or get_schema_drift.`;
 }

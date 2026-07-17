@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 /**
- * The published `archmap` package is ONE bundle: every @archmap/* workspace
+ * The published `archscope` package is ONE bundle: every @archscope/* workspace
  * package is inlined (they live in devDependencies and never reach npm),
  * while third-party runtime deps stay external as real dependencies.
  *
@@ -22,6 +22,6 @@ export default defineConfig({
   clean: true,
   dts: false,
   sourcemap: false,
-  noExternal: [/^@archmap\//],
+  noExternal: [/^@archscope\//],
   onSuccess: "node scripts/copy-dashboard.mjs",
 });

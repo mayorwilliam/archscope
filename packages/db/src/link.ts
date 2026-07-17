@@ -1,5 +1,5 @@
-import type { TableColumn } from "@archmap/schema";
-import { entityId, tableId } from "@archmap/schema";
+import type { TableColumn } from "@archscope/schema";
+import { entityId, tableId } from "@archscope/schema";
 import { type DeclaredEntity, tableKey } from "./declared.js";
 
 /**

@@ -1,6 +1,6 @@
-import { diffGraphs, ensureSnapshot, gitRenames } from "@archmap/core";
-import type { ArchDiff } from "@archmap/schema";
-import { parseNodeId } from "@archmap/schema";
+import { diffGraphs, ensureSnapshot, gitRenames } from "@archscope/core";
+import type { ArchDiff } from "@archscope/schema";
+import { parseNodeId } from "@archscope/schema";
 
 export async function runDiff(
   rootDir: string,

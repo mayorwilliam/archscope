@@ -1,4 +1,4 @@
-import type { EntityField } from "@archmap/schema";
+import type { EntityField } from "@archscope/schema";
 import {
   type Attribute,
   type AttributeArgument,

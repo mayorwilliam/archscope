@@ -1,4 +1,4 @@
-import type { ArchGraph } from "@archmap/schema";
+import type { ArchGraph } from "@archscope/schema";
 import { beforeAll, describe, expect, it } from "vitest";
 import { analyzeFixture, expectGolden } from "./helpers.js";
 

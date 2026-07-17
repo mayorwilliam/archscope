@@ -1,5 +1,5 @@
-import type { ArchDiff, ArchGraph, GraphEdge, GraphNode } from "@archmap/schema";
-import { edgeId, entityId, fileId, moduleId, symbolId, tableId } from "@archmap/schema";
+import type { ArchDiff, ArchGraph, GraphEdge, GraphNode } from "@archscope/schema";
+import { edgeId, entityId, fileId, moduleId, symbolId, tableId } from "@archscope/schema";
 import { describe, expect, it } from "vitest";
 import { BudgetWriter, estimateTokens, MAX_BUDGET, MIN_BUDGET } from "../src/query/budget.js";
 import {
@@ -208,7 +208,7 @@ function syntheticGraph(): ArchGraph {
   return {
     schemaVersion: 1,
     meta: {
-      tool: "archmap",
+      tool: "archscope",
       toolVersion: "test",
       createdAt: "2026-01-01T00:00:00.000Z",
       root: "/repo/synthetic",
@@ -341,7 +341,7 @@ describe("staleness header", () => {
   it("warns when HEAD has moved past the analyzed sha", () => {
     const lines = stalenessLines({ ...staleness, currentSha: "ffee00112233" });
     expect(lines[1]).toContain("⚠ stale: HEAD is now ffee0011");
-    expect(lines[1]).toContain("archmap analyze");
+    expect(lines[1]).toContain("archscope analyze");
   });
 
   it("degrades gracefully without git", () => {

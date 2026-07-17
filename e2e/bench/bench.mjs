@@ -33,7 +33,7 @@ if (!fs.existsSync(CLI)) {
 
 const MODULES = 25;
 const perModule = Math.ceil(FILES / MODULES);
-const repo = fs.mkdtempSync(path.join(os.tmpdir(), "archmap-bench-"));
+const repo = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-bench-"));
 
 function fileBody(mod, i) {
   const lines = [];

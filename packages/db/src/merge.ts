@@ -1,12 +1,12 @@
-import type { ArchGraph, GraphEdge, GraphNode, NodeKind, TableColumn } from "@archmap/schema";
-import { edgeId, tableId } from "@archmap/schema";
+import type { ArchGraph, GraphEdge, GraphNode, NodeKind, TableColumn } from "@archscope/schema";
+import { edgeId, tableId } from "@archscope/schema";
 import { DEFAULT_DB_SCHEMA, tableKey } from "./declared.js";
 import { computeDrift, type DeclaredTableInput, type DriftReport } from "./drift.js";
 import type { LiveFk, LiveSchema, LiveTable } from "./introspect.js";
 
 /**
  * Merge a live introspection into an existing graph — the explicit overlay
- * behind `archmap db introspect`. Declared table nodes keep their DECLARED
+ * behind `archscope db introspect`. Declared table nodes keep their DECLARED
  * columns (code truth stays intact; drift entries carry the discrepancies),
  * live-only tables enter with live columns, live-only FKs enter as edges
  * with source "live". The merge is idempotent: every run first strips the

@@ -1,4 +1,4 @@
-# archmap configuration — commit this file.
+# archscope configuration — commit this file.
 version: 1
 
 # Fixture repos are test inputs, not part of this project's architecture.

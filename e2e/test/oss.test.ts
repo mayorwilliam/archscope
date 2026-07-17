@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { estimateTokens, indexGraph, overviewView, Store } from "@archmap/core";
+import { estimateTokens, indexGraph, overviewView, Store } from "@archscope/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { analyzeAndSave, connectHarness, type Harness } from "./helpers.js";
 

@@ -1,4 +1,4 @@
-# CI: la aceptación de Fase 6 es que `npx archmap init && analyze && serve`
+# CI: la aceptación de Fase 6 es que `npx archscope init && analyze && serve`
 # funcione en macOS/Linux/Windows SIN build steps — el job `npx-smoke` instala
 # el tarball empaquetado en un proyecto limpio y ejercita ese flujo exacto.
 name: CI
@@ -41,12 +41,12 @@ jobs:
           printf 'export function helper(){ return 1 }\n' > src/util.ts
           printf 'import { helper } from "./util";\nexport const x = helper();\n' > src/main.ts
           echo '{"name":"smoke-app","private":true}' > package.json
-          npm install --no-fund --no-audit "$RUNNER_TEMP"/archmap-*.tgz
-          npx archmap --version
-          npx archmap init
-          npx archmap analyze
-          node -e "const g=require('./.archmap/graph.json'); if (g.nodes.length < 4) { throw new Error('graph too small: ' + g.nodes.length) }"
-          npx archmap serve --port 4517 &
+          npm install --no-fund --no-audit "$RUNNER_TEMP"/archscope-*.tgz
+          npx archscope --version
+          npx archscope init
+          npx archscope analyze
+          node -e "const g=require('./.archscope/graph.json'); if (g.nodes.length < 4) { throw new Error('graph too small: ' + g.nodes.length) }"
+          npx archscope serve --port 4517 &
           SERVER=$!
           sleep 5
           curl -sf http://127.0.0.1:4517/api/overview > /dev/null

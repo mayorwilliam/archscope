@@ -1,4 +1,4 @@
-import { parseNodeId } from "@archmap/schema";
+import { parseNodeId } from "@archscope/schema";
 import { useMemo, useState } from "react";
 import { useDiff, useRefs } from "../api/queries";
 import { FlowCanvas } from "../components/FlowCanvas";

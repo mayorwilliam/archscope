@@ -17,14 +17,14 @@ import {
   overviewView,
   schemaDriftView,
   searchView,
-} from "@archmap/core";
+} from "@archscope/core";
 import fastifyStatic from "@fastify/static";
 import chokidar from "chokidar";
 import Fastify from "fastify";
 import { startWatch } from "./watch.js";
 
 /**
- * `archmap serve` is the dashboard's whole backend: static assets, a REST
+ * `archscope serve` is the dashboard's whole backend: static assets, a REST
  * layer that returns core/query view-models VERBATIM (the MCP server renders
  * these same objects to markdown — no consumer derives its own facts), an SSE
  * channel that announces graph updates, and the watch pipeline in-process.
@@ -139,7 +139,7 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
   heartbeat.unref();
 
   let sseTimer: NodeJS.Timeout | null = null;
-  const graphPath = path.join(rootDir, ".archmap", "graph.json");
+  const graphPath = path.join(rootDir, ".archscope", "graph.json");
   chokidar.watch(graphPath, { ignoreInitial: true }).on("all", () => {
     if (sseTimer) clearTimeout(sseTimer);
     sseTimer = setTimeout(() => {
@@ -154,11 +154,11 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
   if (dashboardDist) {
     await app.register(fastifyStatic, { root: dashboardDist });
   } else {
-    console.error("archmap serve: dashboard assets not found — API only (build the monorepo).");
+    console.error("archscope serve: dashboard assets not found — API only (build the monorepo).");
   }
 
   await app.listen({ port, host: "127.0.0.1" });
-  console.log(`archmap serve → http://localhost:${port}  (API under /api, Ctrl-C to stop)`);
+  console.log(`archscope serve → http://localhost:${port}  (API under /api, Ctrl-C to stop)`);
 
   // Watch last: the initial analyze can take a moment on big repos, and the
   // API is already useful with the existing graph while it runs.
@@ -166,7 +166,7 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
     await startWatch(rootDir);
   } catch (error) {
     console.error(
-      `archmap serve: watch failed (${error instanceof Error ? error.message : error}) — ` +
+      `archscope serve: watch failed (${error instanceof Error ? error.message : error}) — ` +
         "serving the existing graph without re-analysis.",
     );
   }
@@ -185,14 +185,14 @@ function notFound(
 }
 
 /**
- * Monorepo dev: resolve @archmap/dashboard's dist through the workspace.
+ * Monorepo dev: resolve @archscope/dashboard's dist through the workspace.
  * Published package: the build copies that dist into <pkg>/dashboard, next to
- * the bundled dist/ (see tsup.config.ts) — @archmap/* never ships to npm.
+ * the bundled dist/ (see tsup.config.ts) — @archscope/* never ships to npm.
  */
 function resolveDashboardDist(): string | null {
   try {
     const require = createRequire(import.meta.url);
-    const pkgJson = require.resolve("@archmap/dashboard/package.json");
+    const pkgJson = require.resolve("@archscope/dashboard/package.json");
     const dist = path.join(path.dirname(pkgJson), "dist");
     if (fs.existsSync(path.join(dist, "index.html"))) return dist;
   } catch {

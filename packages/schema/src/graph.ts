@@ -195,14 +195,14 @@ export type GitInfo = z.infer<typeof GitInfoSchema>;
 export const ArchGraphSchema = z.object({
   schemaVersion: z.literal(1),
   meta: z.object({
-    tool: z.literal("archmap"),
+    tool: z.literal("archscope"),
     toolVersion: z.string(),
     createdAt: z.string(),
     root: z.string(),
     git: GitInfoSchema.nullable(),
     counts: z.record(z.string(), z.number().int().nonnegative()),
     /**
-     * Present only after `archmap db introspect` merged a live database into
+     * Present only after `archscope db introspect` merged a live database into
      * the graph. `analyze` regenerates from static facts and drops it —
      * live data is an explicit overlay, never part of the deterministic build.
      */

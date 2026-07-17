@@ -18,7 +18,7 @@ export function ErdScreen() {
     : isPending || (spec && !flow)
       ? "Laying out…"
       : view && view.tables.length === 0
-        ? "No tables in the graph — declare ORM entities or run `archmap db introspect`."
+        ? "No tables in the graph — declare ORM entities or run `archscope db introspect`."
         : undefined;
 
   return (

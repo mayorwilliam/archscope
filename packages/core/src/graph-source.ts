@@ -7,7 +7,7 @@ import { Store } from "./store/store.js";
 /**
  * Serves the current graph to long-lived consumers — the MCP server and the
  * dashboard's REST layer. The index is rebuilt only when graph.json's mtime
- * moves — which is exactly how `archmap watch` publishes updates, so both
+ * moves — which is exactly how `archscope watch` publishes updates, so both
  * servers compose with watch mode for free. Staleness (current HEAD vs. the
  * analyzed sha) is re-checked on every call: it is the one fact that must
  * never be cached.
@@ -16,8 +16,8 @@ import { Store } from "./store/store.js";
 export class NoGraphError extends Error {
   constructor(rootDir: string) {
     super(
-      `No architecture graph found in ${rootDir}/.archmap/graph.json — ` +
-        `run \`archmap analyze\` there first.`,
+      `No architecture graph found in ${rootDir}/.archscope/graph.json — ` +
+        `run \`archscope analyze\` there first.`,
     );
     this.name = "NoGraphError";
   }

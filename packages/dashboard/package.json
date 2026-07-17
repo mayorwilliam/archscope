@@ -1,5 +1,5 @@
 {
-  "name": "@archmap/dashboard",
+  "name": "@archscope/dashboard",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@archmap/core": "workspace:*",
-    "@archmap/schema": "workspace:*",
+    "@archscope/core": "workspace:*",
+    "@archscope/schema": "workspace:*",
     "@tanstack/react-query": "^5.101.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

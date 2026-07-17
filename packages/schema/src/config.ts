@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EdgeKindSchema } from "./graph.js";
 
 /**
- * Schema for `.archmap.yaml` — the committed, user-owned config.
+ * Schema for `.archscope.yaml` — the committed, user-owned config.
  * Everything is optional: a repo with no config still analyzes with
  * workspace + directory heuristics.
  */
@@ -35,7 +35,7 @@ export const DbLiveSourceSchema = z.object({
 });
 export type DbLiveSource = z.infer<typeof DbLiveSourceSchema>;
 
-export const ArchmapConfigSchema = z.object({
+export const ArchscopeConfigSchema = z.object({
   version: z.literal(1).default(1),
   /** Ordered top→bottom; drives the dashboard's vertical layout. */
   layers: z.array(z.string()).optional(),
@@ -56,8 +56,8 @@ export const ArchmapConfigSchema = z.object({
     })
     .optional(),
 });
-export type ArchmapConfig = z.infer<typeof ArchmapConfigSchema>;
+export type ArchscopeConfig = z.infer<typeof ArchscopeConfigSchema>;
 
-export function parseArchmapConfig(data: unknown): ArchmapConfig {
-  return ArchmapConfigSchema.parse(data ?? {});
+export function parseArchscopeConfig(data: unknown): ArchscopeConfig {
+  return ArchscopeConfigSchema.parse(data ?? {});
 }

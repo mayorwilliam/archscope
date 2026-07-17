@@ -10,8 +10,8 @@ import type {
   RefInfo,
   TableColumn,
   WeightDelta,
-} from "@archmap/schema";
-import { fileId, parseNodeId, symbolId } from "@archmap/schema";
+} from "@archscope/schema";
+import { fileId, parseNodeId, symbolId } from "@archscope/schema";
 
 /**
  * Graph diff = set arithmetic over stable IDs, in three passes:

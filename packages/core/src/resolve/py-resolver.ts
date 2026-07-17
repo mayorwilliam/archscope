@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { ArchmapConfig } from "@archmap/schema";
+import type { ArchscopeConfig } from "@archscope/schema";
 import type { ImportFact } from "../parse/facts.js";
 import { PY_STDLIB } from "./py-stdlib.js";
 import type { ResolvedImport } from "./resolver.js";
@@ -16,7 +16,7 @@ import type { ResolvedImport } from "./resolver.js";
  * Local-before-stdlib matches Python's own behavior (a repo-level `json.py`
  * shadows the stdlib module). Anything dynamic (importlib with non-literal
  * strings, sys.path mutation, namespace magic) is out of scope by design:
- * those become `manual` edges in `.archmap.yaml`, never guesses.
+ * those become `manual` edges in `.archscope.yaml`, never guesses.
  *
  * One import can yield several edges: `from . import models, tasks` is a
  * dependency on each submodule file, not on the package's __init__.py.
@@ -32,7 +32,7 @@ export class PyResolver {
   private readonly roots: string[];
   private readonly dirCache = new Map<string, Set<string> | null>();
 
-  constructor(rootDir: string, config: ArchmapConfig) {
+  constructor(rootDir: string, config: ArchscopeConfig) {
     this.rootDir = rootDir;
     const configured = config.python?.sourceRoots;
     this.roots =

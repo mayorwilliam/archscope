@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ArchGraph, ArchmapConfig } from "@archmap/schema";
+import type { ArchGraph, ArchscopeConfig } from "@archscope/schema";
 import { Piscina } from "piscina";
 import { loadConfig } from "./config-file.js";
 import { gitInfo } from "./git.js";
@@ -29,12 +29,12 @@ import { type CacheStats, FactsCache, factsKey } from "./store/cache.js";
 
 export interface AnalyzeOptions {
   rootDir: string;
-  config?: ArchmapConfig;
+  config?: ArchscopeConfig;
   toolVersion?: string;
   /** Injectable for tests; defaults to now. */
   createdAt?: string;
   /**
-   * Incremental extraction cache. Defaults to `<rootDir>/.archmap/cache`.
+   * Incremental extraction cache. Defaults to `<rootDir>/.archscope/cache`.
    * `false` disables it; `dir` redirects it (a worktree analysis pointing at
    * the main repo's cache is what makes cross-ref snapshots cheap); `refresh`
    * ignores existing entries but still rewrites them (CLI --full).
@@ -71,7 +71,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
       ? null
       : new FactsCache(
           (typeof cacheOpt === "object" ? cacheOpt.dir : undefined) ??
-            path.join(rootDir, ".archmap", "cache"),
+            path.join(rootDir, ".archscope", "cache"),
         );
   const refresh = typeof cacheOpt === "object" && cacheOpt.refresh === true;
   const stats: CacheStats = { hits: 0, misses: 0 };

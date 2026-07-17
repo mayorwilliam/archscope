@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { builtinModules } from "node:module";
 import path from "node:path";
-import { normalizePath } from "@archmap/schema";
+import { normalizePath } from "@archscope/schema";
 import enhancedResolve from "enhanced-resolve";
 import { createPathsMatcher, getTsconfig, type TsConfigResult } from "get-tsconfig";
 import type { WorkspacePackage } from "./workspace.js";

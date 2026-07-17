@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 
 /**
- * Dashboard smoke suite: one fixture repo, one `archmap serve`, tests run
+ * Dashboard smoke suite: one fixture repo, one `archscope serve`, tests run
  * serially against it (the live-update test mutates the repo on purpose).
  */
 export default defineConfig({

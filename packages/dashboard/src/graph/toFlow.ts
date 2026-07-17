@@ -1,4 +1,4 @@
-import { parseNodeId } from "@archmap/schema";
+import { parseNodeId } from "@archscope/schema";
 import type {
   DiffResponse,
   ErdView,
