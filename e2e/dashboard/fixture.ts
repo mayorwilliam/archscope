@@ -100,7 +100,7 @@ export async function buildFixtureRepo(): Promise<string> {
   await git(dir, "branch", "base");
 
   // --- head state ------------------------------------------------------------
-  fs.rmSync(path.join(dir, "legacy"), { recursive: true });
+  fs.rmSync(path.join(dir, "legacy"), { recursive: true, maxRetries: 5, retryDelay: 100 });
   write(
     dir,
     "billing/invoice.ts",

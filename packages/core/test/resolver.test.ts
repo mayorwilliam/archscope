@@ -78,7 +78,7 @@ describe("TsResolver under a symlinked root", () => {
   fs.cpSync(fixturePath("ts-basic"), root, { recursive: true });
 
   afterAll(() => {
-    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("resolves relative imports to files, not 'unresolved'", () => {

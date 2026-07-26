@@ -126,7 +126,7 @@ describe.runIf(LIVE)("live Postgres introspection + drift (TEST_LIVE_DB=1)", () 
       expect(body).not.toContain("postgres://");
       expect(body).not.toContain("postgresql://");
     }
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("connection errors are redacted before they propagate", async () => {

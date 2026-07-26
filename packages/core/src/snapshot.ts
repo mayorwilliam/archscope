@@ -60,6 +60,6 @@ export async function ensureSnapshot(
     await execa("git", ["worktree", "remove", "--force", worktree], { cwd: rootDir }).catch(
       () => {},
     );
-    fs.rmSync(worktree, { recursive: true, force: true });
+    fs.rmSync(worktree, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 }

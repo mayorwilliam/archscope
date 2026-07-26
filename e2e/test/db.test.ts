@@ -68,7 +68,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await h?.close();
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 describe("get_db_schema", () => {

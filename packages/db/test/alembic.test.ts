@@ -32,7 +32,7 @@ describe("detectAlembic", () => {
   });
 
   afterAll(() => {
-    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("finds the versions dir via alembic.ini and computes the merged head", () => {
@@ -57,6 +57,6 @@ describe("detectAlembic", () => {
   it("returns null when there is nothing alembic-shaped", () => {
     const empty = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-noalembic-"));
     expect(detectAlembic(empty)).toBeNull();
-    fs.rmSync(empty, { recursive: true, force: true });
+    fs.rmSync(empty, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 });

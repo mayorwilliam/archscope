@@ -20,7 +20,7 @@ describe("incremental facts cache", () => {
   });
 
   afterAll(() => {
-    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   const run = (cache: Parameters<typeof analyze>[0]["cache"]) =>

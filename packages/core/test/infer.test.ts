@@ -47,7 +47,7 @@ describe("workspace discovery via lerna.json", () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "archscope-lerna-"));
 
   afterAll(() => {
-    fs.rmSync(tmp, { recursive: true, force: true });
+    fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("reads packages from lerna.json when no workspaces field exists", () => {
