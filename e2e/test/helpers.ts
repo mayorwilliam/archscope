@@ -74,7 +74,9 @@ export async function connectHarness(root: string): Promise<Harness> {
     command: process.execPath,
     args: [CLI_BIN, "mcp"],
     cwd: root,
-    stderr: "ignore",
+    // inherit: en mcp stdout es el protocolo y stderr son logs humanos —
+    // si el CLI muere al arrancar, el porqué tiene que verse en el CI.
+    stderr: "inherit",
   });
   await client.connect(transport);
 
