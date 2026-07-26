@@ -1,0 +1,4 @@
+# Checkout siempre en LF, en cualquier plataforma — biome exige LF y el
+# runner de Windows convierte a CRLF con su core.autocrlf=true por default.
+# text=auto deja que git detecte binarios solo; eol=lf aplica solo a texto.
+* text=auto eol=lf
