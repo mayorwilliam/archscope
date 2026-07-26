@@ -11,6 +11,15 @@
     "erd"
   ],
   "license": "MIT",
+  "author": "Guillermo Eduardo Granados Davalos",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayorwilliam/archscope.git"
+  },
+  "homepage": "https://github.com/mayorwilliam/archscope#readme",
+  "bugs": {
+    "url": "https://github.com/mayorwilliam/archscope/issues"
+  },
   "type": "module",
   "bin": {
     "archscope": "dist/index.js"

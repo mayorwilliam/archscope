@@ -10,4 +10,5 @@ playwright-report/
 # build artifacts: dashboard dist + root README mirrored into the publishable CLI package
 packages/cli/dashboard/
 packages/cli/README.md
+packages/cli/LICENSE
 *.tgz
