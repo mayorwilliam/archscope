@@ -20,7 +20,13 @@ describe("incremental facts cache", () => {
   });
 
   afterAll(() => {
-    fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    // Best-effort: en Windows CI, Defender puede retener el dir recién
+    // escrito más allá de los retries — un temp dir huérfano no es un fallo.
+    try {
+      fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+    } catch (err) {
+      console.warn(`cache.test cleanup: no se pudo borrar ${root}:`, err);
+    }
   });
 
   const run = (cache: Parameters<typeof analyze>[0]["cache"]) =>
