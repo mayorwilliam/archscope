@@ -18,6 +18,7 @@ export type {
   OverviewView,
   SchemaDriftView,
   SearchResult,
+  SearchView,
   StalenessInfo,
   TableEntityRef,
 } from "@archscope/core";

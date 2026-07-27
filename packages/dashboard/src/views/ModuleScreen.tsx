@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useModule } from "../api/queries";
 import { FlowCanvas } from "../components/FlowCanvas";
+import { applyFocus } from "../graph/focus";
 import { moduleFlow } from "../graph/toFlow";
 import type { FileNodeData } from "../graph/types-internal";
 import { useElkLayout } from "../layout/useElkLayout";
@@ -9,9 +10,14 @@ import { navigate } from "../router";
 export function ModuleScreen({ moduleRef }: { moduleRef: string }) {
   const { data: view, error, isPending } = useModule(moduleRef);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const spec = useMemo(() => (view ? moduleFlow(view) : null), [view]);
   const flow = useElkLayout(spec, "DOWN");
+
+  // Hover previews, selection pins — same focus model as the overview.
+  const focusedId = hoveredId ?? selectedFileId;
+  const decorated = useMemo(() => (flow ? applyFocus(flow, focusedId) : null), [flow, focusedId]);
 
   const selectedFile = view?.files.find((file) => file.id === selectedFileId) ?? null;
   const status = error ? error.message : isPending || (spec && !flow) ? "Laying out…" : undefined;
@@ -19,7 +25,7 @@ export function ModuleScreen({ moduleRef }: { moduleRef: string }) {
   return (
     <div className="view" data-testid="module-view">
       <FlowCanvas
-        flow={flow}
+        flow={decorated}
         status={status}
         onNodeClick={(node) => {
           if (node.type === "file") {
@@ -32,6 +38,9 @@ export function ModuleScreen({ moduleRef }: { moduleRef: string }) {
             setSelectedFileId(null);
           }
         }}
+        onNodeMouseEnter={(node) => setHoveredId(node.id)}
+        onNodeMouseLeave={() => setHoveredId(null)}
+        onPaneClick={() => setSelectedFileId(null)}
       />
       <aside className="side-panel" data-testid="module-panel">
         {view && (

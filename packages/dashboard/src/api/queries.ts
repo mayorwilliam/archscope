@@ -7,6 +7,7 @@ import type {
   ModuleView,
   OverviewView,
   RefsResponse,
+  SearchView,
 } from "./types";
 
 async function getJson<T>(url: string): Promise<T> {
@@ -52,6 +53,17 @@ export function useModules(refs: string[]) {
           }),
         ),
       ),
+  });
+}
+
+/** Server-side node search — same searchView the MCP tool consumes. */
+export function useSearch(query: string) {
+  return useQuery({
+    queryKey: ["search", query],
+    queryFn: () =>
+      getJson<SearchView>(`/api/search?q=${encodeURIComponent(query)}&kinds=module,file`),
+    enabled: query.length > 0,
+    placeholderData: (previous: SearchView | undefined) => previous,
   });
 }
 

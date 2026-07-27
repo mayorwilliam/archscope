@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useModules, useOverview } from "../api/queries";
-import { FlowCanvas } from "../components/FlowCanvas";
+import type { SearchResult } from "../api/types";
+import { type FitTarget, FlowCanvas } from "../components/FlowCanvas";
 import { nodeCallbacks } from "../components/nodes";
+import { SearchPanel } from "../components/SearchPanel";
+import { applyFocus } from "../graph/focus";
 import { overviewFlow } from "../graph/toFlow";
 import type { ModuleNodeData, ModuleView } from "../graph/types-internal";
 import { useElkLayout } from "../layout/useElkLayout";
@@ -10,6 +13,9 @@ import { navigate } from "../router";
 export function OverviewScreen() {
   const { data: overview, error, isPending } = useOverview();
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const [pinnedId, setPinnedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [jump, setJump] = useState<FitTarget | null>(null);
 
   const expandedList = useMemo(() => [...expanded].sort(), [expanded]);
   const { data: loadedList } = useModules(expandedList);
@@ -38,6 +44,19 @@ export function OverviewScreen() {
   );
   const flow = useElkLayout(spec, "DOWN");
 
+  // Hover previews, click pins: the pin survives until the pane is clicked.
+  const focusedId = hoveredId ?? pinnedId;
+  const decorated = useMemo(() => (flow ? applyFocus(flow, focusedId) : null), [flow, focusedId]);
+
+  const onSearchPick = (result: SearchResult) => {
+    if (result.kind === "file" && result.moduleId !== undefined) {
+      const moduleId = result.moduleId;
+      setExpanded((prev) => (prev.has(moduleId) ? prev : new Set(prev).add(moduleId)));
+    }
+    setPinnedId(result.id);
+    setJump((prev) => ({ id: result.id, nonce: (prev?.nonce ?? 0) + 1 }));
+  };
+
   const status = error
     ? error.message
     : isPending || (spec && !flow)
@@ -49,14 +68,20 @@ export function OverviewScreen() {
   return (
     <div className="view" data-testid="overview-view">
       <FlowCanvas
-        flow={flow}
+        flow={decorated}
         status={status}
+        fitTo={jump}
+        onNodeClick={(node) => setPinnedId(node.id)}
         onNodeDoubleClick={(node) => {
           if (node.type === "module" || node.type === "moduleGroup") {
             navigate({ view: "module", ref: (node.data as unknown as ModuleNodeData).moduleId });
           }
         }}
+        onNodeMouseEnter={(node) => setHoveredId(node.id)}
+        onNodeMouseLeave={() => setHoveredId(null)}
+        onPaneClick={() => setPinnedId(null)}
       />
+      <SearchPanel onPick={onSearchPick} />
     </div>
   );
 }
