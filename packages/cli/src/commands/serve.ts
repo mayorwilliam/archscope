@@ -18,6 +18,7 @@ import {
   schemaDriftView,
   searchView,
 } from "@archscope/core";
+import { NODE_KINDS, type NodeKind } from "@archscope/schema";
 import fastifyStatic from "@fastify/static";
 import chokidar from "chokidar";
 import Fastify from "fastify";
@@ -82,6 +83,19 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
     if (!view) return notFound(reply, index, ref);
     return view;
   });
+
+  app.get<{ Querystring: { q?: string; kinds?: string } }>(
+    "/api/search",
+    async (request, reply) => {
+      const q = request.query.q?.trim();
+      if (!q) return reply.code(400).send({ error: "Missing ?q=<text>" });
+      const kinds = request.query.kinds
+        ?.split(",")
+        .filter((kind): kind is NodeKind => (NODE_KINDS as readonly string[]).includes(kind));
+      const { index } = await source.load();
+      return searchView(index, q, kinds !== undefined && kinds.length > 0 ? kinds : undefined);
+    },
+  );
 
   app.get("/api/erd", async () => {
     const { index } = await source.load();
