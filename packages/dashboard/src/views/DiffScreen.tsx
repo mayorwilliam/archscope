@@ -4,14 +4,27 @@ import { useDiff, useRefs } from "../api/queries";
 import { FlowCanvas } from "../components/FlowCanvas";
 import { diffFlow } from "../graph/toFlow";
 import { useElkLayout } from "../layout/useElkLayout";
+import { navigate } from "../router";
 
 const mod = (id: string) => parseNodeId(id).rest;
 
-export function DiffScreen() {
+/**
+ * The comparison lives in the URL (#/diff/<base>..<head>): deep-linkable,
+ * navigable from the timeline, shareable. Compare = navigate; the route is
+ * the committed state.
+ */
+export function DiffScreen({
+  initialBase,
+  initialHead,
+}: {
+  initialBase?: string;
+  initialHead?: string;
+}) {
   const { data: refsData } = useRefs();
-  const [base, setBase] = useState("");
-  const [head, setHead] = useState("HEAD");
-  const [committed, setCommitted] = useState<{ base: string; head: string } | null>(null);
+  const [base, setBase] = useState(initialBase ?? "");
+  const [head, setHead] = useState(initialHead ?? "HEAD");
+  const committed =
+    initialBase !== undefined ? { base: initialBase, head: initialHead ?? "HEAD" } : null;
 
   const { data, error, isFetching } = useDiff(committed?.base ?? null, committed?.head ?? "HEAD");
   const spec = useMemo(() => (data ? diffFlow(data) : null), [data]);
@@ -19,8 +32,12 @@ export function DiffScreen() {
 
   const refNames = useMemo(() => {
     const names = (refsData?.refs ?? []).map((ref) => ref.name);
-    return ["HEAD", ...names.filter((name) => name !== "HEAD")];
-  }, [refsData]);
+    const extras = [committed?.base, committed?.head].filter(
+      (name): name is string => name !== undefined && name !== "HEAD" && !names.includes(name),
+    );
+    // Timeline hands us bare shas — they must survive as picker options.
+    return ["HEAD", ...names.filter((name) => name !== "HEAD"), ...extras];
+  }, [refsData, committed?.base, committed?.head]);
 
   const diff = data?.diff;
   const changes = diff
@@ -81,7 +98,7 @@ export function DiffScreen() {
           className="primary"
           data-testid="diff-compare"
           disabled={base === ""}
-          onClick={() => setCommitted({ base, head })}
+          onClick={() => navigate({ view: "diff", base, head })}
         >
           Compare
         </button>

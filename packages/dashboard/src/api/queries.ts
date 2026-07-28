@@ -12,6 +12,8 @@ import type {
   RefsResponse,
   SearchView,
   SourceResponse,
+  TimelinePointResponse,
+  TimelineView,
 } from "./types";
 
 async function getJson<T>(url: string): Promise<T> {
@@ -108,6 +110,24 @@ export function useSource(path: string | null, start: number, end: number) {
 
 export function useRefs() {
   return useQuery({ queryKey: ["refs"], queryFn: () => getJson<RefsResponse>("/api/refs") });
+}
+
+export function useTimeline(commits: number) {
+  return useQuery({
+    queryKey: ["timeline", commits],
+    queryFn: () => getJson<TimelineView>(`/api/timeline?commits=${commits}`),
+  });
+}
+
+/** First fetch for a sha materializes its snapshot server-side — can take seconds. */
+export function useTimelinePoint(sha: string | null) {
+  return useQuery({
+    queryKey: ["timeline-point", sha],
+    queryFn: () =>
+      getJson<TimelinePointResponse>(`/api/timeline/point?sha=${encodeURIComponent(sha ?? "")}`),
+    enabled: sha !== null,
+    staleTime: Number.POSITIVE_INFINITY, // snapshots are immutable per sha
+  });
 }
 
 export function useDiff(base: string | null, head: string) {

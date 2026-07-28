@@ -1,4 +1,4 @@
-import type { GitRef, OverviewView, StalenessInfo } from "@archscope/core";
+import type { GitRef, ModuleSummary, OverviewView, StalenessInfo } from "@archscope/core";
 import type { ArchDiff, GitInfo } from "@archscope/schema";
 
 /**
@@ -28,6 +28,8 @@ export type {
   SearchView,
   StalenessInfo,
   TableEntityRef,
+  TimelinePoint,
+  TimelineView,
 } from "@archscope/core";
 export type { ArchDiff, DriftEntry, TableColumn } from "@archscope/schema";
 
@@ -54,4 +56,10 @@ export interface SourceResponse {
   startLine: number;
   endLine: number;
   lines: string[];
+}
+
+export interface TimelinePointResponse {
+  sha: string;
+  counts: Record<string, number>;
+  modules: ModuleSummary[];
 }

@@ -8,7 +8,7 @@ export type Route =
   | { view: "doc"; ref: string }
   | { view: "graph" }
   | { view: "erd" }
-  | { view: "diff" }
+  | { view: "diff"; base?: string; head?: string }
   | { view: "timeline" };
 
 export function parseHash(hash: string): Route {
@@ -21,7 +21,20 @@ export function parseHash(hash: string): Route {
   }
   if (parts[0] === "graph") return { view: "graph" };
   if (parts[0] === "erd") return { view: "erd" };
-  if (parts[0] === "diff") return { view: "diff" };
+  if (parts[0] === "diff") {
+    // #/diff/<base>..<head> — linkable comparisons. ".." never appears in a
+    // valid git refname, so the separator is unambiguous.
+    const range = parts.slice(1).join("/");
+    const sep = range.indexOf("..");
+    if (sep > 0) {
+      return {
+        view: "diff",
+        base: decodeURIComponent(range.slice(0, sep)),
+        head: decodeURIComponent(range.slice(sep + 2)) || "HEAD",
+      };
+    }
+    return { view: "diff" };
+  }
   if (parts[0] === "timeline") return { view: "timeline" };
   return { view: "home" };
 }
@@ -39,7 +52,9 @@ export function routeHash(route: Route): string {
     case "erd":
       return "#/erd";
     case "diff":
-      return "#/diff";
+      return route.base !== undefined
+        ? `#/diff/${encodeURIComponent(route.base)}..${encodeURIComponent(route.head ?? "HEAD")}`
+        : "#/diff";
     case "timeline":
       return "#/timeline";
   }

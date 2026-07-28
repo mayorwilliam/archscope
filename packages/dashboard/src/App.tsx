@@ -27,7 +27,13 @@ export function App() {
         {route.view === "doc" && <DocPage docRef={route.ref} key={route.ref} />}
         {route.view === "graph" && <GraphScreen />}
         {route.view === "erd" && <ErdScreen />}
-        {route.view === "diff" && <DiffScreen />}
+        {route.view === "diff" && (
+          <DiffScreen
+            key={`${route.base ?? ""}..${route.head ?? ""}`}
+            {...(route.base !== undefined ? { initialBase: route.base } : {})}
+            {...(route.head !== undefined ? { initialHead: route.head } : {})}
+          />
+        )}
         {route.view === "timeline" && <TimelineScreen />}
       </main>
     </div>
