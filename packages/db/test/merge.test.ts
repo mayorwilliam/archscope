@@ -6,7 +6,7 @@ import { mergeLiveSchema } from "../src/merge.js";
 
 function baseGraph(): ArchGraph {
   return parseArchGraph({
-    schemaVersion: 1,
+    schemaVersion: 2,
     meta: {
       tool: "archscope",
       toolVersion: "test",

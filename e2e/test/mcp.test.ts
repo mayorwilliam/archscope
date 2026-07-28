@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { estimateTokens } from "@archscope/core";
+import { analyze, estimateTokens } from "@archscope/core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   analyzeAndSave,
@@ -29,6 +29,12 @@ let h: Harness;
 beforeAll(async () => {
   root = makeTmpDir("archscope-e2e-");
   generateRepo(root, AREAS, FILES);
+  // Wiki prose: a module README (→ About section + get_doc) present in BOTH
+  // commits, so the diff numbers below stay untouched.
+  fs.writeFileSync(
+    path.join(root, "area3", "README.md"),
+    "# Area Three\n\nChained helpers for area three.\n",
+  );
   await initGitRepo(root);
   await git(root, "add", "-A");
   await git(root, "commit", "-q", "-m", "base architecture");
@@ -72,10 +78,10 @@ const SWEEP_ARGS: Record<string, Record<string, unknown>> = {
 };
 
 describe("tool surface", () => {
-  it("exposes exactly the 10 tools", async () => {
+  it("exposes exactly the 11 tools", async () => {
     const { tools } = await h.client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
-      [...TOOLS, "get_db_schema", "get_entity_relations", "get_schema_drift"].sort(),
+      [...TOOLS, "get_db_schema", "get_doc", "get_entity_relations", "get_schema_drift"].sort(),
     );
   });
 
@@ -204,6 +210,34 @@ describe("drill-down hints are executable calls", () => {
     const { text } = await h.callText("search_nodes", { query: "helper", budget_tokens: 200 });
     expect(text).toContain("… +");
     expect(text).toContain('search_nodes("helper", budget_tokens=');
+  });
+});
+
+describe("wiki prose (docs)", () => {
+  it("get_module opens the module's README as an About section", async () => {
+    const { text } = await h.callText("get_module", { module: "area3", budget_tokens: 8000 });
+    expect(text).toContain("## About (area3/README.md)");
+    expect(text).toContain("Chained helpers for area three.");
+  });
+
+  it("get_doc round-trips a doc by bare path", async () => {
+    const { text, isError } = await h.callText("get_doc", { ref: "area3/README.md" });
+    expect(isError).toBe(false);
+    expect(text).toContain("# doc:area3/README.md");
+    expect(text).toContain("documents mod:area3");
+    expect(text).toContain("# Area Three");
+  });
+
+  it("search_nodes finds docs when asked for the doc kind", async () => {
+    const { text } = await h.callText("search_nodes", { query: "Area Three", kinds: ["doc"] });
+    expect(text).toContain("doc:area3/README.md");
+  });
+
+  it("analyze stays byte-deterministic with docs in the graph", async () => {
+    const opts = { rootDir: root, createdAt: "1970-01-01T00:00:00.000Z", cache: false as const };
+    const [a, b] = [await analyze(opts), await analyze(opts)];
+    expect(JSON.stringify(a.graph)).toBe(JSON.stringify(b.graph));
+    expect(a.graph.meta.counts.doc).toBe(1);
   });
 });
 

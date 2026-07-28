@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "meta": {
     "tool": "archscope",
     "toolVersion": "test",
@@ -12,7 +12,8 @@
       "symbol": 5,
       "entity": 3,
       "table": 3,
-      "extpkg": 2
+      "extpkg": 2,
+      "doc": 0
     }
   },
   "nodes": [

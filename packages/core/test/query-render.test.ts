@@ -1,10 +1,12 @@
 import type { ArchDiff, ArchGraph, GraphEdge, GraphNode } from "@archscope/schema";
-import { edgeId, entityId, fileId, moduleId, symbolId, tableId } from "@archscope/schema";
+import { docId, edgeId, entityId, fileId, moduleId, symbolId, tableId } from "@archscope/schema";
 import { describe, expect, it } from "vitest";
 import { BudgetWriter, estimateTokens, MAX_BUDGET, MIN_BUDGET } from "../src/query/budget.js";
 import {
   dbSchemaView,
   dependenciesView,
+  docsView,
+  docView,
   entityRelationsView,
   fileContextView,
   impactView,
@@ -19,6 +21,8 @@ import {
   renderDbSchema,
   renderDependencies,
   renderDiff,
+  renderDoc,
+  renderDocs,
   renderEntityRelations,
   renderFileContext,
   renderImpact,
@@ -205,8 +209,37 @@ function syntheticGraph(): ArchGraph {
     }
   }
 
+  // A long README documenting area-05: forces renderModule's About section
+  // and renderDoc to truncate at the low end of the budget range.
+  const readmePath = "area-05/README.md";
+  nodes.push({
+    id: docId(readmePath),
+    kind: "doc",
+    name: "Area 05",
+    attrs: {
+      kind: "doc",
+      format: "markdown",
+      title: "Area 05",
+      content: `# Area 05\n\n${Array.from(
+        { length: 120 },
+        (_, i) => `Line ${i} of the area-05 readme, long enough to matter.`,
+      ).join("\n")}\n`,
+      truncated: false,
+      headings: [{ depth: 1, text: "Area 05" }],
+    },
+    metrics: { fanIn: 0, fanOut: 0, rank: 0 },
+  });
+  edges.push({
+    id: edgeId("documents", docId(readmePath), moduleId("area-05")),
+    kind: "documents",
+    from: docId(readmePath),
+    to: moduleId("area-05"),
+    source: "static",
+    confidence: "certain",
+  });
+
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     meta: {
       tool: "archscope",
       toolVersion: "test",
@@ -225,6 +258,7 @@ function syntheticGraph(): ArchGraph {
         entity: TABLES,
         table: TABLES,
         extpkg: 0,
+        doc: 1,
       },
     },
     nodes,
@@ -278,10 +312,13 @@ function everyRender(ctx: RenderContext): Array<[string, string]> {
   const file = fileContextView(index, "area-05/file-5.ts");
   const entityRel = entityRelationsView(index, "Entity10");
   const tableRel = entityRelationsView(index, "public.table_10");
-  if (!mod || !deps || !impact || !file || !entityRel || !tableRel) {
+  const doc = docView(index, "area-05/README.md");
+  if (!mod || !deps || !impact || !file || !entityRel || !tableRel || !doc) {
     throw new Error("synthetic graph lookup failed");
   }
   return [
+    ["get_doc", renderDoc(doc, ctx)],
+    ["docs_list", renderDocs(docsView(index), ctx)],
     ["get_architecture_overview", renderOverview(overviewView(index), ctx)],
     ["get_module", renderModule(mod, ctx)],
     ["find_dependencies", renderDependencies(deps, ctx)],

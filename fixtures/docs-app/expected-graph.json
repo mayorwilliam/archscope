@@ -1,0 +1,491 @@
+{
+  "schemaVersion": 2,
+  "meta": {
+    "tool": "archscope",
+    "toolVersion": "test",
+    "createdAt": "1970-01-01T00:00:00.000Z",
+    "root": "<fixture>",
+    "git": null,
+    "counts": {
+      "module": 3,
+      "file": 4,
+      "symbol": 9,
+      "entity": 0,
+      "table": 0,
+      "extpkg": 0,
+      "doc": 4
+    }
+  },
+  "nodes": [
+    {
+      "id": "doc:CONTRIBUTING.md",
+      "kind": "doc",
+      "name": "Contributing",
+      "attrs": {
+        "kind": "doc",
+        "format": "markdown",
+        "title": "Contributing",
+        "content": "## Contributing\n\nRoot-level page without an h1 — the title must fall back to the first\nheading of any depth.\n",
+        "truncated": false,
+        "headings": [
+          {
+            "depth": 2,
+            "text": "Contributing"
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "doc:docs/guide.md",
+      "kind": "doc",
+      "name": "Guide",
+      "attrs": {
+        "kind": "doc",
+        "format": "markdown",
+        "title": "Guide",
+        "content": "# Guide\n\nA docs/ page. It carries no `documents` edge — project docs are not\nmodule docs.\n\n```bash\n# this is a comment inside a fence, not a heading\necho \"hi\"\n```\n\n## Second section\n\nDone.\n",
+        "truncated": false,
+        "headings": [
+          {
+            "depth": 1,
+            "text": "Guide"
+          },
+          {
+            "depth": 2,
+            "text": "Second section"
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "doc:README.md",
+      "kind": "doc",
+      "name": "Docs App",
+      "attrs": {
+        "kind": "doc",
+        "format": "markdown",
+        "title": "Docs App",
+        "content": "# Docs App\n\nA tiny fixture exercising the deterministic prose extraction: READMEs,\ndocs pages, JSDoc and Python docstrings.\n\n## Layout\n\nTwo source modules (`auth`, `worker`) and a docs/ folder.\n",
+        "truncated": false,
+        "headings": [
+          {
+            "depth": 1,
+            "text": "Docs App"
+          },
+          {
+            "depth": 2,
+            "text": "Layout"
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "doc:src/auth/README.md",
+      "kind": "doc",
+      "name": "Auth",
+      "attrs": {
+        "kind": "doc",
+        "format": "markdown",
+        "title": "Auth",
+        "content": "# Auth\n\nLogin and session handling. This README sits next to the module's own\nfiles, so its `documents` edge is certain.\n",
+        "truncated": false,
+        "headings": [
+          {
+            "depth": 1,
+            "text": "Auth"
+          }
+        ]
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      }
+    },
+    {
+      "id": "file:src/auth/login.ts",
+      "kind": "file",
+      "name": "login.ts",
+      "parent": "mod:auth",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 31,
+        "fanIn": 2,
+        "fanOut": 0,
+        "rank": 0.473684
+      }
+    },
+    {
+      "id": "file:src/auth/session.ts",
+      "kind": "file",
+      "name": "session.ts",
+      "parent": "mod:auth",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file",
+        "doc": "Session storage helpers — this labeled comment is the file-level doc even though it is adjacent to the import below."
+      },
+      "metrics": {
+        "loc": 18,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.175439
+      }
+    },
+    {
+      "id": "file:src/main.ts",
+      "kind": "file",
+      "name": "main.ts",
+      "parent": "mod:docs-app",
+      "lang": "ts",
+      "attrs": {
+        "kind": "file"
+      },
+      "metrics": {
+        "loc": 4,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.175439
+      }
+    },
+    {
+      "id": "file:worker/tasks.py",
+      "kind": "file",
+      "name": "tasks.py",
+      "parent": "mod:worker",
+      "lang": "py",
+      "attrs": {
+        "kind": "file",
+        "doc": "Task queue helpers for the worker module."
+      },
+      "metrics": {
+        "loc": 25,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0.175439
+      }
+    },
+    {
+      "id": "mod:auth",
+      "kind": "module",
+      "name": "auth",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 49,
+        "fanIn": 1,
+        "fanOut": 0,
+        "rank": 0.649123
+      }
+    },
+    {
+      "id": "mod:docs-app",
+      "kind": "module",
+      "name": "docs-app",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 4,
+        "fanIn": 0,
+        "fanOut": 1,
+        "rank": 0.175439
+      }
+    },
+    {
+      "id": "mod:worker",
+      "kind": "module",
+      "name": "worker",
+      "attrs": {
+        "kind": "module",
+        "source": "inferred"
+      },
+      "metrics": {
+        "loc": 25,
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0.175439
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#login",
+      "kind": "symbol",
+      "name": "login",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true,
+        "doc": "Log a user in and mint a session token."
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 7,
+        "endLine": 9
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#logout",
+      "kind": "symbol",
+      "name": "logout",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 14,
+        "endLine": 16
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#MAX_RETRIES",
+      "kind": "symbol",
+      "name": "MAX_RETRIES",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "const",
+        "exported": true,
+        "doc": "Retry budget for the login flow."
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 19,
+        "endLine": 19
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#refresh",
+      "kind": "symbol",
+      "name": "refresh",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 23,
+        "endLine": 23
+      }
+    },
+    {
+      "id": "sym:src/auth/login.ts#Session",
+      "kind": "symbol",
+      "name": "Session",
+      "parent": "file:src/auth/login.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "interface",
+        "exported": true,
+        "doc": "Shape of a session record."
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/login.ts",
+        "startLine": 28,
+        "endLine": 30
+      }
+    },
+    {
+      "id": "sym:src/auth/session.ts#SessionStore",
+      "kind": "symbol",
+      "name": "SessionStore",
+      "parent": "file:src/auth/session.ts",
+      "lang": "ts",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true,
+        "doc": "Persist sessions with automatic retry."
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "src/auth/session.ts",
+        "startLine": 11,
+        "endLine": 13
+      }
+    },
+    {
+      "id": "sym:worker/tasks.py#enqueue",
+      "kind": "symbol",
+      "name": "enqueue",
+      "parent": "file:worker/tasks.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true,
+        "doc": "Push a task onto the queue."
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "worker/tasks.py",
+        "startLine": 7,
+        "endLine": 9
+      }
+    },
+    {
+      "id": "sym:worker/tasks.py#plain",
+      "kind": "symbol",
+      "name": "plain",
+      "parent": "file:worker/tasks.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "function",
+        "exported": true
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "worker/tasks.py",
+        "startLine": 23,
+        "endLine": 24
+      }
+    },
+    {
+      "id": "sym:worker/tasks.py#Scheduler",
+      "kind": "symbol",
+      "name": "Scheduler",
+      "parent": "file:worker/tasks.py",
+      "lang": "py",
+      "attrs": {
+        "kind": "symbol",
+        "symbolKind": "class",
+        "exported": true,
+        "doc": "Runs periodic jobs on a fixed interval."
+      },
+      "metrics": {
+        "fanIn": 0,
+        "fanOut": 0,
+        "rank": 0
+      },
+      "span": {
+        "path": "worker/tasks.py",
+        "startLine": 12,
+        "endLine": 20
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "depends_on|mod:docs-app|mod:auth",
+      "kind": "depends_on",
+      "from": "mod:docs-app",
+      "to": "mod:auth",
+      "attrs": {
+        "weight": 1
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "documents|doc:README.md|mod:docs-app",
+      "kind": "documents",
+      "from": "doc:README.md",
+      "to": "mod:docs-app",
+      "source": "static",
+      "confidence": "inferred"
+    },
+    {
+      "id": "documents|doc:src/auth/README.md|mod:auth",
+      "kind": "documents",
+      "from": "doc:src/auth/README.md",
+      "to": "mod:auth",
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/auth/session.ts|file:src/auth/login.ts",
+      "kind": "imports",
+      "from": "file:src/auth/session.ts",
+      "to": "file:src/auth/login.ts",
+      "attrs": {
+        "symbols": [
+          "MAX_RETRIES"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    },
+    {
+      "id": "imports|file:src/main.ts|file:src/auth/login.ts",
+      "kind": "imports",
+      "from": "file:src/main.ts",
+      "to": "file:src/auth/login.ts",
+      "attrs": {
+        "symbols": [
+          "login"
+        ]
+      },
+      "source": "static",
+      "confidence": "certain"
+    }
+  ]
+}
