@@ -67,6 +67,40 @@ describe("overviewView", () => {
   it("aggregates external packages by fan-in", () => {
     expect(view.packages.map((p) => p.id).sort()).toEqual(["pkg:express", "pkg:fs", "pkg:path"]);
   });
+
+  it("computes Martin instability from depends_on degrees", () => {
+    const utils = view.modules.find((m) => m.id === "mod:utils");
+    expect(utils?.instability).toBe(0); // pure dependee — maximally stable
+    const root = view.modules.find((m) => m.id === "mod:ts-basic");
+    expect(root?.instability).toBe(1); // pure depender — maximally unstable
+  });
+
+  it("ts-basic has no module cycles (file-level cycle stays inside mod:auth)", () => {
+    expect(view.cycles).toEqual([]);
+  });
+});
+
+describe("dependency cycles", () => {
+  it("reports a two-module cycle once, members sorted", () => {
+    const golden = loadGolden("ts-basic");
+    const withCycle = {
+      ...golden.graph,
+      edges: [
+        ...golden.graph.edges,
+        {
+          id: "depends_on|mod:utils|mod:auth",
+          kind: "depends_on" as const,
+          from: "mod:utils",
+          to: "mod:auth",
+          attrs: { weight: 1 },
+          source: "static" as const,
+          confidence: "certain" as const,
+        },
+      ],
+    };
+    const view = overviewView(indexGraph(withCycle));
+    expect(view.cycles).toEqual([["mod:auth", "mod:utils"]]);
+  });
 });
 
 describe("moduleView", () => {

@@ -59,6 +59,13 @@ export function renderOverview(view: OverviewView, ctx: RenderContext): string {
       `${c.extpkg ?? 0} external packages · ${view.totalImports} import edges`,
   );
 
+  if (view.cycles.length > 0) {
+    w.line(
+      `⚠ ${view.cycles.length} dependency ${view.cycles.length === 1 ? "cycle" : "cycles"}: ` +
+        view.cycles.map((c) => c.join(" ↔ ")).join(" · "),
+    );
+  }
+
   section(w, "## Modules (by rank)");
   w.list(
     view.modules.map(

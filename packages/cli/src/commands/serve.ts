@@ -9,6 +9,7 @@ import {
   docView,
   ensureSnapshot,
   erdView,
+  fileContextView,
   GraphSource,
   gitInfo,
   gitRefs,
@@ -96,6 +97,43 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
         .filter((kind): kind is NodeKind => (NODE_KINDS as readonly string[]).includes(kind));
       const { index } = await source.load();
       return searchView(index, q, kinds !== undefined && kinds.length > 0 ? kinds : undefined);
+    },
+  );
+
+  app.get<{ Querystring: { ref?: string } }>("/api/file", async (request, reply) => {
+    const ref = request.query.ref;
+    if (!ref) return reply.code(400).send({ error: "Missing ?ref=<path or file: id>" });
+    const { index } = await source.load();
+    const view = fileContextView(index, ref);
+    if (!view) return notFound(reply, index, ref);
+    return view;
+  });
+
+  /**
+   * Line range of a file — for "view source" affordances in the wiki. Only
+   * paths that exist as file:/doc: nodes in the CURRENT graph are served
+   * (path traversal is impossible by construction), clamped to 200 lines.
+   * This displays bytes the graph already points at; it derives no facts.
+   */
+  app.get<{ Querystring: { path?: string; start?: string; end?: string } }>(
+    "/api/source",
+    async (request, reply) => {
+      const relPath = request.query.path;
+      if (!relPath) return reply.code(400).send({ error: "Missing ?path=" });
+      const { index } = await source.load();
+      const node = index.nodes.get(`file:${relPath}`) ?? index.nodes.get(`doc:${relPath}`);
+      if (!node) return notFound(reply, index, relPath);
+      const start = Math.max(1, Number.parseInt(request.query.start ?? "1", 10) || 1);
+      const requestedEnd = Number.parseInt(request.query.end ?? "", 10) || start;
+      const end = Math.min(requestedEnd, start + 199);
+      let content: string;
+      try {
+        content = fs.readFileSync(path.join(rootDir, relPath), "utf8");
+      } catch {
+        return reply.code(404).send({ error: `File not on disk: ${relPath}` });
+      }
+      const lines = content.split(/\r?\n/).slice(start - 1, end);
+      return { path: relPath, startLine: start, endLine: start + lines.length - 1, lines };
     },
   );
 

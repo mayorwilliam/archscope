@@ -86,6 +86,11 @@ export interface ModuleSummary {
   /** Outgoing / incoming depends_on counts. */
   dependsOn: number;
   dependents: number;
+  /**
+   * Martin's I = Ce/(Ca+Ce) over depends_on: 1 = depends on everyone
+   * (unstable), 0 = everyone depends on it (stable). Absent when isolated.
+   */
+  instability?: number;
 }
 
 export interface ModuleDependency {
@@ -111,6 +116,8 @@ export interface OverviewView {
   modules: ModuleSummary[];
   dependencies: ModuleDependency[];
   packages: PackageSummary[];
+  /** Module dependency cycles (Tarjan SCCs of size >1), members sorted. */
+  cycles: string[][];
 }
 
 export function overviewView(index: GraphIndex): OverviewView {
@@ -150,6 +157,7 @@ export function overviewView(index: GraphIndex): OverviewView {
     modules,
     dependencies,
     packages,
+    cycles: dependencyCycles(index),
   };
 }
 
@@ -167,6 +175,7 @@ function moduleSummary(index: GraphIndex, node: GraphNode): ModuleSummary {
     if (edge.kind === "depends_on") dependents += 1;
   }
   const layer = node.attrs.kind === "module" ? node.attrs.layer : undefined;
+  const coupled = dependsOn + dependents;
   return {
     id: node.id,
     name: node.name,
@@ -176,7 +185,64 @@ function moduleSummary(index: GraphIndex, node: GraphNode): ModuleSummary {
     rank: node.metrics.rank,
     dependsOn,
     dependents,
+    ...(coupled > 0 ? { instability: Number((dependsOn / coupled).toFixed(3)) } : {}),
   };
+}
+
+/**
+ * Tarjan over the module depends_on graph. Only true cycles (SCC size >1 or a
+ * self-loop) are reported; members and output order are sorted — same graph,
+ * same cycles, byte for byte.
+ */
+function dependencyCycles(index: GraphIndex): string[][] {
+  const adjacency = new Map<string, string[]>();
+  for (const edge of index.graph.edges) {
+    if (edge.kind !== "depends_on") continue;
+    push(adjacency, edge.from, edge.to);
+  }
+  const ids = [...adjacency.keys()].sort();
+
+  const indexOf = new Map<string, number>();
+  const lowlink = new Map<string, number>();
+  const onStack = new Set<string>();
+  const stack: string[] = [];
+  const cycles: string[][] = [];
+  let counter = 0;
+
+  const connect = (v: string): void => {
+    indexOf.set(v, counter);
+    lowlink.set(v, counter);
+    counter += 1;
+    stack.push(v);
+    onStack.add(v);
+
+    for (const w of adjacency.get(v) ?? []) {
+      if (!indexOf.has(w)) {
+        connect(w);
+        lowlink.set(v, Math.min(lowlink.get(v) as number, lowlink.get(w) as number));
+      } else if (onStack.has(w)) {
+        lowlink.set(v, Math.min(lowlink.get(v) as number, indexOf.get(w) as number));
+      }
+    }
+
+    if (lowlink.get(v) === indexOf.get(v)) {
+      const component: string[] = [];
+      let w: string;
+      do {
+        w = stack.pop() as string;
+        onStack.delete(w);
+        component.push(w);
+      } while (w !== v);
+      const selfLoop = component.length === 1 && (adjacency.get(v) ?? []).includes(v);
+      if (component.length > 1 || selfLoop) cycles.push(component.sort());
+    }
+  };
+
+  for (const id of ids) {
+    if (!indexOf.has(id)) connect(id);
+  }
+  cycles.sort((a, b) => (a[0] as string).localeCompare(b[0] as string));
+  return cycles;
 }
 
 // ---------------------------------------------------------------------------
