@@ -14,7 +14,7 @@ import type { FileFacts } from "../parse/facts.js";
  */
 
 /** Bump whenever extraction output changes shape or semantics. */
-export const EXTRACTOR_VERSION = 3; // v3: TypeORM/Drizzle/Django extractors (phase 6)
+export const EXTRACTOR_VERSION = 4; // v4: JSDoc/docstring capture (wiki)
 
 export interface CacheStats {
   hits: number;

@@ -10,7 +10,14 @@ export {
   type ModuleAssignment,
   type ModuleInferrer,
 } from "./modules/infer.js";
+export {
+  DOC_SUMMARY_MAX,
+  normalizeJsDoc,
+  normalizePyDoc,
+  pyStringBody,
+} from "./parse/doc-normalize.js";
 export type { FileFacts, ImportFact, ImportKind, OrmHint, SymbolFact } from "./parse/facts.js";
+export { DOC_MAX_BYTES, type DocFacts, extractDocFacts } from "./parse/markdown.js";
 export { grammarForFile, initParser } from "./parse/parser.js";
 export { extractPyFacts } from "./parse/py.js";
 export { extractTsFacts } from "./parse/ts.js";
@@ -29,9 +36,15 @@ export {
   type DbSchemaView,
   type DependenciesView,
   type DependencyItem,
+  type DocListItem,
+  type DocModuleRef,
+  type DocsView,
+  type DocView,
   type DriftTable,
   dbSchemaView,
   dependenciesView,
+  docsView,
+  docView,
   type EntityRelationsView,
   type ErdTable,
   type ErdView,
@@ -50,6 +63,7 @@ export {
   indexGraph,
   type LiveMeta,
   type ModuleDependency,
+  type ModuleReadme,
   type ModuleSummary,
   type ModuleView,
   moduleView,
@@ -71,6 +85,8 @@ export {
   renderDbSchema,
   renderDependencies,
   renderDiff,
+  renderDoc,
+  renderDocs,
   renderEntityRelations,
   renderFileContext,
   renderImpact,
@@ -90,7 +106,7 @@ export {
 } from "./resolve/resolver.js";
 export { packageNameOf, type Resolution, TsResolver } from "./resolve/ts-resolver.js";
 export { discoverWorkspacePackages, type WorkspacePackage } from "./resolve/workspace.js";
-export { scanSourceFiles } from "./scan.js";
+export { scanDocFiles, scanSourceFiles } from "./scan.js";
 export { type EnsureSnapshotResult, ensureSnapshot, resolveRef } from "./snapshot.js";
 export { type CacheStats, EXTRACTOR_VERSION, FactsCache, factsKey } from "./store/cache.js";
 export { Store } from "./store/store.js";

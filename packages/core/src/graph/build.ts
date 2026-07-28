@@ -8,9 +8,10 @@ import type {
   GraphNode,
   NodeKind,
 } from "@archscope/schema";
-import { edgeId, fileId, moduleId, packageId, symbolId } from "@archscope/schema";
+import { docId, edgeId, fileId, moduleId, packageId, symbolId } from "@archscope/schema";
 import type { ModuleInferrer } from "../modules/infer.js";
 import type { FileFacts } from "../parse/facts.js";
+import type { DocFacts } from "../parse/markdown.js";
 import type { ImportResolver } from "../resolve/resolver.js";
 import { pageRank } from "./metrics.js";
 
@@ -26,6 +27,7 @@ export interface BuildInput {
   rootDir: string;
   toolVersion: string;
   facts: FileFacts[];
+  docs?: DocFacts[];
   resolver: ImportResolver;
   inferModule: ModuleInferrer;
   config: ArchscopeConfig;
@@ -67,7 +69,7 @@ export function buildGraph(input: BuildInput): ArchGraph {
       name: file.path.split("/").pop() ?? file.path,
       parent: modId,
       lang: file.lang,
-      attrs: { kind: "file" },
+      attrs: { kind: "file", ...(file.doc !== undefined ? { doc: file.doc } : {}) },
       metrics: { loc: file.loc, fanIn: 0, fanOut: 0, rank: 0 },
     });
 
@@ -80,11 +82,60 @@ export function buildGraph(input: BuildInput): ArchGraph {
         name: sym.name,
         parent: fid,
         lang: file.lang,
-        attrs: { kind: "symbol", symbolKind: sym.symbolKind, exported: true },
+        attrs: {
+          kind: "symbol",
+          symbolKind: sym.symbolKind,
+          exported: true,
+          ...(sym.doc !== undefined ? { doc: sym.doc } : {}),
+        },
         metrics: { fanIn: 0, fanOut: 0, rank: 0 },
         span: { path: file.path, startLine: sym.startLine, endLine: sym.endLine },
       });
     }
+  }
+
+  // --- markdown docs --------------------------------------------------------
+  // READMEs attach to the module the inferrer assigns their path — the same
+  // rule source files follow, so a README lands with the code around it.
+  // `certain` when that module actually owns files in the README's own
+  // directory; `inferred` when the nearest-ancestor guess is all we have.
+  // Non-README pages (docs/**, root CONTRIBUTING.md, ...) stay unattached:
+  // they document the project, not one module.
+  for (const doc of input.docs ?? []) {
+    const did = docId(doc.path);
+    nodes.set(did, {
+      id: did,
+      kind: "doc",
+      name: doc.title,
+      attrs: {
+        kind: "doc",
+        format: "markdown",
+        title: doc.title,
+        content: doc.content,
+        truncated: doc.truncated,
+        headings: doc.headings,
+      },
+      metrics: { fanIn: 0, fanOut: 0, rank: 0 },
+    });
+
+    const baseName = doc.path.split("/").pop() ?? doc.path;
+    if (baseName.toLowerCase() !== "readme.md") continue;
+    const modId = moduleId(inferModule(doc.path).moduleName);
+    if (!nodes.has(modId)) continue;
+    const docDir = doc.path.includes("/") ? doc.path.slice(0, doc.path.lastIndexOf("/")) : "";
+    const ownsSiblingFile = facts.some((f) => {
+      const fileDir = f.path.includes("/") ? f.path.slice(0, f.path.lastIndexOf("/")) : "";
+      return fileDir === docDir && moduleId(inferModule(f.path).moduleName) === modId;
+    });
+    const id = edgeId("documents", did, modId);
+    edges.set(id, {
+      id,
+      kind: "documents",
+      from: did,
+      to: modId,
+      source: "static",
+      confidence: ownsSiblingFile ? "certain" : "inferred",
+    });
   }
 
   // --- import edges --------------------------------------------------------
@@ -220,12 +271,20 @@ export function buildGraph(input: BuildInput): ArchGraph {
   const sortedEdges = [...edges.values()].sort((a, b) => a.id.localeCompare(b.id));
 
   const counts: Record<string, number> = {};
-  for (const kind of ["module", "file", "symbol", "entity", "table", "extpkg"] as NodeKind[]) {
+  for (const kind of [
+    "module",
+    "file",
+    "symbol",
+    "entity",
+    "table",
+    "extpkg",
+    "doc",
+  ] as NodeKind[]) {
     counts[kind] = sortedNodes.filter((n) => n.kind === kind).length;
   }
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     meta: {
       tool: "archscope",
       toolVersion: input.toolVersion,

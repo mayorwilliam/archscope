@@ -5,6 +5,8 @@ import type {
   DbSchemaView,
   DependenciesView,
   DependencyItem,
+  DocsView,
+  DocView,
   EntityRelationsView,
   FileContextView,
   ImpactView,
@@ -99,6 +101,13 @@ export function renderModule(view: ModuleView, ctx: RenderContext): string {
       `${view.files.length} files · ${fmtLoc(view.loc)} loc · r=${fmtRank(view.rank)}`,
   );
 
+  if (view.readme) {
+    section(w, `## About (${view.readme.path})`);
+    renderProse(w, view.readme.content, ABOUT_MAX_LINES, (n) =>
+      more(n, `get_doc("${view.readme?.path}", budget_tokens=${suggestBudget(budget)})`),
+    );
+  }
+
   if (view.dependsOn.length > 0) {
     section(w, "## Depends on");
     w.list(
@@ -123,7 +132,8 @@ export function renderModule(view: ModuleView, ctx: RenderContext): string {
     view.files.map(
       (f) =>
         `- ${f.id} · r=${fmtRank(f.rank)} · ←${f.fanIn} →${f.fanOut}` +
-        `${f.exports.length > 0 ? ` · exports: ${nameList(f.exports, 4)}` : ""}`,
+        `${f.exports.length > 0 ? ` · exports: ${nameList(f.exports, 4)}` : ""}` +
+        `${f.doc !== undefined ? ` — ${clip(f.doc, 100)}` : ""}`,
     ),
     moreModule,
   );
@@ -226,13 +236,18 @@ export function renderFileContext(view: FileContextView, ctx: RenderContext): st
       `${fmtLoc(view.loc)} loc · r=${fmtRank(view.rank)} · ←${view.fanIn} →${view.fanOut}`,
   );
 
+  if (view.doc !== undefined) {
+    w.line(clip(view.doc, 200));
+  }
+
   if (view.exports.length > 0) {
     section(w, `## Exports (${view.exports.length})`);
     w.list(
       view.exports.map(
         (e) =>
           `- ${e.name} · ${e.symbolKind}` +
-          `${e.startLine !== undefined ? ` · L${e.startLine}–${e.endLine}` : ""}`,
+          `${e.startLine !== undefined ? ` · L${e.startLine}–${e.endLine}` : ""}` +
+          `${e.doc !== undefined ? ` — ${clip(e.doc, 100)}` : ""}`,
       ),
       moreFile,
     );
@@ -336,6 +351,39 @@ export function renderDiff(diff: ArchDiff, ctx: RenderContext): string {
     w.blank();
     w.line("No architectural changes.");
   }
+  return w.toString();
+}
+
+export function renderDoc(view: DocView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  w.line(`# ${view.id}`);
+  w.line(
+    `"${view.title}"${view.module ? ` · documents ${view.module.id}` : ""}` +
+      `${view.truncated ? " · ⚠ stored content was capped at extraction" : ""}`,
+  );
+  w.blank();
+  renderProse(w, view.content, Number.POSITIVE_INFINITY, (n) =>
+    more(n, `get_doc("${view.path}", budget_tokens=${suggestBudget(budget)})`),
+  );
+  return w.toString();
+}
+
+export function renderDocs(view: DocsView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  w.line(`# Docs — ${view.total} markdown pages`);
+  if (view.total === 0) {
+    w.line("No markdown docs in the graph — add a README.md and re-run `archscope analyze`.");
+    return w.toString();
+  }
+  w.blank();
+  w.list(
+    view.docs.map((d) => `- ${d.id} · "${d.title}"${d.module ? ` · → ${d.module.id}` : ""}`),
+    (n) => more(n, `budget_tokens=${suggestBudget(budget)}`),
+  );
+  w.blank();
+  w.line(`Read one: get_doc("<path>").`);
   return w.toString();
 }
 
@@ -572,6 +620,33 @@ function section(w: BudgetWriter, title: string): void {
 
 function more(omitted: number, call: string): string {
   return `… +${omitted} more → ${call}`;
+}
+
+/** Lines shown of a module README inside get_module before deferring to get_doc. */
+const ABOUT_MAX_LINES = 30;
+
+/**
+ * Stream markdown prose through the budget, line by line. `maxLines` bounds
+ * how much of the doc this section may claim even when budget remains — the
+ * hint always reports the TRUE number of lines left in the document.
+ */
+function renderProse(
+  w: BudgetWriter,
+  content: string,
+  maxLines: number,
+  makeHint: (omitted: number) => string,
+): void {
+  const lines = content.replace(/\n+$/, "").split("\n");
+  const shown = lines.slice(0, maxLines);
+  const rest = lines.length - shown.length;
+  const written = w.list(shown, (n) => makeHint(n + rest));
+  if (written === shown.length && rest > 0) {
+    w.line(makeHint(rest));
+  }
+}
+
+function clip(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
 function dependencyLine(item: DependencyItem): string {

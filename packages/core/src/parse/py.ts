@@ -5,6 +5,7 @@ import {
 } from "@archscope/db";
 import type { Lang, SymbolKind } from "@archscope/schema";
 import type { Node } from "web-tree-sitter";
+import { normalizePyDoc, pyStringBody } from "./doc-normalize.js";
 import type { FileFacts, ImportFact, SymbolFact } from "./facts.js";
 import { parseSource } from "./parser.js";
 
@@ -75,6 +76,9 @@ export async function extractPyFacts(relPath: string, source: string): Promise<F
     entities.push(...extractDjangoEntities(relPath, root));
   }
 
+  // PEP 257: the module docstring is the file's first statement.
+  const fileDoc = docstringOf(root);
+
   tree.delete();
 
   return {
@@ -89,6 +93,7 @@ export async function extractPyFacts(relPath: string, source: string): Promise<F
       endLine: e.endLine,
     })),
     ...(entities.length > 0 ? { entities } : {}),
+    ...(fileDoc !== undefined ? { doc: fileDoc } : {}),
   };
 }
 
@@ -162,13 +167,24 @@ function dynamicImportSpecifier(call: Node): string | null {
 function pushSymbol(symbols: SymbolFact[], def: Node, symbolKind: SymbolKind): void {
   const name = def.childForFieldName("name");
   if (!name) return;
+  const doc = docstringOf(def.childForFieldName("body"));
   symbols.push({
     name: name.text,
     symbolKind,
     exported: false, // resolved after the walk (__all__ may appear anywhere)
     startLine: line(def),
     endLine: def.endPosition.row + 1,
+    ...(doc !== undefined ? { doc } : {}),
   });
+}
+
+/** PEP 257 docstring: a string literal as the first statement of a body/module. */
+function docstringOf(body: Node | null): string | undefined {
+  const first = body?.namedChildren[0];
+  if (first?.type !== "expression_statement") return undefined;
+  const expr = first.namedChildren[0];
+  if (expr?.type !== "string") return undefined;
+  return normalizePyDoc(pyStringBody(expr.text));
 }
 
 /** `a = 1`, `a: int = 1`, chained `a = b = 1`. Tuple targets are skipped in v1. */

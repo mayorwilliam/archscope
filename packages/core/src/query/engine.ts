@@ -1,5 +1,6 @@
 import type {
   ArchGraph,
+  DocHeading,
   DriftEntry,
   EntityField,
   GraphEdge,
@@ -7,7 +8,7 @@ import type {
   NodeKind,
   TableColumn,
 } from "@archscope/schema";
-import { fileId, moduleId, packageId, parseNodeId, tableId } from "@archscope/schema";
+import { docId, fileId, moduleId, packageId, parseNodeId, tableId } from "@archscope/schema";
 
 /**
  * The query engine is a pure library over an already-built ArchGraph: no I/O,
@@ -64,7 +65,7 @@ function push<T>(map: Map<string, T[]>, key: string, value: T): void {
 export function resolveNodeRef(index: GraphIndex, ref: string): GraphNode | null {
   const direct = index.nodes.get(ref);
   if (direct) return direct;
-  for (const candidate of [moduleId(ref), fileId(ref), packageId(ref)]) {
+  for (const candidate of [moduleId(ref), fileId(ref), packageId(ref), docId(ref)]) {
     const node = index.nodes.get(candidate);
     if (node) return node;
   }
@@ -190,6 +191,15 @@ export interface FileSummary {
   fanIn: number;
   fanOut: number;
   exports: string[];
+  /** File-level doc summary, when the file has one. */
+  doc?: string;
+}
+
+export interface ModuleReadme {
+  id: string;
+  path: string;
+  title: string;
+  content: string;
 }
 
 export interface ModuleView {
@@ -199,6 +209,8 @@ export interface ModuleView {
   source: string;
   loc: number;
   rank: number;
+  /** The module's README via `documents` edges — certain beats inferred. */
+  readme?: ModuleReadme;
   files: FileSummary[];
   /** file→file imports where both ends live in this module. */
   internalImports: Array<{ from: string; to: string }>;
@@ -220,6 +232,7 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
     for (const sym of index.children.get(child.id) ?? []) {
       if (sym.kind === "symbol") exports.push(sym.name);
     }
+    const fileDoc = child.attrs.kind === "file" ? child.attrs.doc : undefined;
     files.push({
       id: child.id,
       path: parseNodeId(child.id).rest,
@@ -228,6 +241,7 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
       fanIn: child.metrics.fanIn,
       fanOut: child.metrics.fanOut,
       exports: exports.sort(),
+      ...(fileDoc !== undefined ? { doc: fileDoc } : {}),
     });
     for (const edge of index.outEdges.get(child.id) ?? []) {
       if (edge.kind === "imports_pkg") {
@@ -251,6 +265,7 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
   const dependents = moduleDeps(index.inEdges.get(node.id) ?? []);
   const layer = node.attrs.kind === "module" ? node.attrs.layer : undefined;
   const source = node.attrs.kind === "module" ? node.attrs.source : "inferred";
+  const readme = moduleReadme(index, node.id);
 
   return {
     id: node.id,
@@ -259,11 +274,36 @@ export function moduleView(index: GraphIndex, ref: string): ModuleView | null {
     source,
     loc: node.metrics.loc ?? 0,
     rank: node.metrics.rank,
+    ...(readme !== undefined ? { readme } : {}),
     files,
     internalImports,
     dependsOn,
     dependents,
     packages,
+  };
+}
+
+/** Best `documents` in-edge wins: certain before inferred, then path asc. */
+function moduleReadme(index: GraphIndex, modId: string): ModuleReadme | undefined {
+  const candidates: Array<{ certain: boolean; path: string; doc: GraphNode }> = [];
+  for (const edge of index.inEdges.get(modId) ?? []) {
+    if (edge.kind !== "documents") continue;
+    const doc = index.nodes.get(edge.from);
+    if (doc?.attrs.kind !== "doc") continue;
+    candidates.push({
+      certain: edge.confidence === "certain",
+      path: parseNodeId(doc.id).rest,
+      doc,
+    });
+  }
+  candidates.sort((a, b) => Number(b.certain) - Number(a.certain) || a.path.localeCompare(b.path));
+  const best = candidates[0];
+  if (best?.doc.attrs.kind !== "doc") return undefined;
+  return {
+    id: best.doc.id,
+    path: best.path,
+    title: best.doc.attrs.title,
+    content: best.doc.attrs.content,
   };
 }
 
@@ -949,6 +989,8 @@ export interface FileExport {
   symbolKind: string;
   startLine?: number;
   endLine?: number;
+  /** JSDoc/docstring summary, when the symbol has one. */
+  doc?: string;
 }
 
 export interface FileContextView {
@@ -960,6 +1002,8 @@ export interface FileContextView {
   fanIn: number;
   fanOut: number;
   moduleId?: string;
+  /** File-level doc summary, when the file has one. */
+  doc?: string;
   exports: FileExport[];
   entities: Array<{ id: string; name: string; orm: string; declaredTable: string }>;
   imports: DependencyItem[];
@@ -980,6 +1024,7 @@ export function fileContextView(index: GraphIndex, ref: string): FileContextView
         ...(child.span !== undefined
           ? { startLine: child.span.startLine, endLine: child.span.endLine }
           : {}),
+        ...(child.attrs.doc !== undefined ? { doc: child.attrs.doc } : {}),
       });
     } else if (child.kind === "entity" && child.attrs.kind === "entity") {
       entities.push({
@@ -993,6 +1038,7 @@ export function fileContextView(index: GraphIndex, ref: string): FileContextView
   exports.sort((a, b) => (a.startLine ?? 0) - (b.startLine ?? 0) || a.name.localeCompare(b.name));
   entities.sort((a, b) => a.id.localeCompare(b.id));
 
+  const fileDoc = node.attrs.kind === "file" ? node.attrs.doc : undefined;
   return {
     id: node.id,
     path: parseNodeId(node.id).rest,
@@ -1002,9 +1048,85 @@ export function fileContextView(index: GraphIndex, ref: string): FileContextView
     fanIn: node.metrics.fanIn,
     fanOut: node.metrics.fanOut,
     ...(node.parent !== undefined ? { moduleId: node.parent } : {}),
+    ...(fileDoc !== undefined ? { doc: fileDoc } : {}),
     exports,
     entities,
     imports: dependencyItems(index, index.outEdges.get(node.id) ?? [], "to"),
     importedBy: dependencyItems(index, index.inEdges.get(node.id) ?? [], "from"),
   };
+}
+
+// ---------------------------------------------------------------------------
+// Docs (wiki prose)
+// ---------------------------------------------------------------------------
+
+export interface DocModuleRef {
+  id: string;
+  name: string;
+  confidence: GraphEdge["confidence"];
+}
+
+export interface DocView {
+  id: string;
+  path: string;
+  title: string;
+  content: string;
+  truncated: boolean;
+  headings: DocHeading[];
+  /** The module this doc documents, when a `documents` edge exists. */
+  module?: DocModuleRef;
+}
+
+export interface DocListItem {
+  id: string;
+  path: string;
+  title: string;
+  module?: DocModuleRef;
+}
+
+export interface DocsView {
+  total: number;
+  docs: DocListItem[];
+}
+
+export function docView(index: GraphIndex, ref: string): DocView | null {
+  const node = resolveNodeRef(index, ref);
+  if (node?.kind !== "doc" || node.attrs.kind !== "doc") return null;
+  return {
+    id: node.id,
+    path: parseNodeId(node.id).rest,
+    title: node.attrs.title,
+    content: node.attrs.content,
+    truncated: node.attrs.truncated,
+    headings: node.attrs.headings,
+    ...docModuleRef(index, node.id),
+  };
+}
+
+export function docsView(index: GraphIndex): DocsView {
+  const docs: DocListItem[] = [];
+  for (const node of index.graph.nodes) {
+    if (node.kind !== "doc" || node.attrs.kind !== "doc") continue;
+    docs.push({
+      id: node.id,
+      path: parseNodeId(node.id).rest,
+      title: node.attrs.title,
+      ...docModuleRef(index, node.id),
+    });
+  }
+  docs.sort((a, b) => a.path.localeCompare(b.path));
+  return { total: docs.length, docs };
+}
+
+function docModuleRef(
+  index: GraphIndex,
+  nodeId: string,
+): { module: DocModuleRef } | Record<string, never> {
+  for (const edge of index.outEdges.get(nodeId) ?? []) {
+    if (edge.kind !== "documents") continue;
+    const mod = index.nodes.get(edge.to);
+    if (!mod) continue;
+    return { module: { id: mod.id, name: mod.name, confidence: edge.confidence } };
+  }
+  return {};
 }

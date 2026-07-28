@@ -1,6 +1,7 @@
 import { type DeclaredEntity, extractDrizzleEntities, extractTypeormEntities } from "@archscope/db";
 import type { Lang, SymbolKind } from "@archscope/schema";
 import type { Node } from "web-tree-sitter";
+import { normalizeJsDoc } from "./doc-normalize.js";
 import type { FileFacts, ImportFact, OrmHint, SymbolFact } from "./facts.js";
 import { grammarForFile, parseSource } from "./parser.js";
 
@@ -34,10 +35,10 @@ export async function extractTsFacts(relPath: string, source: string): Promise<F
         collectImportStatement(stmt, imports);
         break;
       case "export_statement":
-        collectExportStatement(stmt, imports, symbols, exportedNames);
+        collectExportStatement(stmt, imports, symbols, exportedNames, docCommentBefore(stmt));
         break;
       default:
-        collectDeclaration(stmt, symbols, false);
+        collectDeclaration(stmt, symbols, false, docCommentBefore(stmt));
         break;
     }
   }
@@ -60,6 +61,8 @@ export async function extractTsFacts(relPath: string, source: string): Promise<F
     entities.push(...extractDrizzleEntities(relPath, root));
   }
 
+  const fileDoc = extractFileDoc(root);
+
   tree.delete();
 
   return {
@@ -72,7 +75,38 @@ export async function extractTsFacts(relPath: string, source: string): Promise<F
       (e): OrmHint => ({ framework: e.orm, startLine: e.startLine, endLine: e.endLine }),
     ),
     ...(entities.length > 0 ? { entities } : {}),
+    ...(fileDoc !== undefined ? { doc: fileDoc } : {}),
   };
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * The JSDoc block immediately above a statement documents it. Decorators
+ * written before `export`/`class` are part of the statement node in the
+ * grammar, so plain sibling adjacency handles `/** *​/ @Injectable() export
+ * class X` with no special casing.
+ */
+function docCommentBefore(stmt: Node): string | undefined {
+  const prev = stmt.previousNamedSibling;
+  if (prev?.type !== "comment" || !prev.text.startsWith("/**")) return undefined;
+  if (stmt.startPosition.row - prev.endPosition.row > 1) return undefined; // blank line breaks the bond
+  return normalizeJsDoc(prev.text);
+}
+
+/**
+ * File-level doc: the file's very first block comment, when it is either
+ * explicitly labeled (@fileoverview/@module) or separated from the first
+ * statement by a blank line (adjacent comments belong to that statement).
+ */
+function extractFileDoc(root: Node): string | undefined {
+  const first = root.namedChildren[0];
+  if (first?.type !== "comment" || !first.text.startsWith("/*")) return undefined;
+  const labeled = /@(fileoverview|module|file)\b/.test(first.text);
+  const next = first.nextNamedSibling;
+  const detached = next === null || next.startPosition.row - first.endPosition.row > 1;
+  if (!labeled && !detached) return undefined;
+  return normalizeJsDoc(first.text);
 }
 
 // ---------------------------------------------------------------------------
@@ -104,6 +138,7 @@ function collectExportStatement(
   imports: ImportFact[],
   symbols: SymbolFact[],
   exportedNames: Set<string>,
+  doc: string | undefined,
 ): void {
   const specifier = sourceString(node);
   if (specifier !== null) {
@@ -128,7 +163,7 @@ function collectExportStatement(
 
   const declaration = node.childForFieldName("declaration");
   if (declaration) {
-    collectDeclaration(declaration, symbols, true);
+    collectDeclaration(declaration, symbols, true, doc);
     return;
   }
 
@@ -153,7 +188,12 @@ const DECLARATION_KINDS: Record<string, SymbolKind> = {
   enum_declaration: "enum",
 };
 
-function collectDeclaration(node: Node, symbols: SymbolFact[], exported: boolean): void {
+function collectDeclaration(
+  node: Node,
+  symbols: SymbolFact[],
+  exported: boolean,
+  doc?: string,
+): void {
   const kind = DECLARATION_KINDS[node.type];
   if (kind) {
     const name = node.childForFieldName("name");
@@ -164,6 +204,7 @@ function collectDeclaration(node: Node, symbols: SymbolFact[], exported: boolean
         exported,
         startLine: line(node),
         endLine: node.endPosition.row + 1,
+        ...(doc !== undefined ? { doc } : {}),
       });
     }
     return;
@@ -180,6 +221,7 @@ function collectDeclaration(node: Node, symbols: SymbolFact[], exported: boolean
           exported,
           startLine: line(node),
           endLine: node.endPosition.row + 1,
+          ...(doc !== undefined ? { doc } : {}),
         });
       }
     }

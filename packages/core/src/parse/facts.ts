@@ -24,6 +24,8 @@ export interface SymbolFact {
   exported: boolean;
   startLine: number;
   endLine: number;
+  /** First paragraph of the JSDoc/docstring, normalized. Absent when none. */
+  doc?: string;
 }
 
 export interface OrmHint {
@@ -42,4 +44,6 @@ export interface FileFacts {
   ormHints: OrmHint[];
   /** ORM entities declared in this file (populated when ormHints is). */
   entities?: DeclaredEntity[];
+  /** File-level doc: @fileoverview / leading block comment / module docstring. */
+  doc?: string;
 }

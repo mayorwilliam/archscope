@@ -9,6 +9,7 @@ import { gitInfo } from "./git.js";
 import { buildGraph } from "./graph/build.js";
 import { createModuleInferrer } from "./modules/infer.js";
 import type { FileFacts } from "./parse/facts.js";
+import { type DocFacts, extractDocFacts } from "./parse/markdown.js";
 import { grammarForFile } from "./parse/parser.js";
 import { extractPrismaFacts } from "./parse/prisma.js";
 import { extractPyFacts } from "./parse/py.js";
@@ -18,7 +19,7 @@ import { PyResolver } from "./resolve/py-resolver.js";
 import { CombinedResolver } from "./resolve/resolver.js";
 import { TsResolver } from "./resolve/ts-resolver.js";
 import { discoverWorkspacePackages } from "./resolve/workspace.js";
-import { scanSourceFiles } from "./scan.js";
+import { scanDocFiles, scanSourceFiles } from "./scan.js";
 import { type CacheStats, FactsCache, factsKey } from "./store/cache.js";
 
 /**
@@ -125,6 +126,13 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
     }
   }
 
+  // Markdown docs: sequential and uncached on purpose — a line regex over a
+  // handful of files is negligible next to tree-sitter, and FactsCache stays
+  // typed to FileFacts.
+  const docs: DocFacts[] = scanDocFiles(rootDir, config).map((relPath) =>
+    extractDocFacts(relPath, fs.readFileSync(path.join(rootDir, relPath), "utf8")),
+  );
+
   const resolver = new CombinedResolver(
     new TsResolver(rootDir, workspacePackages),
     new PyResolver(rootDir, config),
@@ -136,6 +144,7 @@ export async function analyze(options: AnalyzeOptions): Promise<AnalyzeResult> {
     rootDir,
     toolVersion: options.toolVersion ?? "0.0.1",
     facts: facts.filter((f): f is FileFacts => f !== null),
+    docs,
     resolver,
     inferModule,
     config,

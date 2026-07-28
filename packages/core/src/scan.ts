@@ -37,6 +37,46 @@ const ALWAYS_IGNORED_DIRS = new Set([
 ]);
 
 export function scanSourceFiles(rootDir: string, config: ArchscopeConfig): string[] {
+  return scanFiles(rootDir, config, (name) =>
+    SOURCE_EXTENSIONS.has(path.extname(name).toLowerCase()),
+  );
+}
+
+/**
+ * Markdown docs for the wiki. Deliberately curated — "every .md in the repo"
+ * would drown the wiki in a docs-site repo: any README.md, anything under
+ * docs/, and root-level pages (CONTRIBUTING.md, ARCHITECTURE.md, ...).
+ * `config.docs.include` replaces these defaults; `docs.exclude` filters more.
+ */
+export function scanDocFiles(rootDir: string, config: ArchscopeConfig): string[] {
+  const isIncluded =
+    config.docs?.include && config.docs.include.length > 0
+      ? picomatch(config.docs.include, { dot: true })
+      : (rel: string) => {
+          if (!rel.toLowerCase().endsWith(".md")) return false;
+          const base = rel.split("/").pop() ?? rel;
+          if (base.toLowerCase() === "readme.md") return true;
+          if (rel.startsWith("docs/")) return true;
+          return !rel.includes("/"); // root-level *.md
+        };
+  const isDocExcluded =
+    config.docs?.exclude && config.docs.exclude.length > 0
+      ? picomatch(config.docs.exclude, { dot: true })
+      : () => false;
+  return scanFiles(
+    rootDir,
+    config,
+    (name) => name.toLowerCase().endsWith(".md"),
+    (rel) => isIncluded(rel) && !isDocExcluded(rel),
+  );
+}
+
+function scanFiles(
+  rootDir: string,
+  config: ArchscopeConfig,
+  matchesName: (fileName: string) => boolean,
+  matchesPath: (relPath: string) => boolean = () => true,
+): string[] {
   const ig = ignore();
   const gitignorePath = path.join(rootDir, ".gitignore");
   if (fs.existsSync(gitignorePath)) {
@@ -65,9 +105,9 @@ export function scanSourceFiles(rootDir: string, config: ArchscopeConfig): strin
         if (ig.ignores(`${rel}/`)) continue;
         walk(path.join(absDir, entry.name), rel);
       } else if (entry.isFile()) {
-        if (!SOURCE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) continue;
+        if (!matchesName(entry.name)) continue;
         const normalized = normalizePath(rel);
-        if (ig.ignores(normalized) || isExcluded(normalized)) continue;
+        if (ig.ignores(normalized) || isExcluded(normalized) || !matchesPath(normalized)) continue;
         results.push(normalized);
       }
     }

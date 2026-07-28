@@ -63,11 +63,20 @@ export class Store {
     return file;
   }
 
+  /**
+   * Returns null when missing OR stale-schema/corrupt: snapshots are derived
+   * artifacts, so a schema bump silently falls through to a rebuild via
+   * `ensureSnapshot` — unlike graph.json, which fails loudly in loadGraph.
+   */
   loadSnapshot(sha: string): ArchGraph | null {
     const file = this.snapshotPath(sha);
     if (!fs.existsSync(file)) return null;
-    const raw = JSON.parse(zlib.gunzipSync(fs.readFileSync(file)).toString("utf8"));
-    return parseArchGraph(raw);
+    try {
+      const raw = JSON.parse(zlib.gunzipSync(fs.readFileSync(file)).toString("utf8"));
+      return parseArchGraph(raw);
+    } catch {
+      return null;
+    }
   }
 
   listSnapshots(): string[] {
