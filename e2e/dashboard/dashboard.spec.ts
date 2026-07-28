@@ -105,6 +105,33 @@ test("diff overlays added/removed in color and lists every change", async ({ pag
   await expect(page.getByTestId("change-table")).toContainText("bio");
 });
 
+test("timeline: milestone, point card and two-point compare land on a linkable diff", async ({
+  page,
+}) => {
+  await page.goto(`${server.url}/#/timeline`);
+  await expect(page.getByTestId("timeline-milestone")).toHaveCount(1); // v1.0 on head
+  await expect(page.getByTestId("timeline-point")).toHaveCount(1); // the base commit
+
+  // Oldest point → summary card (its snapshot may build on first visit).
+  await page.getByTestId("timeline-point").click();
+  await expect(page.getByTestId("timeline-point-card")).toBeVisible();
+  await page.getByTestId("timeline-compare-btn").click();
+  await page.getByTestId("timeline-milestone").click();
+
+  await expect(page).toHaveURL(/#\/diff\//);
+  await expect(page.getByTestId("change-module-added")).toContainText("billing", {
+    timeout: 90_000,
+  });
+});
+
+test("a diff deep-link renders with no picker interaction", async ({ page }) => {
+  await page.goto(`${server.url}/#/diff/base..HEAD`);
+  await expect(page.getByTestId("change-module-added")).toContainText("billing", {
+    timeout: 90_000,
+  });
+  await expect(page.locator(".react-flow__edge.edge-added")).toHaveCount(1);
+});
+
 test("editing a file updates the open view in <2s without a reload", async ({ page }) => {
   await page.goto(server.url);
   await expect(page.getByTestId("graph-counts")).toHaveText("4 modules · 5 files");

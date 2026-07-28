@@ -112,6 +112,7 @@ export async function buildFixtureRepo(): Promise<string> {
   write(dir, "prisma/schema.prisma", PRISMA_HEADER + USER_HEAD);
   await git(dir, "add", "-A");
   await git(dir, "commit", "-q", "-m", "head: billing added, legacy removed, User.bio");
+  await git(dir, "tag", "-a", "v1.0", "-m", "release");
 
   return dir;
 }

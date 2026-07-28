@@ -38,6 +38,7 @@ beforeAll(async () => {
   await initGitRepo(root);
   await git(root, "add", "-A");
   await git(root, "commit", "-q", "-m", "base architecture");
+  await git(root, "tag", "-a", "v0-base", "-m", "primera base");
 
   // Head commit introduces a brand-new cross-module dependency for the diff.
   fs.writeFileSync(
@@ -78,10 +79,18 @@ const SWEEP_ARGS: Record<string, Record<string, unknown>> = {
 };
 
 describe("tool surface", () => {
-  it("exposes exactly the 11 tools", async () => {
+  it("exposes exactly the 13 tools", async () => {
     const { tools } = await h.client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(
-      [...TOOLS, "get_db_schema", "get_doc", "get_entity_relations", "get_schema_drift"].sort(),
+      [
+        ...TOOLS,
+        "get_architecture_history",
+        "get_db_schema",
+        "get_doc",
+        "get_entity_relations",
+        "get_schema_drift",
+        "get_timeline",
+      ].sort(),
     );
   });
 
@@ -239,6 +248,28 @@ describe("wiki prose (docs)", () => {
     expect(JSON.stringify(a.graph)).toBe(JSON.stringify(b.graph));
     expect(a.graph.meta.counts.doc).toBe(1);
   });
+});
+
+describe("timeline & history", () => {
+  it("get_timeline lists the fixture history with its milestone", async () => {
+    const { text, isError } = await h.callText("get_timeline", {});
+    expect(isError).toBe(false);
+    expect(text).toContain("# Timeline — main");
+    expect(text).toContain("## Milestones");
+    expect(text).toContain("v0-base");
+    expect(text).toContain("area11 reaches into area0");
+    expect(text).toContain("get_architecture_diff");
+  });
+
+  it("get_architecture_history folds the range into intervals", async () => {
+    const { text, isError } = await h.callText("get_architecture_history", {
+      from: "HEAD~1",
+      budget_tokens: 4000,
+    });
+    expect(isError).toBe(false);
+    expect(text).toContain("# Architecture history — 2 waypoints");
+    expect(text).toContain("+ mod:area11 → mod:area0");
+  }, 120_000);
 });
 
 // Keep last: it moves HEAD, which makes every later response carry a warning.
