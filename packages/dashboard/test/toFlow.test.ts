@@ -26,6 +26,7 @@ const overview: OverviewView = {
     { from: "mod:auth", to: "mod:utils", weight: 3, source: "static", confidence: "certain" },
   ],
   packages: [],
+  cycles: [],
 };
 
 const authModule: ModuleView = {

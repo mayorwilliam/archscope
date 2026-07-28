@@ -15,6 +15,8 @@ export type {
   DocView,
   ErdTable,
   ErdView,
+  FileContextView,
+  FileExport,
   FileSummary,
   ModuleDependency,
   ModuleReadme,
@@ -45,4 +47,11 @@ export interface RefsResponse {
 export interface DiffResponse {
   diff: ArchDiff;
   headOverview: OverviewView;
+}
+
+export interface SourceResponse {
+  path: string;
+  startLine: number;
+  endLine: number;
+  lines: string[];
 }

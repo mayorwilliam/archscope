@@ -10,7 +10,7 @@ import type { ModuleNodeData, ModuleView } from "../graph/types-internal";
 import { useElkLayout } from "../layout/useElkLayout";
 import { navigate } from "../router";
 
-export function OverviewScreen() {
+export function GraphScreen() {
   const { data: overview, error, isPending } = useOverview();
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [pinnedId, setPinnedId] = useState<string | null>(null);
@@ -66,7 +66,7 @@ export function OverviewScreen() {
         : undefined;
 
   return (
-    <div className="view" data-testid="overview-view">
+    <div className="view" data-testid="graph-view">
       <FlowCanvas
         flow={decorated}
         status={status}

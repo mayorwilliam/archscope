@@ -2,12 +2,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type {
   DiffResponse,
+  DocsView,
+  DocView,
   ErdView,
+  FileContextView,
   MetaResponse,
   ModuleView,
   OverviewView,
   RefsResponse,
   SearchView,
+  SourceResponse,
 } from "./types";
 
 async function getJson<T>(url: string): Promise<T> {
@@ -57,11 +61,10 @@ export function useModules(refs: string[]) {
 }
 
 /** Server-side node search — same searchView the MCP tool consumes. */
-export function useSearch(query: string) {
+export function useSearch(query: string, kinds = "module,file") {
   return useQuery({
-    queryKey: ["search", query],
-    queryFn: () =>
-      getJson<SearchView>(`/api/search?q=${encodeURIComponent(query)}&kinds=module,file`),
+    queryKey: ["search", query, kinds],
+    queryFn: () => getJson<SearchView>(`/api/search?q=${encodeURIComponent(query)}&kinds=${kinds}`),
     enabled: query.length > 0,
     placeholderData: (previous: SearchView | undefined) => previous,
   });
@@ -69,6 +72,38 @@ export function useSearch(query: string) {
 
 export function useErd() {
   return useQuery({ queryKey: ["erd"], queryFn: () => getJson<ErdView>("/api/erd") });
+}
+
+export function useDocs() {
+  return useQuery({ queryKey: ["docs"], queryFn: () => getJson<DocsView>("/api/docs") });
+}
+
+export function useFileContext(ref: string | null) {
+  return useQuery({
+    queryKey: ["file", ref],
+    queryFn: () => getJson<FileContextView>(`/api/file?ref=${encodeURIComponent(ref ?? "")}`),
+    enabled: ref !== null,
+  });
+}
+
+export function useDoc(ref: string | null) {
+  return useQuery({
+    queryKey: ["doc", ref],
+    queryFn: () => getJson<DocView>(`/api/doc?ref=${encodeURIComponent(ref ?? "")}`),
+    enabled: ref !== null,
+  });
+}
+
+/** Line range of a file the graph knows about — display bytes, not new facts. */
+export function useSource(path: string | null, start: number, end: number) {
+  return useQuery({
+    queryKey: ["source", path, start, end],
+    queryFn: () =>
+      getJson<SourceResponse>(
+        `/api/source?path=${encodeURIComponent(path ?? "")}&start=${start}&end=${end}`,
+      ),
+    enabled: path !== null,
+  });
 }
 
 export function useRefs() {
