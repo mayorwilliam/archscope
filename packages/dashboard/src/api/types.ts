@@ -9,10 +9,15 @@ import type { ArchDiff, GitInfo } from "@archscope/schema";
  */
 
 export type {
+  DocListItem,
+  DocModuleRef,
+  DocsView,
+  DocView,
   ErdTable,
   ErdView,
   FileSummary,
   ModuleDependency,
+  ModuleReadme,
   ModuleSummary,
   ModuleView,
   OverviewView,

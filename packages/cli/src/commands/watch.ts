@@ -32,6 +32,7 @@ const WATCHED_EXTENSIONS = new Set([
   ".mjs",
   ".cjs",
   ".py",
+  ".md", // wiki docs live-update through the same SSE path
 ]);
 
 const WATCHED_FILENAMES = new Set([

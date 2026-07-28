@@ -5,6 +5,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   diffGraphs,
+  docsView,
+  docView,
   ensureSnapshot,
   erdView,
   GraphSource,
@@ -96,6 +98,20 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
       return searchView(index, q, kinds !== undefined && kinds.length > 0 ? kinds : undefined);
     },
   );
+
+  app.get("/api/docs", async () => {
+    const { index } = await source.load();
+    return docsView(index);
+  });
+
+  app.get<{ Querystring: { ref?: string } }>("/api/doc", async (request, reply) => {
+    const ref = request.query.ref;
+    if (!ref) return reply.code(400).send({ error: "Missing ?ref=<path or doc: id>" });
+    const { index } = await source.load();
+    const view = docView(index, ref);
+    if (!view) return notFound(reply, index, ref);
+    return view;
+  });
 
   app.get("/api/erd", async () => {
     const { index } = await source.load();

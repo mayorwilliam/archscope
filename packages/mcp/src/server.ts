@@ -3,6 +3,7 @@ import {
   dbSchemaView,
   dependenciesView,
   diffGraphs,
+  docView,
   ensureSnapshot,
   entityRelationsView,
   fileContextView,
@@ -18,6 +19,7 @@ import {
   renderDbSchema,
   renderDependencies,
   renderDiff,
+  renderDoc,
   renderEntityRelations,
   renderFileContext,
   renderImpact,
@@ -204,6 +206,28 @@ export function createArchscopeServer(options: ArchscopeServerOptions): McpServe
       const view = fileContextView(index, args.path);
       if (!view) return notFound(index, args.path, renderCtx);
       return text(renderFileContext(view, renderCtx));
+    }),
+  );
+
+  server.registerTool(
+    "get_doc",
+    {
+      title: "Project doc",
+      description:
+        "One markdown doc from the analyzed repo (README, docs/ page) as extracted into the " +
+        "graph, with the module it documents. Accepts a repo-relative path or a doc: id. " +
+        'Docs are discoverable via search_nodes(kinds=["doc"]) or a module\'s About section.',
+      inputSchema: {
+        ref: z.string().describe("Repo-relative .md path or doc: id"),
+        budget_tokens,
+      },
+    },
+    guarded(async (args) => {
+      const { index, staleness } = await source.load();
+      const renderCtx = ctx(args.budget_tokens, staleness);
+      const view = docView(index, args.ref);
+      if (!view) return notFound(index, args.ref, renderCtx);
+      return text(renderDoc(view, renderCtx));
     }),
   );
 
