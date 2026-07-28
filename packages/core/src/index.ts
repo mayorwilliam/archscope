@@ -1,7 +1,7 @@
 export { CONFIG_FILENAME, loadConfig } from "./config-file.js";
 export { type DiffInput, diffGraphs } from "./diff/engine.js";
 export { gitRenames } from "./diff/rename.js";
-export { type GitRef, gitInfo, gitRefs } from "./git.js";
+export { type GitCommit, type GitRef, gitInfo, gitLog, gitRefs } from "./git.js";
 export { type BuildInput, buildGraph } from "./graph/build.js";
 export { pageRank } from "./graph/metrics.js";
 export { GraphSource, type LoadedGraph, NoGraphError } from "./graph-source.js";
@@ -89,12 +89,14 @@ export {
   renderDocs,
   renderEntityRelations,
   renderFileContext,
+  renderHistory,
   renderImpact,
   renderModule,
   renderNotFound,
   renderOverview,
   renderSchemaDrift,
   renderSearch,
+  renderTimeline,
   type StalenessInfo,
   stalenessLines,
 } from "./query/render.js";
@@ -110,3 +112,12 @@ export { scanDocFiles, scanSourceFiles } from "./scan.js";
 export { type EnsureSnapshotResult, ensureSnapshot, resolveRef } from "./snapshot.js";
 export { type CacheStats, EXTRACTOR_VERSION, FactsCache, factsKey } from "./store/cache.js";
 export { Store } from "./store/store.js";
+export {
+  buildHistory,
+  buildTimeline,
+  type HistoryInterval,
+  type HistoryPoint,
+  type HistoryView,
+  type TimelinePoint,
+  type TimelineView,
+} from "./timeline.js";

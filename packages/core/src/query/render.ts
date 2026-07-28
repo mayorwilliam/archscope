@@ -1,5 +1,6 @@
 import type { ArchDiff, DriftEntry, EntityField, TableColumn } from "@archscope/schema";
 import { parseNodeId } from "@archscope/schema";
+import type { HistoryView, TimelineView } from "../timeline.js";
 import { BudgetWriter, clampBudget, suggestBudget } from "./budget.js";
 import type {
   DbSchemaView,
@@ -391,6 +392,96 @@ export function renderDocs(view: DocsView, ctx: RenderContext): string {
   );
   w.blank();
   w.line(`Read one: get_doc("<path>").`);
+  return w.toString();
+}
+
+export function renderTimeline(view: TimelineView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  const t = view.totals;
+  w.line(`# Timeline — ${view.branch ?? "?"}`);
+  w.line(
+    `${t.commits} recent commits · ${t.milestones} milestones · ` +
+      `${t.snapshotsBuilt} snapshots built`,
+  );
+
+  const milestones = view.points.filter((p) => p.milestone);
+  if (milestones.length > 0) {
+    section(w, "## Milestones");
+    w.list(
+      milestones.map(
+        (p) =>
+          `- ${p.tags.join(", ")} · ${p.shortSha} · ${p.date.slice(0, 10)}` +
+          `${p.snapshot.built ? " · snapshot✓" : ""}`,
+      ),
+      (n) =>
+        more(n, `get_timeline(commits=${t.commits * 2}, budget_tokens=${suggestBudget(budget)})`),
+    );
+  }
+
+  section(w, "## Commits (newest first)");
+  w.list(
+    view.points
+      .filter((p) => !p.milestone || p.author !== "")
+      .map(
+        (p) =>
+          `- ${p.shortSha} · ${p.date.slice(0, 10)} · ${p.subject}` +
+          `${p.tags.length > 0 ? ` [${p.tags.join(", ")}]` : ""}` +
+          `${p.snapshot.built ? " · snapshot✓" : ""}`,
+      ),
+    (n) =>
+      more(n, `get_timeline(commits=${t.commits * 2}, budget_tokens=${suggestBudget(budget)})`),
+  );
+
+  w.blank();
+  w.line(
+    'Compare two points: get_architecture_diff(base="<sha>", head="<sha>") · ' +
+      'walk a range: get_architecture_history(from="<sha|tag>", to="<sha|tag>").',
+  );
+  return w.toString();
+}
+
+export function renderHistory(view: HistoryView, ctx: RenderContext): string {
+  const w = open(ctx);
+  const budget = w.budget;
+  w.line(`# Architecture history — ${view.points.length} waypoints`);
+  w.line(view.points.map((p) => `${p.label}@${p.shortSha}`).join(" → "));
+
+  for (const interval of view.intervals) {
+    const d = interval.diff;
+    const m = d.moduleChanges;
+    const deps = d.dependencyChanges;
+    const fileCounts = { added: 0, removed: 0, moved: 0, changed: 0 };
+    for (const change of d.fileChanges) fileCounts[change.change] += 1;
+
+    section(w, `## ${interval.base.label} → ${interval.head.label}`);
+    const headline =
+      `modules +${m.added.length} −${m.removed.length} ~${m.renamed.length} · ` +
+      `deps +${deps.added.length} −${deps.removed.length} Δ${deps.weightDelta.length} · ` +
+      `files +${fileCounts.added} −${fileCounts.removed} ~${fileCounts.moved}`;
+    w.line(headline);
+    const changes = [
+      ...m.added.map((id) => `+ ${id}`),
+      ...m.removed.map((id) => `- ${id}`),
+      ...m.renamed.map(([oldId, newId]) => `~ ${oldId} → ${newId}`),
+      ...deps.added.map((e) => `+ ${e.from} → ${e.to}`),
+      ...deps.removed.map((e) => `- ${e.from} → ${e.to}`),
+    ];
+    if (changes.length > 0) {
+      w.list(changes, (n) =>
+        more(
+          n,
+          `get_architecture_diff("${interval.base.shortSha}", "${interval.head.shortSha}", ` +
+            `budget_tokens=${suggestBudget(budget)})`,
+        ),
+      );
+    }
+  }
+
+  if (view.intervals.length === 0) {
+    w.blank();
+    w.line("Empty range — from and to resolve to the same commit.");
+  }
   return w.toString();
 }
 

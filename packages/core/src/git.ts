@@ -20,8 +20,11 @@ export async function gitInfo(rootDir: string): Promise<GitInfo | null> {
 
 export interface GitRef {
   name: string;
+  /** For annotated tags this is the PEELED commit sha, not the tag object. */
   sha: string;
   kind: "branch" | "tag";
+  /** Creator date (ISO strict) — what makes refs sortable on a time axis. */
+  date?: string;
 }
 
 /** Local branches and tags — the candidates for the dashboard's diff pickers. */
@@ -29,21 +32,71 @@ export async function gitRefs(rootDir: string): Promise<GitRef[]> {
   try {
     const out = await git(rootDir, [
       "for-each-ref",
-      "--format=%(refname) %(objectname)",
+      "--format=%(refname)%09%(objectname)%09%(*objectname)%09%(creatordate:iso-strict)",
       "refs/heads",
       "refs/tags",
     ]);
     const refs: GitRef[] = [];
-    for (const line of out.split("\n")) {
-      const [refname, sha] = line.split(" ");
+    for (const rawLine of out.split("\n")) {
+      const [refname, sha, peeled, date] = rawLine.trim().split("\t");
       if (!refname || !sha) continue;
       refs.push({
         name: refname.replace(/^refs\/(heads|tags)\//, ""),
-        sha,
+        sha: peeled || sha,
         kind: refname.startsWith("refs/tags/") ? "tag" : "branch",
+        ...(date ? { date } : {}),
       });
     }
     return refs;
+  } catch {
+    return [];
+  }
+}
+
+export interface GitCommit {
+  sha: string;
+  shortSha: string;
+  /** Author date, ISO strict. */
+  date: string;
+  author: string;
+  subject: string;
+  /** Tag names decorating this commit. */
+  tags: string[];
+}
+
+/**
+ * Recent history of a ref, one call: sha, author, date, subject and tag
+ * decorations per commit. Fields are separated by \x1f (never appears in
+ * subjects); lines are trimmed per line — the Windows CRLF lesson.
+ */
+export async function gitLog(
+  rootDir: string,
+  options: { limit?: number; ref?: string } = {},
+): Promise<GitCommit[]> {
+  const { limit = 50, ref = "HEAD" } = options;
+  try {
+    const out = await git(rootDir, [
+      "log",
+      "--format=%H%x1f%h%x1f%aI%x1f%an%x1f%s%x1f%D",
+      "-n",
+      String(limit),
+      ref,
+      "--",
+    ]);
+    const commits: GitCommit[] = [];
+    for (const rawLine of out.split("\n")) {
+      const line = rawLine.trim();
+      if (line === "") continue;
+      const [sha, shortSha, date, author, subject, decorations] = line.split("\x1f");
+      if (!sha || !shortSha || !date) continue;
+      const tags = (decorations ?? "")
+        .split(",")
+        .map((d) => d.trim())
+        .filter((d) => d.startsWith("tag: "))
+        .map((d) => d.slice("tag: ".length));
+      commits.push({ sha, shortSha, date, author: author ?? "", subject: subject ?? "", tags });
+    }
+    return commits;
   } catch {
     return [];
   }
