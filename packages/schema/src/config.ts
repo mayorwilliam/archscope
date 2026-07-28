@@ -43,6 +43,16 @@ export const ArchscopeConfigSchema = z.object({
   edges: z.array(ManualEdgeSchema).optional(),
   /** Globs excluded from analysis entirely (generated code, vendored dirs). */
   exclude: z.array(z.string()).optional(),
+  /**
+   * Markdown docs for the wiki. Defaults: any README.md, docs/**, root *.md.
+   * `include` replaces the defaults; `exclude` filters on top of either.
+   */
+  docs: z
+    .object({
+      include: z.array(z.string()).optional(),
+      exclude: z.array(z.string()).optional(),
+    })
+    .optional(),
   python: z
     .object({
       sourceRoots: z.array(z.string()).optional(),

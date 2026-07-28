@@ -14,7 +14,7 @@ export type NodeId = string;
 const SEP = ":";
 const SYMBOL_SEP = "#";
 
-export type NodeIdKind = "mod" | "file" | "sym" | "ent" | "tbl" | "pkg";
+export type NodeIdKind = "mod" | "file" | "sym" | "ent" | "tbl" | "pkg" | "doc";
 
 export function moduleId(name: string): NodeId {
   return `mod${SEP}${name}`;
@@ -41,6 +41,10 @@ export function packageId(packageName: string): NodeId {
   return `pkg${SEP}${packageName}`;
 }
 
+export function docId(relPath: string): NodeId {
+  return `doc${SEP}${normalizePath(relPath)}`;
+}
+
 export interface ParsedNodeId {
   kind: NodeIdKind;
   /** Everything after `kind:`. For sym/ent this still contains the `#`. */
@@ -51,7 +55,7 @@ export interface ParsedNodeId {
   name?: string;
 }
 
-const ID_RE = /^(mod|file|sym|ent|tbl|pkg):(.+)$/;
+const ID_RE = /^(mod|file|sym|ent|tbl|pkg|doc):(.+)$/;
 
 export function parseNodeId(id: NodeId): ParsedNodeId {
   const m = ID_RE.exec(id);

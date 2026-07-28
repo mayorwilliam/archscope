@@ -8,7 +8,7 @@ import { z } from "zod";
  * stale-schema graph fails loudly instead of producing silent nonsense.
  */
 
-export const NODE_KINDS = ["module", "file", "symbol", "entity", "table", "extpkg"] as const;
+export const NODE_KINDS = ["module", "file", "symbol", "entity", "table", "extpkg", "doc"] as const;
 export const NodeKindSchema = z.enum(NODE_KINDS);
 export type NodeKind = z.infer<typeof NodeKindSchema>;
 
@@ -27,6 +27,8 @@ export const ModuleAttrsSchema = z.object({
 
 export const FileAttrsSchema = z.object({
   kind: z.literal("file"),
+  /** File-level doc: @fileoverview / leading block comment / module docstring. */
+  doc: z.string().optional(),
 });
 
 export const SymbolKindSchema = z.enum(["function", "class", "const", "type", "interface", "enum"]);
@@ -36,6 +38,8 @@ export const SymbolAttrsSchema = z.object({
   kind: z.literal("symbol"),
   symbolKind: SymbolKindSchema,
   exported: z.boolean(),
+  /** First paragraph of the JSDoc/docstring, normalized. Extraction is deterministic. */
+  doc: z.string().optional(),
 });
 
 export const EntityFieldSchema = z.object({
@@ -100,6 +104,26 @@ export const ExtPkgAttrsSchema = z.object({
   registry: z.enum(["npm", "pypi", "stdlib"]),
 });
 
+export const DocHeadingSchema = z.object({
+  depth: z.number().int().min(1).max(6),
+  text: z.string(),
+});
+export type DocHeading = z.infer<typeof DocHeadingSchema>;
+
+/**
+ * Markdown documents are first-class nodes: the content lives IN the graph
+ * (capped, deterministically truncated) so snapshots stay self-contained —
+ * a historical snapshot can render its wiki without the file on disk.
+ */
+export const DocAttrsSchema = z.object({
+  kind: z.literal("doc"),
+  format: z.literal("markdown"),
+  title: z.string(),
+  content: z.string(),
+  truncated: z.boolean(),
+  headings: z.array(DocHeadingSchema),
+});
+
 export const NodeAttrsSchema = z.discriminatedUnion("kind", [
   ModuleAttrsSchema,
   FileAttrsSchema,
@@ -107,6 +131,7 @@ export const NodeAttrsSchema = z.discriminatedUnion("kind", [
   EntityAttrsSchema,
   TableAttrsSchema,
   ExtPkgAttrsSchema,
+  DocAttrsSchema,
 ]);
 export type NodeAttrs = z.infer<typeof NodeAttrsSchema>;
 
@@ -154,6 +179,7 @@ export const EDGE_KINDS = [
   "fk",
   "maps_to",
   "depends_on",
+  "documents",
 ] as const;
 export const EdgeKindSchema = z.enum(EDGE_KINDS);
 export type EdgeKind = z.infer<typeof EdgeKindSchema>;
@@ -193,7 +219,7 @@ export const GitInfoSchema = z.object({
 export type GitInfo = z.infer<typeof GitInfoSchema>;
 
 export const ArchGraphSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.literal(2),
   meta: z.object({
     tool: z.literal("archscope"),
     toolVersion: z.string(),
