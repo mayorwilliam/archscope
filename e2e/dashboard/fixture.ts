@@ -78,6 +78,9 @@ export async function buildFixtureRepo(): Promise<string> {
   write(dir, ".gitignore", ".archscope/\n");
 
   // --- base state ------------------------------------------------------------
+  // Wiki prose, present in BOTH commits so diff numbers stay untouched.
+  write(dir, "README.md", "# Fixture App\n\nA tiny repo the dashboard smoke tests against.\n");
+  write(dir, "auth/README.md", "# Auth module\n\nLogin and session handling.\n");
   write(dir, "utils/fmt.ts", "export function fmt(v: string): string {\n  return v.trim();\n}\n");
   write(
     dir,
