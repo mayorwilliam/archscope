@@ -1,4 +1,6 @@
 import {
+  buildHistory,
+  buildTimeline,
   DEFAULT_BUDGET,
   dbSchemaView,
   dependenciesView,
@@ -22,12 +24,14 @@ import {
   renderDoc,
   renderEntityRelations,
   renderFileContext,
+  renderHistory,
   renderImpact,
   renderModule,
   renderNotFound,
   renderOverview,
   renderSchemaDrift,
   renderSearch,
+  renderTimeline,
   type StalenessInfo,
   schemaDriftView,
   searchView,
@@ -291,6 +295,54 @@ export function createArchscopeServer(options: ArchscopeServerOptions): McpServe
     guarded(async (args) => {
       const { index, staleness } = await source.load();
       return text(renderSchemaDrift(schemaDriftView(index), ctx(args.budget_tokens, staleness)));
+    }),
+  );
+
+  server.registerTool(
+    "get_timeline",
+    {
+      title: "Project timeline",
+      description:
+        "The repo's time axis: tags as milestones plus the most recent commits of the current " +
+        "branch, marking which points already have an architecture snapshot built. Start here " +
+        "before comparing points in time.",
+      inputSchema: {
+        commits: z.number().int().min(1).max(300).optional().describe("Window size, default 30"),
+        budget_tokens,
+      },
+    },
+    guarded(async (args) => {
+      const { staleness } = await source.load();
+      const view = await buildTimeline(rootDir, {
+        ...(args.commits !== undefined ? { commits: args.commits } : {}),
+      });
+      return text(renderTimeline(view, ctx(args.budget_tokens, staleness)));
+    }),
+  );
+
+  server.registerTool(
+    "get_architecture_history",
+    {
+      title: "Architecture history",
+      description:
+        "Walk a range of the repo's history as a SERIES: tag milestones between two refs become " +
+        "waypoints and each adjacent pair is diffed. First calls build snapshots on demand and " +
+        "can take a while; results are cached per sha forever.",
+      inputSchema: {
+        from: z.string().describe("Older ref (sha, branch, tag)"),
+        to: z.string().optional().describe("Newer ref, default HEAD"),
+        max_points: z.number().int().min(2).max(12).optional().describe("Waypoint cap, default 5"),
+        budget_tokens,
+      },
+    },
+    guarded(async (args) => {
+      const { staleness } = await source.load();
+      const view = await buildHistory(rootDir, {
+        from: args.from,
+        ...(args.to !== undefined ? { to: args.to } : {}),
+        ...(args.max_points !== undefined ? { maxPoints: args.max_points } : {}),
+      });
+      return text(renderHistory(view, ctx(args.budget_tokens, staleness)));
     }),
   );
 

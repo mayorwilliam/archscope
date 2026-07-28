@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  buildTimeline,
   diffGraphs,
   docsView,
   docView,
@@ -164,6 +165,20 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
   app.get("/api/refs", async () => {
     const [refs, head] = await Promise.all([gitRefs(rootDir), gitInfo(rootDir)]);
     return { refs, head };
+  });
+
+  // Never builds snapshots — reports availability; points materialize on click.
+  app.get<{ Querystring: { commits?: string } }>("/api/timeline", async (request) => {
+    const commits = Number.parseInt(request.query.commits ?? "", 10) || 30;
+    return buildTimeline(rootDir, { commits: Math.min(Math.max(commits, 1), 300) });
+  });
+
+  app.get<{ Querystring: { sha?: string } }>("/api/timeline/point", async (request, reply) => {
+    const sha = request.query.sha;
+    if (!sha) return reply.code(400).send({ error: "Missing ?sha=" });
+    const snap = await ensureSnapshot(rootDir, sha);
+    const overview = overviewView(indexGraph(snap.graph));
+    return { sha: snap.sha, counts: snap.graph.meta.counts, modules: overview.modules };
   });
 
   app.get<{ Querystring: { base?: string; head?: string } }>(
