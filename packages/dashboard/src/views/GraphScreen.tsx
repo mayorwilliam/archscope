@@ -2,7 +2,7 @@ import { parseNodeId } from "@archscope/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useModules, useOverview } from "../api/queries";
 import type { SearchResult } from "../api/types";
-import { FilePanel } from "../components/FilePanel";
+import { FileModal } from "../components/FileModal";
 import { type FitTarget, FlowCanvas } from "../components/FlowCanvas";
 import { nodeCallbacks } from "../components/nodes";
 import { SearchPanel } from "../components/SearchPanel";
@@ -96,7 +96,7 @@ export function GraphScreen() {
       />
       <SearchPanel onPick={onSearchPick} />
       {openFilePath !== null && (
-        <FilePanel path={openFilePath} onClose={() => setOpenFilePath(null)} />
+        <FileModal path={openFilePath} onClose={() => setOpenFilePath(null)} />
       )}
     </div>
   );

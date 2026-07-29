@@ -360,24 +360,252 @@
   color: var(--changed);
 }
 
-/* --- file panel (click a file node) ----------------------------------------- */
+/* --- file modal (click a file node) ----------------------------------------- */
 
-.file-panel .file-panel-head {
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--text) 35%, transparent);
+  backdrop-filter: blur(2px);
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
 }
 
-.file-panel .file-panel-head h2 {
+.file-modal {
+  width: min(1240px, 94vw);
+  height: min(860px, 90vh);
+  background: var(--panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 35%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.file-modal-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.file-modal-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-modal-title h2 {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   font-weight: 600;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.file-panel .file-panel-doc {
+.file-search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+}
+
+.file-search input {
+  width: 240px;
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.file-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.file-search .match-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
   color: var(--muted);
-  margin: var(--space-2) 0;
+  min-width: 40px;
+  text-align: center;
+}
+
+.modal-close {
+  flex: none;
+  font-size: var(--text-md);
+}
+
+.file-modal-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+}
+
+.file-outline {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.file-outline h3 {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.file-outline h3:first-child {
+  margin-top: 0;
+}
+
+.file-panel-doc {
+  color: var(--muted);
+  margin: 0 0 var(--space-2);
+}
+
+.outline-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 3px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+}
+
+.outline-item:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+.outline-item:disabled {
+  cursor: default;
+}
+
+.outline-item .export-name {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outline-item .lines {
+  margin-left: auto;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+/* --- code viewer ------------------------------------------------------------- */
+
+.code-view {
+  overflow: auto;
+  padding: var(--space-3) 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  background: var(--bg);
+}
+
+.code-line {
+  display: flex;
+  padding: 0 var(--space-4) 0 0;
+  white-space: pre;
+}
+
+.code-line .line-no {
+  flex: none;
+  width: 52px;
+  padding-right: 14px;
+  text-align: right;
+  color: var(--muted);
+  opacity: 0.6;
+  user-select: none;
+}
+
+.code-line.hit {
+  background: color-mix(in srgb, var(--changed) 12%, transparent);
+}
+
+.code-line.current {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.code-line mark {
+  background: var(--changed-bg);
+  color: var(--changed);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* hljs tokens, editorial palette — light and dark ride the CSS vars */
+
+.hljs-keyword,
+.hljs-built_in,
+.hljs-type {
+  color: var(--accent);
+}
+
+.hljs-string,
+.hljs-regexp {
+  color: var(--added);
+}
+
+.hljs-comment,
+.hljs-doctag {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-attr,
+.hljs-meta {
+  color: var(--accent-warm);
+}
+
+.hljs-title,
+.hljs-function .hljs-title,
+.hljs-title.function_,
+.hljs-title.class_ {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.hljs-variable,
+.hljs-params,
+.hljs-property {
+  color: var(--text);
+}
+
+.hljs-section {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .history-row {
