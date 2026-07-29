@@ -68,20 +68,25 @@ export interface GitCommit {
  * Recent history of a ref, one call: sha, author, date, subject and tag
  * decorations per commit. Fields are separated by \x1f (never appears in
  * subjects); lines are trimmed per line — the Windows CRLF lesson.
+ *
+ * `path` scopes the log to one file (with --follow, so history survives
+ * renames). Git metadata is live state — never persisted into the graph.
  */
 export async function gitLog(
   rootDir: string,
-  options: { limit?: number; ref?: string } = {},
+  options: { limit?: number; ref?: string; path?: string } = {},
 ): Promise<GitCommit[]> {
-  const { limit = 50, ref = "HEAD" } = options;
+  const { limit = 50, ref = "HEAD", path } = options;
   try {
     const out = await git(rootDir, [
       "log",
       "--format=%H%x1f%h%x1f%aI%x1f%an%x1f%s%x1f%D",
       "-n",
       String(limit),
+      ...(path !== undefined ? ["--follow"] : []),
       ref,
       "--",
+      ...(path !== undefined ? [path] : []),
     ]);
     const commits: GitCommit[] = [];
     for (const rawLine of out.split("\n")) {

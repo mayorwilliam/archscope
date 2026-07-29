@@ -13,6 +13,7 @@ import {
   fileContextView,
   GraphSource,
   gitInfo,
+  gitLog,
   gitRefs,
   gitRenames,
   indexGraph,
@@ -109,6 +110,25 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
     if (!view) return notFound(reply, index, ref);
     return view;
   });
+
+  /**
+   * Recent commits touching ONE file (git log --follow). Live git state,
+   * same stance as /api/timeline — never persisted. Same anti-traversal
+   * guard as /api/source: only paths the graph knows as file:/doc: nodes.
+   */
+  app.get<{ Querystring: { path?: string; limit?: string } }>(
+    "/api/file/history",
+    async (request, reply) => {
+      const relPath = request.query.path;
+      if (!relPath) return reply.code(400).send({ error: "Missing ?path=" });
+      const { index } = await source.load();
+      const node = index.nodes.get(`file:${relPath}`) ?? index.nodes.get(`doc:${relPath}`);
+      if (!node) return notFound(reply, index, relPath);
+      const limit = Math.min(Math.max(Number.parseInt(request.query.limit ?? "", 10) || 10, 1), 50);
+      const commits = await gitLog(rootDir, { limit, path: relPath });
+      return { path: relPath, commits };
+    },
+  );
 
   /**
    * Line range of a file — for "view source" affordances in the wiki. Only
