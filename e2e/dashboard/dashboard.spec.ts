@@ -68,17 +68,27 @@ test("a module expands into its files and collapses back", async ({ page }) => {
   await expect(page.getByTestId("module-node")).toHaveCount(4);
 });
 
-test("clicking a file node opens its panel with exports and recent commits", async ({ page }) => {
+test("clicking a file node opens the code modal: source, search and history", async ({ page }) => {
   await page.goto(`${server.url}/#/graph`);
   await page.locator('[data-module-id="mod:auth"] [data-testid="expand-btn"]').click();
   await page.locator('[data-testid="file-node"]', { hasText: "login.ts" }).click();
 
-  const panel = page.getByTestId("file-panel");
-  await expect(panel).toBeVisible();
-  await expect(panel).toContainText("login"); // exported symbol
-  await expect(page.getByTestId("file-history")).toContainText("base"); // commit subject
-  await page.getByTestId("file-panel-close").click();
-  await expect(panel).toHaveCount(0);
+  const modal = page.getByTestId("file-modal");
+  await expect(modal).toBeVisible();
+  // The REAL code, highlighted and line-numbered.
+  await expect(page.getByTestId("code-view")).toContainText("export function login");
+  await expect(page.locator(".code-view .hljs-keyword").first()).toBeVisible();
+  // Outline jumps + history.
+  await expect(page.getByTestId("outline-export")).toContainText("login");
+  await expect(page.getByTestId("file-history")).toContainText("base");
+
+  // In-file search: matches counted, hit line marked.
+  await page.getByTestId("file-search").fill("fmt");
+  await expect(page.getByTestId("file-search-count")).toHaveText(/\/2$|^1\/2/);
+  await expect(page.locator(".code-line.hit")).toHaveCount(2);
+
+  await page.getByTestId("file-modal-close").click();
+  await expect(modal).toHaveCount(0);
 });
 
 test("ERD draws tables with PK/FK marks, FK edges and a drift badge", async ({ page }) => {
