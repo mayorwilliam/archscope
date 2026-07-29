@@ -131,10 +131,10 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
   );
 
   /**
-   * Line range of a file — for "view source" affordances in the wiki. Only
-   * paths that exist as file:/doc: nodes in the CURRENT graph are served
-   * (path traversal is impossible by construction), clamped to 200 lines.
-   * This displays bytes the graph already points at; it derives no facts.
+   * Line range of a file — excerpts in the wiki and the full-file code
+   * viewer. Only paths that exist as file:/doc: nodes in the CURRENT graph
+   * are served (path traversal is impossible by construction), clamped to
+   * 5000 lines per request. Displays bytes the graph already points at.
    */
   app.get<{ Querystring: { path?: string; start?: string; end?: string } }>(
     "/api/source",
@@ -146,7 +146,7 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
       if (!node) return notFound(reply, index, relPath);
       const start = Math.max(1, Number.parseInt(request.query.start ?? "1", 10) || 1);
       const requestedEnd = Number.parseInt(request.query.end ?? "", 10) || start;
-      const end = Math.min(requestedEnd, start + 199);
+      const end = Math.min(requestedEnd, start + 4999);
       let content: string;
       try {
         content = fs.readFileSync(path.join(rootDir, relPath), "utf8");
