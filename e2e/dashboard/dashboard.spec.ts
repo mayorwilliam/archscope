@@ -87,6 +87,13 @@ test("clicking a file node opens the code modal: source, search and history", as
   await expect(page.getByTestId("file-search-count")).toHaveText(/\/2$|^1\/2/);
   await expect(page.locator(".code-line.hit")).toHaveCount(2);
 
+  // Click a commit → that commit's patch for THIS file, then back to code.
+  await page.getByTestId("history-commit").first().click();
+  await expect(page.getByTestId("commit-diff")).toBeVisible();
+  await expect(page.locator(".diff-line.add", { hasText: "export function login" })).toBeVisible();
+  await page.getByTestId("diff-back").click();
+  await expect(page.getByTestId("code-view")).toBeVisible();
+
   await page.getByTestId("file-modal-close").click();
   await expect(modal).toHaveCount(0);
 });
