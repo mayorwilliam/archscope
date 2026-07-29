@@ -1,4 +1,10 @@
-import type { GitRef, ModuleSummary, OverviewView, StalenessInfo } from "@archscope/core";
+import type {
+  GitCommit,
+  GitRef,
+  ModuleSummary,
+  OverviewView,
+  StalenessInfo,
+} from "@archscope/core";
 import type { ArchDiff, GitInfo } from "@archscope/schema";
 
 /**
@@ -62,4 +68,11 @@ export interface TimelinePointResponse {
   sha: string;
   counts: Record<string, number>;
   modules: ModuleSummary[];
+}
+
+export type { GitCommit } from "@archscope/core";
+
+export interface FileHistoryResponse {
+  path: string;
+  commits: GitCommit[];
 }

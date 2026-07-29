@@ -360,6 +360,60 @@
   color: var(--changed);
 }
 
+/* --- file panel (click a file node) ----------------------------------------- */
+
+.file-panel .file-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.file-panel .file-panel-head h2 {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.file-panel .file-panel-doc {
+  color: var(--muted);
+  margin: var(--space-2) 0;
+}
+
+.history-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+
+.history-row:last-child {
+  border-bottom: none;
+}
+
+.history-row .history-sha {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent);
+}
+
+.history-row .history-date {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.history-row .history-subject {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+}
+
 /* --- canvas search overlay -------------------------------------------------- */
 
 .search-panel {

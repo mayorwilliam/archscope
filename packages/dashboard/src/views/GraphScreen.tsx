@@ -1,12 +1,14 @@
+import { parseNodeId } from "@archscope/schema";
 import { useEffect, useMemo, useState } from "react";
 import { useModules, useOverview } from "../api/queries";
 import type { SearchResult } from "../api/types";
+import { FilePanel } from "../components/FilePanel";
 import { type FitTarget, FlowCanvas } from "../components/FlowCanvas";
 import { nodeCallbacks } from "../components/nodes";
 import { SearchPanel } from "../components/SearchPanel";
 import { applyFocus } from "../graph/focus";
 import { overviewFlow } from "../graph/toFlow";
-import type { ModuleNodeData, ModuleView } from "../graph/types-internal";
+import type { FileNodeData, ModuleNodeData, ModuleView } from "../graph/types-internal";
 import { useElkLayout } from "../layout/useElkLayout";
 import { navigate } from "../router";
 
@@ -16,6 +18,7 @@ export function GraphScreen() {
   const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [jump, setJump] = useState<FitTarget | null>(null);
+  const [openFilePath, setOpenFilePath] = useState<string | null>(null);
 
   const expandedList = useMemo(() => [...expanded].sort(), [expanded]);
   const { data: loadedList } = useModules(expandedList);
@@ -71,7 +74,14 @@ export function GraphScreen() {
         flow={decorated}
         status={status}
         fitTo={jump}
-        onNodeClick={(node) => setPinnedId(node.id)}
+        onNodeClick={(node) => {
+          setPinnedId(node.id);
+          // A file node click opens the file: exports, docs, recent commits.
+          if (node.type === "file") {
+            const fileId = (node.data as unknown as FileNodeData).fileId;
+            setOpenFilePath(parseNodeId(fileId).rest);
+          }
+        }}
         onNodeDoubleClick={(node) => {
           if (node.type === "module" || node.type === "moduleGroup") {
             navigate({ view: "module", ref: (node.data as unknown as ModuleNodeData).moduleId });
@@ -79,9 +89,15 @@ export function GraphScreen() {
         }}
         onNodeMouseEnter={(node) => setHoveredId(node.id)}
         onNodeMouseLeave={() => setHoveredId(null)}
-        onPaneClick={() => setPinnedId(null)}
+        onPaneClick={() => {
+          setPinnedId(null);
+          setOpenFilePath(null);
+        }}
       />
       <SearchPanel onPick={onSearchPick} />
+      {openFilePath !== null && (
+        <FilePanel path={openFilePath} onClose={() => setOpenFilePath(null)} />
+      )}
     </div>
   );
 }

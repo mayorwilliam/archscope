@@ -6,6 +6,7 @@ import type {
   DocView,
   ErdView,
   FileContextView,
+  FileHistoryResponse,
   MetaResponse,
   ModuleView,
   OverviewView,
@@ -85,6 +86,18 @@ export function useFileContext(ref: string | null) {
     queryKey: ["file", ref],
     queryFn: () => getJson<FileContextView>(`/api/file?ref=${encodeURIComponent(ref ?? "")}`),
     enabled: ref !== null,
+  });
+}
+
+/** Recent commits touching one file — live git state, like the timeline. */
+export function useFileHistory(path: string | null, limit = 10) {
+  return useQuery({
+    queryKey: ["file-history", path, limit],
+    queryFn: () =>
+      getJson<FileHistoryResponse>(
+        `/api/file/history?path=${encodeURIComponent(path ?? "")}&limit=${limit}`,
+      ),
+    enabled: path !== null,
   });
 }
 

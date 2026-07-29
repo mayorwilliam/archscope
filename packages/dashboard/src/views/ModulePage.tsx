@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useFileContext, useModule, useOverview } from "../api/queries";
 import type { FileSummary } from "../api/types";
+import { FileHistory } from "../components/FilePanel";
 import { FlowCanvas } from "../components/FlowCanvas";
 import { Markdown } from "../components/Markdown";
 import { SourceExcerpt } from "../components/SourceExcerpt";
@@ -295,6 +296,7 @@ function FileDetail({ path }: { path: string }) {
       {excerpt && (
         <SourceExcerpt path={file.path} startLine={excerpt.start} endLine={excerpt.end} />
       )}
+      <FileHistory path={file.path} />
     </div>
   );
 }
