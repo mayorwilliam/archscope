@@ -1,6 +1,6 @@
 {
   "name": "archscope",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Architecture graphs for humans and coding agents — deterministic static analysis, one graph, a dashboard and an MCP server.",
   "keywords": [
     "architecture",

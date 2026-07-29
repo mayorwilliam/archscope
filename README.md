@@ -2,12 +2,12 @@
 
 **Architecture graphs for humans and coding agents — from deterministic static analysis.**
 
-ArchScope extracts the architecture of a repository — modules, dependencies, DB schema, and how it all changes over time — into a single graph, and serves that same graph to two consumers:
+ArchScope extracts the architecture of a repository — modules, dependencies, docs, DB schema, and how it all changes over time — into a single graph, and serves that same graph to two consumers:
 
-- **A local dashboard** (`archscope serve`): module overview, drill-down, ERD and architectural diff.
-- **An MCP server** (`archscope mcp`): 10 tools that give coding agents (Claude Code, Cursor, …) structured, token-budgeted context about your codebase.
+- **A local project wiki** (`archscope serve`): your README and docs as readable pages, a wiki page per module with its prose, metrics and an embedded neighborhood graph, the full dependency canvas, an ERD, a **timeline** of how the architecture moved (tags as milestones, linkable diffs between any two points), and a code viewer with per-file git history and per-commit diffs.
+- **An MCP server** (`archscope mcp`): 13 tools that give coding agents (Claude Code, Cursor, …) structured, token-budgeted context about your codebase — including its docs and its history.
 
-No LLM anywhere in the pipeline. The same repo analyzed twice produces the same graph, byte for byte. Every edge carries its provenance (`static` / `live` / `manual`) and confidence (`certain` / `inferred`) — the tool never presents a guess as a fact.
+No LLM anywhere in the pipeline. The same repo analyzed twice produces the same graph, byte for byte — READMEs, JSDoc and docstrings included, extracted deterministically. Every edge carries its provenance (`static` / `live` / `manual`) and confidence (`certain` / `inferred`) — the tool never presents a guess as a fact.
 
 ## Quickstart
 
@@ -28,6 +28,7 @@ claude mcp add archscope -- npx -y archscope mcp
 | | |
 |---|---|
 | **Languages** | TypeScript / JavaScript (tsconfig paths, workspace monorepos, dynamic `import()`), Python (absolute + relative imports, `__all__`, `importlib` literals) |
+| **Prose** | READMEs, `docs/**` and root markdown as first-class graph nodes (linked to the module they document); JSDoc/TSDoc and Python docstrings as symbol summaries — all deterministic, no LLM |
 | **ORMs (static)** | Prisma, SQLAlchemy (classic + 2.0 Mapped), TypeORM, Drizzle, Django |
 | **Live databases** | Postgres and MySQL introspection (read-only) with **drift detection**: declared schema vs live schema, compared by normalized type families |
 | **Migrations** | Alembic detection (best-effort): migration count + current head(s), reported as context — never used to reconstruct the schema |
@@ -62,7 +63,7 @@ db:
 
 ## MCP tools
 
-`get_architecture_overview` · `get_module` · `find_dependencies` · `get_impact` (blast radius, tables included via `maps_to`) · `search_nodes` · `get_file_context` · `get_db_schema` · `get_entity_relations` · `get_schema_drift` · `get_architecture_diff`
+`get_architecture_overview` · `get_module` (with the module's README as prose) · `find_dependencies` · `get_impact` (blast radius, tables included via `maps_to`) · `search_nodes` · `get_file_context` · `get_doc` · `get_db_schema` · `get_entity_relations` · `get_schema_drift` · `get_timeline` (milestones + recent commits, snapshot availability) · `get_architecture_history` (a range of history as a series of diffed intervals) · `get_architecture_diff`
 
 Every tool accepts `budget_tokens` (clamped to [200, 20000]). Responses are ranked (PageRank + fan-in), truncated **explicitly** with an executable drill-down hint (`… +37 more → get_module("payments", budget_tokens=4000)`), and stamped with a staleness header (`graph@ab12cd34, branch main, clean`) so agents know when the graph is behind HEAD.
 
