@@ -68,6 +68,19 @@ test("a module expands into its files and collapses back", async ({ page }) => {
   await expect(page.getByTestId("module-node")).toHaveCount(4);
 });
 
+test("clicking a file node opens its panel with exports and recent commits", async ({ page }) => {
+  await page.goto(`${server.url}/#/graph`);
+  await page.locator('[data-module-id="mod:auth"] [data-testid="expand-btn"]').click();
+  await page.locator('[data-testid="file-node"]', { hasText: "login.ts" }).click();
+
+  const panel = page.getByTestId("file-panel");
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("login"); // exported symbol
+  await expect(page.getByTestId("file-history")).toContainText("base"); // commit subject
+  await page.getByTestId("file-panel-close").click();
+  await expect(panel).toHaveCount(0);
+});
+
 test("ERD draws tables with PK/FK marks, FK edges and a drift badge", async ({ page }) => {
   injectDrift(repo, "User");
   await page.goto(`${server.url}/#/erd`);

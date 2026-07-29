@@ -81,6 +81,13 @@ describe("timeline", () => {
     it("returns [] outside a git repo", async () => {
       expect(await gitLog(os.tmpdir())).toEqual([]);
     });
+
+    it("path scopes the log to commits touching that file", async () => {
+      const forA = await gitLog(root, { limit: 10, path: "core/a.ts" });
+      expect(forA.map((c) => c.sha)).toEqual([shas[0]]);
+      const forC = await gitLog(root, { limit: 10, path: "core/c.ts" });
+      expect(forC.map((c) => c.sha)).toEqual([shas[2]]);
+    });
   });
 
   describe("gitRefs with dates", () => {
