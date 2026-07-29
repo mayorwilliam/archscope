@@ -76,3 +76,10 @@ export interface FileHistoryResponse {
   path: string;
   commits: GitCommit[];
 }
+
+export interface FileDiffResponse {
+  path: string;
+  sha: string;
+  /** Raw unified patch as git emitted it; empty when the commit didn't touch the file. */
+  patch: string;
+}

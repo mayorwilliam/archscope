@@ -563,6 +563,101 @@
   padding: 0 1px;
 }
 
+/* --- commit diff mode -------------------------------------------------------- */
+
+.history-row.clickable {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.history-row.clickable:hover {
+  background: var(--bg);
+}
+
+.history-row.clickable.active {
+  background: var(--accent-soft);
+}
+
+.diff-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-2);
+  min-width: 0;
+}
+
+.diff-head .diff-subject {
+  font-family: var(--font-body);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diff-line {
+  display: flex;
+  white-space: pre;
+  padding-right: var(--space-4);
+}
+
+.diff-line .line-no {
+  flex: none;
+  width: 44px;
+  padding-right: 10px;
+  text-align: right;
+  color: var(--muted);
+  opacity: 0.6;
+  user-select: none;
+}
+
+.diff-line .diff-sign {
+  flex: none;
+  width: 18px;
+  text-align: center;
+  font-weight: 700;
+  user-select: none;
+}
+
+.diff-line.add {
+  background: color-mix(in srgb, var(--added) 12%, transparent);
+}
+
+.diff-line.add .diff-sign {
+  color: var(--added);
+}
+
+.diff-line.del {
+  background: color-mix(in srgb, var(--removed) 12%, transparent);
+}
+
+.diff-line.del .line-content {
+  opacity: 0.85;
+}
+
+.diff-line.del .diff-sign {
+  color: var(--removed);
+}
+
+.diff-line.hunk {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  margin: var(--space-2) 0;
+}
+
+.diff-line.meta {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  opacity: 0.75;
+}
+
 /* hljs tokens, editorial palette — light and dark ride the CSS vars */
 
 .hljs-keyword,

@@ -6,6 +6,7 @@ import type {
   DocView,
   ErdView,
   FileContextView,
+  FileDiffResponse,
   FileHistoryResponse,
   MetaResponse,
   ModuleView,
@@ -86,6 +87,19 @@ export function useFileContext(ref: string | null) {
     queryKey: ["file", ref],
     queryFn: () => getJson<FileContextView>(`/api/file?ref=${encodeURIComponent(ref ?? "")}`),
     enabled: ref !== null,
+  });
+}
+
+/** The patch one commit applied to one file — immutable per (sha, path). */
+export function useFileDiff(path: string | null, sha: string | null) {
+  return useQuery({
+    queryKey: ["file-diff", path, sha],
+    queryFn: () =>
+      getJson<FileDiffResponse>(
+        `/api/file/diff?path=${encodeURIComponent(path ?? "")}&sha=${encodeURIComponent(sha ?? "")}`,
+      ),
+    enabled: path !== null && sha !== null,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 }
 
