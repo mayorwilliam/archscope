@@ -1,7 +1,7 @@
 export { CONFIG_FILENAME, loadConfig } from "./config-file.js";
 export { type DiffInput, diffGraphs } from "./diff/engine.js";
 export { gitRenames } from "./diff/rename.js";
-export { type GitCommit, type GitRef, gitInfo, gitLog, gitRefs } from "./git.js";
+export { type GitCommit, type GitRef, gitFileDiff, gitInfo, gitLog, gitRefs } from "./git.js";
 export { type BuildInput, buildGraph } from "./graph/build.js";
 export { pageRank } from "./graph/metrics.js";
 export { GraphSource, type LoadedGraph, NoGraphError } from "./graph-source.js";

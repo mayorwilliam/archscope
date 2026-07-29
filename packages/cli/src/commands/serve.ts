@@ -12,6 +12,7 @@ import {
   erdView,
   fileContextView,
   GraphSource,
+  gitFileDiff,
   gitInfo,
   gitLog,
   gitRefs,
@@ -127,6 +128,28 @@ export async function runServe(rootDir: string, options: { port?: string }): Pro
       const limit = Math.min(Math.max(Number.parseInt(request.query.limit ?? "", 10) || 10, 1), 50);
       const commits = await gitLog(rootDir, { limit, path: relPath });
       return { path: relPath, commits };
+    },
+  );
+
+  /**
+   * The patch one commit applied to one file. Same guards as the rest of the
+   * display endpoints: the path must be a file:/doc: node of the graph, and
+   * the sha must be strict hex — a querystring can never smuggle a git flag.
+   */
+  app.get<{ Querystring: { path?: string; sha?: string } }>(
+    "/api/file/diff",
+    async (request, reply) => {
+      const relPath = request.query.path;
+      const sha = request.query.sha;
+      if (!relPath) return reply.code(400).send({ error: "Missing ?path=" });
+      if (!sha || !/^[0-9a-f]{4,40}$/i.test(sha)) {
+        return reply.code(400).send({ error: "Missing or invalid ?sha= (hex commit sha)" });
+      }
+      const { index } = await source.load();
+      const node = index.nodes.get(`file:${relPath}`) ?? index.nodes.get(`doc:${relPath}`);
+      if (!node) return notFound(reply, index, relPath);
+      const patch = await gitFileDiff(rootDir, sha, relPath);
+      return { path: relPath, sha, patch };
     },
   );
 

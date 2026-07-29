@@ -53,6 +53,18 @@ export async function gitRefs(rootDir: string): Promise<GitRef[]> {
   }
 }
 
+/**
+ * The unified patch ONE commit applied to ONE file (rename-aware via
+ * --follow). Raw `git` output, served for display — never a graph fact.
+ */
+export async function gitFileDiff(rootDir: string, sha: string, path: string): Promise<string> {
+  try {
+    return await git(rootDir, ["log", "--follow", "--format=", "-p", "-n", "1", sha, "--", path]);
+  } catch {
+    return "";
+  }
+}
+
 export interface GitCommit {
   sha: string;
   shortSha: string;
